@@ -154,7 +154,7 @@ Plug-N-Play AI automatically parses, validates, and normalizes all industry-stan
 - **AST Validation**: Before any generated SQL query is dispatched to your database, it is parsed into an abstract syntax tree and validated against strict whitelists.
 - **Whitelist Only**: Only pure `SELECT` queries are permitted.
 - **Destructive Keyword Rejection**: Any query containing `DROP`, `DELETE`, `UPDATE`, `INSERT`, `ALTER`, `TRUNCATE`, `GRANT`, `REVOKE`, or `EXEC` is rejected immediately, and a security shield alert is logged.
-- **Semicolon Multi-Statement Blocking**: Attackers cannot chain statements (e.g., `SELECT * FROM users; DROP TABLE orders;`). Multi-statement executions are blocked at the parser level.
+- **Semicolon Multi-Statement Blocking**: Attackers cannot chain statements with semicolons (e.g., appending destructive drops or updates). Multi-statement executions are blocked at the parser level.
 - **Comment Stripping**: SQL comment syntax (`--`, `/* */`) commonly used in SQL injection is blocked.
 - **Sensitive Column Masking**: Password hashes, salt tokens, CVV numbers, and private keys are filtered out of LLM contexts automatically.
 - **Self-Healing Retries**: If the LLM produces a syntax error or references a misspelled column, the engine captures the database feedback and self-corrects up to 3 times before responding.

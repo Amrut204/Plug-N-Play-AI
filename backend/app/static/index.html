@@ -5893,8 +5893,15 @@ class AIChatController extends Controller {
           method: 'POST',
           body: formData
         });
-        const data = await res.json();
-        if (res.ok) {
+        
+        let data = null;
+        try {
+          data = await res.json();
+        } catch (_) {
+          // Response was not JSON (e.g., HTML error from WAF or gateway)
+        }
+
+        if (res.ok && data) {
           statusEl.style.color = 'var(--accent-green)';
           statusEl.innerText = `✓ Successfully extracted ${data.file_count} document(s) (${data.total_char_count} chars)!`;
           
@@ -5917,7 +5924,15 @@ class AIChatController extends Controller {
           });
         } else {
           statusEl.style.color = 'var(--accent-rose)';
-          statusEl.innerText = `Upload failed: ${data.detail || 'Error'}`;
+          if (data && data.detail) {
+            statusEl.innerText = `Upload failed: ${data.detail}`;
+          } else if (res.status === 403) {
+            statusEl.innerText = `Upload blocked by cloud firewall (403 Forbidden). Please check for sensitive keywords.`;
+          } else if (res.status === 413) {
+            statusEl.innerText = `Upload failed: File size exceeds the maximum allowed limit.`;
+          } else {
+            statusEl.innerText = `Upload failed: Server error (${res.status} ${res.statusText || 'Error'})`;
+          }
         }
       } catch (err) {
         statusEl.style.color = 'var(--accent-rose)';

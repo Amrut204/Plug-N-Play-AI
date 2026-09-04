@@ -133,7 +133,7 @@ NO. Plug-N-Play AI features an Abstract Syntax Tree (AST) Security Gate:
 - Abstract Syntax Tree (AST) Validation: Before any generated query is sent to the database, it is compiled into an AST syntax tree and validated against strict rules.
 - Whitelist Only: Only pure `SELECT` queries are permitted.
 - Destructive Keyword Rejection: Any query containing `DROP`, `DELETE`, `UPDATE`, `INSERT`, `ALTER`, `TRUNCATE`, `GRANT`, `REVOKE`, or `EXEC` is rejected immediately with a security alert logged.
-- Semicolon Chaining Blocked: Attackers cannot append `; DROP TABLE users;`. Multi-statement executions are rejected.
+- Semicolon Chaining Blocked: Attackers cannot append destructive chained commands with semicolons. Multi-statement executions are rejected.
 - Comment Stripping: SQL injection comments (`--`, `/* */`) are forbidden.
 - Sensitive Column Masking: Password hashes, salt tokens, social security numbers, and private keys are filtered out of LLM contexts automatically.
 - Self-Healing Retries: If a query has a minor syntax mistake or column typo, the engine reflects the schema back to the LLM and self-corrects up to 3 times automatically.
