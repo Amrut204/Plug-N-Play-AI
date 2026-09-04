@@ -139,6 +139,90 @@ class EmailService:
         smtp_pass = os.getenv("SMTP_PASS")
         from_email = os.getenv("SMTP_FROM", "alerts@plugnplay-ai.com")
 
+        # 1. Try Resend HTTP API if configured (Port 443 — never blocked by Render/cloud firewalls)
+        resend_api_key = os.getenv("RESEND_API_KEY")
+        if resend_api_key:
+            try:
+                import httpx
+                resend_from = os.getenv("RESEND_FROM", "onboarding@resend.dev")
+                res_resp = httpx.post(
+                    "https://api.resend.com/emails",
+                    headers={
+                        "Authorization": f"Bearer {resend_api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "from": resend_from,
+                        "to": [clean_email],
+                        "subject": subject,
+                        "html": html_content
+                    },
+                    timeout=5.0
+                )
+                if res_resp.status_code in (200, 201):
+                    logger.info(f"Escalation email successfully sent via Resend HTTPS API to {clean_email}")
+                    return {"status": "success", "mode": "resend", "recipient": clean_email}
+                else:
+                    logger.warning(f"Resend dispatch returned {res_resp.status_code}: {res_resp.text}")
+            except Exception as res_err:
+                logger.warning(f"Resend dispatch error: {res_err}")
+
+        # 2. Try SendGrid HTTP API if configured (Port 443)
+        sendgrid_api_key = os.getenv("SENDGRID_API_KEY")
+        if sendgrid_api_key:
+            try:
+                import httpx
+                sg_from = os.getenv("SENDGRID_FROM", from_email or "alerts@plugnplay-ai.com")
+                sg_resp = httpx.post(
+                    "https://api.sendgrid.com/v3/mail/send",
+                    headers={
+                        "Authorization": f"Bearer {sendgrid_api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "personalizations": [{"to": [{"email": clean_email}]}],
+                        "from": {"email": sg_from},
+                        "subject": subject,
+                        "content": [{"type": "text/html", "value": html_content}]
+                    },
+                    timeout=6.0
+                )
+                if sg_resp.status_code in (200, 201, 202):
+                    logger.info(f"Escalation email successfully sent via SendGrid HTTPS API to {clean_email}")
+                    return {"status": "success", "mode": "sendgrid", "recipient": clean_email}
+                else:
+                    logger.warning(f"SendGrid dispatch returned {sg_resp.status_code}: {sg_resp.text}")
+            except Exception as sg_err:
+                logger.error(f"SendGrid dispatch error: {sg_err}")
+
+        # 3. Try Brevo HTTP API if configured (Port 443)
+        brevo_api_key = os.getenv("BREVO_API_KEY")
+        if brevo_api_key:
+            try:
+                import httpx
+                brevo_from = os.getenv("BREVO_FROM", from_email or "alerts@plugnplay-ai.com")
+                br_resp = httpx.post(
+                    "https://api.brevo.com/v3/smtp/email",
+                    headers={
+                        "api-key": brevo_api_key,
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "sender": {"email": brevo_from, "name": "Plug-N-Play AI Alerts"},
+                        "to": [{"email": clean_email}],
+                        "subject": subject,
+                        "htmlContent": html_content
+                    },
+                    timeout=6.0
+                )
+                if br_resp.status_code in (200, 201):
+                    logger.info(f"Escalation email successfully sent via Brevo HTTPS API to {clean_email}")
+                    return {"status": "success", "mode": "brevo", "recipient": clean_email}
+                else:
+                    logger.warning(f"Brevo dispatch returned {br_resp.status_code}: {br_resp.text}")
+            except Exception as br_err:
+                logger.error(f"Brevo dispatch error: {br_err}")
+
         if smtp_host and smtp_user and smtp_pass:
             try:
                 msg = MIMEMultipart("alternative")
