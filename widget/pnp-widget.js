@@ -4,7 +4,15 @@
     const agentId = (scriptTag && scriptTag.getAttribute('data-agent-id')) || 'default';
     let sessionToken = scriptTag ? scriptTag.getAttribute('data-session-token') : null;
     let activeSessionId = null;
-    const apiHost = (scriptTag && scriptTag.getAttribute('data-api-host')) || 'http://127.0.0.1:8000';
+    
+    // Automatically infer apiHost from script origin (perfect for Render / production)
+    let autoHost = 'http://127.0.0.1:8000';
+    if (scriptTag && scriptTag.src && (scriptTag.src.startsWith('http://') || scriptTag.src.startsWith('https://'))) {
+        try {
+            autoHost = new URL(scriptTag.src).origin;
+        } catch (e) {}
+    }
+    const apiHost = (scriptTag && scriptTag.getAttribute('data-api-host')) || autoHost;
     const userId = (scriptTag && scriptTag.getAttribute('data-user-id')) || 'guest_user';
     const userRole = (scriptTag && scriptTag.getAttribute('data-user-role')) || 'user';
     const botTitle = (scriptTag && scriptTag.getAttribute('data-title')) || 'AI Assistant';
@@ -550,6 +558,25 @@
             font-weight: 600;
         }
         .pnp-branding a:hover { text-decoration: underline; }
+
+        /* Universal Tactile Button Click Active Animations */
+        .pnp-widget-btn:active {
+            transform: scale(0.92) translateY(2px) !important;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+            transition: transform 0.05s ease-out !important;
+        }
+        .pnp-send-btn:active,
+        .pnp-icon-btn:active,
+        .pnp-chip:active,
+        .pnp-fb-btn:active,
+        .pnp-escalate-btn:active,
+        .pnp-close-btn:active,
+        .pnp-action-btn-confirm:active,
+        .pnp-action-btn-dismiss:active {
+            transform: scale(0.92) translateY(1.5px) !important;
+            filter: brightness(0.90) contrast(1.05) !important;
+            transition: transform 0.04s ease-out, filter 0.04s ease-out !important;
+        }
     `;
     document.head.appendChild(style);
 
