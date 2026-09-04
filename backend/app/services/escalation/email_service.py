@@ -281,9 +281,63 @@ class EmailService:
                 else:
                     logger.warning(f"Resend dispatch returned {res_resp.status_code}: {res_resp.text}")
             except Exception as res_err:
-                logger.error(f"Resend dispatch error: {res_err}")
+        # 2. Try SendGrid HTTP API if configured (Port 443 — free with GitHub Student Developer Pack)
+        sendgrid_api_key = os.getenv("SENDGRID_API_KEY")
+        if sendgrid_api_key:
+            try:
+                import httpx
+                sg_from = os.getenv("SENDGRID_FROM", from_email or "auth@plugnplay-ai.com")
+                sg_resp = httpx.post(
+                    "https://api.sendgrid.com/v3/mail/send",
+                    headers={
+                        "Authorization": f"Bearer {sendgrid_api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "personalizations": [{"to": [{"email": clean_email}]}],
+                        "from": {"email": sg_from},
+                        "subject": subject,
+                        "content": [{"type": "text/html", "value": html_content}]
+                    },
+                    timeout=6.0
+                )
+                if sg_resp.status_code in (200, 201, 202):
+                    logger.info(f"OTP email successfully sent via SendGrid HTTPS API to {clean_email}")
+                    return {"status": "success", "mode": "sendgrid", "recipient": clean_email}
+                else:
+                    logger.warning(f"SendGrid dispatch returned {sg_resp.status_code}: {sg_resp.text}")
+            except Exception as sg_err:
+                logger.error(f"SendGrid dispatch error: {sg_err}")
 
-        # 2. Try Standard SMTP (if host/user/pass configured)
+        # 3. Try Brevo HTTP API if configured (Port 443 — 300 free emails/day)
+        brevo_api_key = os.getenv("BREVO_API_KEY")
+        if brevo_api_key:
+            try:
+                import httpx
+                brevo_from = os.getenv("BREVO_FROM", from_email or "auth@plugnplay-ai.com")
+                br_resp = httpx.post(
+                    "https://api.brevo.com/v3/smtp/email",
+                    headers={
+                        "api-key": brevo_api_key,
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "sender": {"email": brevo_from, "name": "Plug-N-Play AI"},
+                        "to": [{"email": clean_email}],
+                        "subject": subject,
+                        "htmlContent": html_content
+                    },
+                    timeout=6.0
+                )
+                if br_resp.status_code in (200, 201):
+                    logger.info(f"OTP email successfully sent via Brevo HTTPS API to {clean_email}")
+                    return {"status": "success", "mode": "brevo", "recipient": clean_email}
+                else:
+                    logger.warning(f"Brevo dispatch returned {br_resp.status_code}: {br_resp.text}")
+            except Exception as br_err:
+                logger.error(f"Brevo dispatch error: {br_err}")
+
+        # 4. Try Standard SMTP (if host/user/pass configured)
         if smtp_host and smtp_user and smtp_pass:
             try:
                 msg = MIMEMultipart("alternative")

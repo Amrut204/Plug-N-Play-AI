@@ -48,3 +48,10 @@ services:
         sync: false
       - key: SMTP_FROM
         sync: false
+      # HTTP-based email delivery (works on Render Free tier without port blocking)
+      - key: RESEND_API_KEY
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
