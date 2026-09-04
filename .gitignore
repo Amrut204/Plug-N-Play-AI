@@ -1,0 +1,68 @@
+# ==============================================================================
+# Plug-N-Play AI — Comprehensive .gitignore
+# ==============================================================================
+
+# Critical Security: Never commit environment secrets or API keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+
+# Node.js & Frontend dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+.env/
+
+# Python Bytecode, Caches & Builds
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Local Database Files
+*.db
+*.sqlite
+*.sqlite3
+plug_n_play_platform.db
+
+# Scratch Scripts & Local Debug Artifacts
+scratch/
+*.log
+logs/
+*.tmp
+*.bak
+.tempmediaStorage/
+.system_generated/
+
+# OS-generated Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor Configurations
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

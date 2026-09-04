@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Node.js Bridge Dashboard — Zero-Knowledge Database</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #121215;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --muted: #a1a1aa;
+      --accent: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 40px 24px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .shield-badge { font-size: 11px; font-weight: 700; color: var(--accent); background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 4px 10px; border-radius: 99px; }
+    .chat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+    .input-row { display: flex; gap: 12px; margin-top: 16px; }
+    input[type="text"] { flex: 1; background: #18181b; border: 1px solid var(--border); color: #fff; padding: 12px 16px; border-radius: 8px; font-size: 14px; outline: none; }
+    button { background: #fff; color: #000; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .response-area { background: #18181b; border: 1px solid var(--border); border-radius: 12px; padding: 20px; min-height: 120px; font-size: 14px; line-height: 1.6; }
+    pre { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #38bdf8; background: #000; padding: 12px; border-radius: 6px; margin-top: 12px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div style="font-size: 20px; font-weight: 800;">🟢 Node.js Zero-Knowledge Bridge Server</div>
+      <div class="shield-badge">🛡️ Local Database Protected</div>
+    </div>
+
+    <div class="chat-box">
+      <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Ask AI via Local Backend Bridge</h2>
+      <p style="color: var(--muted); font-size: 13px;">Queries are processed through your private server at <code>POST /api/ai-chat</code>. Zero raw database rows touch the cloud.</p>
+
+      <div class="input-row">
+        <input type="text" id="query-input" placeholder="e.g., What is the status of my order ORD-901?" value="What is the status of my order ORD-901?" />
+        <button onclick="sendBridgeQuery()">Send Query</button>
+      </div>
+    </div>
+
+    <div class="response-area" id="response-box">
+      <span style="color: var(--muted);">Click "Send Query" to test local bridge response...</span>
+    </div>
+  </div>
+
+  <script>
+    async function sendBridgeQuery() {
+      const q = document.getElementById('query-input').value.trim();
+      const resBox = document.getElementById('response-box');
+      if (!q) return;
+
+      resBox.innerHTML = '<span style="color: var(--muted);">Connecting to local Node.js bridge server...</span>';
+
+      try {
+        const res = await fetch('/api/ai-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: q, userId: 'demo_user' })
+        });
+        const data = await res.json();
+        
+        resBox.innerHTML = `
+          <div style="font-weight: 700; color: #22c55e; margin-bottom: 8px;">✓ Bridge Response Received:</div>
+          <div>${data.answer}</div>
+          ${data.sql_executed ? `<pre>Executed on Private Local DB: ${data.sql_executed}</pre>` : ''}
+        `;
+      } catch (err) {
+        resBox.innerHTML = `<span style="color: #f87171;">⚠️ Bridge Error: ${err.message}</span>`;
+      }
+    }
+  </script>
+</body>
+</html>

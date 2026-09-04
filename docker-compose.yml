@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Primary Platform Database with pgvector extension enabled
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: pnp_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: pnp_admin
+      POSTGRES_PASSWORD: pnp_secret_password
+      POSTGRES_DB: pnp_ai_platform
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pnp_admin -d pnp_ai_platform"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for task queuing & rate limiting
+  redis:
+    image: redis:7-alpine
+    container_name: pnp_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Plug-N-Play AI Modular Monolith Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pnp_backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://pnp_admin:pnp_secret_password@postgres:5432/pnp_ai_platform
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=enterprise_super_secret_pnp_jwt_key_32_bytes_long
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  redis_data:

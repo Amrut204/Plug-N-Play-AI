@@ -1,0 +1,11 @@
+product_id,product_name,category,price,stock_quantity,warranty_months,shipping_days
+P101,Sony WH-1000XM5 Wireless Headphones,Electronics,349.99,42,12,2
+P102,Apple MacBook Air M3 13-inch,Laptops,1099.00,18,12,1
+P103,Logitech MX Master 3S Mouse,Accessories,99.99,115,24,2
+P104,Samsung 27-inch 4K UHD Monitor,Displays,279.99,26,36,3
+P105,Nike Air Zoom Pegasus 40 Running Shoes,Footwear,129.99,78,6,3
+P106,Hydro Flask 32oz Wide Mouth Bottle,Fitness,44.95,210,12,2
+P107,Kindle Paperwhite 16GB,Electronics,149.99,55,12,2
+P108,Keychron K2 Wireless Mechanical Keyboard,Accessories,89.99,64,12,3
+P109,Anker 65W GaN Fast Charger,Electronics,35.99,180,18,1
+P110,The North Face Borealis Backpack,Outdoor,98.95,39,24,2

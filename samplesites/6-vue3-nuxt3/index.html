@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MetroHealth Patient Care — Vue 3 / Nuxt 3 Sample Site</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  </head>
+  <body style="margin: 0; background: #09090b; color: #f8fafc; font-family: 'Inter', sans-serif;">
+    <div id="app">
+      <div style="max-width: 1100px; margin: 0 auto; padding: 40px 24px;">
+        <header style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 36px;">
+          <div style="font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+            🏥 MetroHealth Patient Care (Vue 3 / Nuxt 3)
+          </div>
+          <div style="font-size: 13px; color: #a1a1aa;">
+            Patient ID: pt_metro_8841
+          </div>
+        </header>
+
+        <main>
+          <div style="background: #121215; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 36px; margin-bottom: 32px;">
+            <h1 style="font-size: 28px; font-weight: 800; margin-bottom: 12px;">Diagnostic Lab &amp; Follow-up Consultations</h1>
+            <p style="color: #a1a1aa; font-size: 15px; margin: 0;">
+              Schedule outpatient appointments, check fasting preparation guidelines, and view digital lab reports.
+            </p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+            <div style="background: #121215; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px;">
+              <div style="font-size: 12px; color: #4ade80; font-weight: 700; text-transform: uppercase;">Upcoming Appointment</div>
+              <div style="font-size: 18px; font-weight: 700; color: #ffffff; margin: 8px 0;">Routine Cardiology Review</div>
+              <div style="font-size: 13px; color: #a1a1aa;">Dr. Sarah Jenkins &bull; Thursday at 10:30 AM</div>
+            </div>
+
+            <div style="background: #121215; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px;">
+              <div style="font-size: 12px; color: #38bdf8; font-weight: 700; text-transform: uppercase;">Insurance Coverage</div>
+              <div style="font-size: 18px; font-weight: 700; color: #ffffff; margin: 8px 0;">BlueCross BlueShield</div>
+              <div style="font-size: 13px; color: #22c55e;">Active &bull; Standard In-Network Co-Pay</div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Live Action Event Receiver Banner -->
+    <div id="pnp-action-toast" style="display:none; position:fixed; top:20px; right:20px; z-index:999999; background:#0f172a; color:#fff; border:1px solid #22c55e; border-radius:10px; padding:14px 18px; box-shadow:0 12px 35px rgba(0,0,0,0.6); font-family:system-ui, -apple-system, sans-serif; max-width:380px;">
+      <div style="font-weight:700; color:#4ade80; font-size:12px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+        <span>⚡ HOST APP RECEIVED ACTION:</span> <span id="pnp-toast-name"></span>
+      </div>
+      <div id="pnp-toast-payload" style="font-size:11.5px; font-family:monospace; background:rgba(0,0,0,0.5); padding:6px 8px; border-radius:6px; color:#e2e8f0; word-break:break-all;"></div>
+    </div>
+
+    <script>
+      // 1. Client-Side Action Handler for Browser Relay Mode
+      const _origFetch = window.fetch;
+      window.fetch = async function(url, opts) {
+        if (typeof url === 'string' && (url === '/api/orders/cancel' || url.endsWith('/api/orders/cancel'))) {
+          const body = opts?.body ? JSON.parse(opts.body) : {};
+          showClientActionToast('cancel_order', body);
+          return new Response(JSON.stringify({
+            status: 'success',
+            order_id: body.order_id,
+            refund_amount: 349.99,
+            reference_id: `CAN-${body.order_id}-${Math.floor(Math.random()*9000+1000)}`,
+            message: 'Order cancelled directly via host app session!'
+          }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+        if (typeof url === 'string' && (url === '/api/appointments/reschedule' || url.endsWith('/api/appointments/reschedule'))) {
+          const body = opts?.body ? JSON.parse(opts.body) : {};
+          showClientActionToast('reschedule_appointment', body);
+          return new Response(JSON.stringify({
+            status: 'success',
+            booking_id: body.booking_id,
+            new_date: body.preferred_date,
+            reference_id: `RESCHED-${Math.floor(Math.random()*9000+1000)}`
+          }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+        return _origFetch.apply(this, arguments);
+      };
+
+      // 2. CustomEvent Listener for WebSocket / Event-Driven integrations
+      window.addEventListener('pnp:action:execute', (e) => {
+        showClientActionToast(e.detail?.display_name || e.detail?.name, e.detail?.parameters);
+      });
+
+      function showClientActionToast(name, payload) {
+        const toast = document.getElementById('pnp-action-toast');
+        const nEl = document.getElementById('pnp-toast-name');
+        const pEl = document.getElementById('pnp-toast-payload');
+        if (toast && nEl && pEl) {
+          nEl.innerText = name;
+          pEl.innerText = JSON.stringify(payload, null, 2);
+          toast.style.display = 'block';
+          setTimeout(() => { toast.style.display = 'none'; }, 6000);
+        }
+      }
+    </script>
+
+    <!-- Vue 3 / Nuxt 3 AIWidget script -->
+    <script 
+      src="http://127.0.0.1:8000/static/pnp-widget.js"
+      data-api-host="http://127.0.0.1:8000"
+      data-agent-id="49e431f4-893a-414e-a42e-7582d3fbf0c6"
+      data-title="OmniAction Enterprise AI"
+      data-primary-color="#09090b"
+      data-accent-color="#22c55e"
+      data-bg-color="#09090b"
+      data-header-bg="#121215"
+      data-text-color="#f8fafc"
+      data-user-bubble="#22c55e"
+      data-position="bottom-right"
+      data-widget-size="medium"
+      data-btn-shape="circle"
+      data-border-radius="24"
+      data-theme="dark"
+      data-welcome="Hello! I am OmniAction Enterprise AI. I can cancel orders or reschedule appointments. Try an action prompt below:"
+      data-starter-questions="Please cancel my order 1001,Please reschedule appointment BKG-992 to tomorrow"
+      data-show-branding="true">
+    </script>
+  </body>
+</html>

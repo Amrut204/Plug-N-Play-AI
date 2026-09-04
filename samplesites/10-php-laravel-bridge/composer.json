@@ -1,0 +1,9 @@
+{
+  "name": "sample-laravel-bridge",
+  "type": "project",
+  "description": "PHP Laravel Zero-Knowledge Bridge for Plug-N-Play AI",
+  "require": {
+    "php": "^8.1",
+    "guzzlehttp/guzzle": "^7.8"
+  }
+}

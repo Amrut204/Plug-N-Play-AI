@@ -1,0 +1,467 @@
+"""
+DirectDBExecutor - Connects directly to a client's database.
+Supports PostgreSQL, MySQL, and MongoDB.
+No middleware, no connector endpoints.
+The client just provides a read-only database URL.
+"""
+
+import logging
+from typing import List, Dict, Any, Optional
+from urllib.parse import urlparse
+
+logger = logging.getLogger(__name__)
+
+
+def detect_db_type(db_url: str) -> str:
+    """Auto-detect database type from URL scheme."""
+    url = db_url.strip().lower()
+    if url.startswith("mongodb://") or url.startswith("mongodb+srv://"):
+        return "mongodb"
+    elif url.startswith("mysql://") or url.startswith("mysql+"):
+        return "mysql"
+    elif url.startswith("postgresql://") or url.startswith("postgres://"):
+        return "postgresql"
+    else:
+        raise ValueError(
+            f"Unsupported database URL scheme. "
+            f"Supported: postgresql://, mysql://, mongodb://, mongodb+srv://"
+        )
+
+
+# ══════════════════════════════════════════════════════════════
+#  PostgreSQL Executor (asyncpg)
+# ══════════════════════════════════════════════════════════════
+
+_pg_pool_cache: Dict[str, Any] = {}
+
+
+async def _get_pg_pool(db_url: str):
+    import asyncpg
+
+    if db_url in _pg_pool_cache:
+        pool = _pg_pool_cache[db_url]
+        try:
+            async with pool.acquire(timeout=3) as conn:
+                await conn.fetchval("SELECT 1")
+            return pool
+        except Exception:
+            try:
+                await pool.close()
+            except Exception:
+                pass
+            del _pg_pool_cache[db_url]
+
+    clean_url = db_url.split("?")[0]
+    ssl_mode = "require" if ("ssl=require" in db_url or "sslmode=require" in db_url) else None
+
+    pool = await asyncpg.create_pool(clean_url, min_size=1, max_size=3, command_timeout=10, timeout=3.0, ssl=ssl_mode)
+    _pg_pool_cache[db_url] = pool
+    return pool
+
+
+class PostgresExecutor:
+    @staticmethod
+    async def test_connection(db_url: str) -> Dict[str, Any]:
+        try:
+            pool = await _get_pg_pool(db_url)
+            async with pool.acquire(timeout=5) as conn:
+                rows = await conn.fetch("""
+                    SELECT table_name FROM information_schema.tables
+                    WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+                    ORDER BY table_name
+                """)
+                tables = [r["table_name"] for r in rows]
+                return {"status": "success", "message": f"Connected! Found {len(tables)} tables.", "tables": tables, "db_type": "postgresql"}
+        except Exception as e:
+            return {"status": "error", "message": f"Connection failed: {type(e).__name__}: {e}", "tables": []}
+
+    @staticmethod
+    async def discover_schema(db_url: str, table_names: List[str]) -> List[Dict[str, Any]]:
+        pool = await _get_pg_pool(db_url)
+        schemas = []
+        async with pool.acquire(timeout=5) as conn:
+            for table in table_names:
+                rows = await conn.fetch("""
+                    SELECT column_name, data_type FROM information_schema.columns
+                    WHERE table_schema = 'public' AND table_name = $1
+                    ORDER BY ordinal_position
+                """, table)
+                columns = [{"column_name": r["column_name"], "data_type": r["data_type"].upper(),
+                            "business_meaning": r["column_name"].replace("_", " ").title(),
+                            "is_sensitive": any(kw in r["column_name"].lower() for kw in ["password", "secret", "token", "hash", "ssn"])}
+                           for r in rows]
+                schemas.append({"table_name": table, "business_name": table.replace("_", " ").title(),
+                                "description": f"Data from the {table} table", "columns": columns})
+        return schemas
+
+    @staticmethod
+    async def execute_readonly(db_url: str, sql: str, params: Optional[Dict[str, Any]] = None, max_rows: int = 100) -> List[Dict[str, Any]]:
+        _validate_sql_safety(sql)
+        pool = await _get_pg_pool(db_url)
+        async with pool.acquire(timeout=10) as conn:
+            if params:
+                rows = await conn.fetch(sql, *list(params.values()))
+            else:
+                rows = await conn.fetch(sql)
+            return [dict(row) for row in rows[:max_rows]]
+
+
+# ══════════════════════════════════════════════════════════════
+#  MySQL Executor (aiomysql)
+# ══════════════════════════════════════════════════════════════
+
+_mysql_pool_cache: Dict[str, Any] = {}
+
+
+def _parse_mysql_url(db_url: str) -> dict:
+    """Parse mysql://user:pass@host:port/dbname into connection kwargs."""
+    parsed = urlparse(db_url)
+    return {
+        "host": parsed.hostname or "localhost",
+        "port": parsed.port or 3306,
+        "user": parsed.username or "root",
+        "password": parsed.password or "",
+        "db": (parsed.path or "/").lstrip("/"),
+    }
+
+
+async def _get_mysql_pool(db_url: str):
+    import aiomysql
+
+    if db_url in _mysql_pool_cache:
+        pool = _mysql_pool_cache[db_url]
+        if not pool._closed:
+            return pool
+        del _mysql_pool_cache[db_url]
+
+    params = _parse_mysql_url(db_url)
+    pool = await aiomysql.create_pool(minsize=1, maxsize=3, connect_timeout=3, **params)
+    _mysql_pool_cache[db_url] = pool
+    return pool
+
+
+class MySQLExecutor:
+    @staticmethod
+    async def test_connection(db_url: str) -> Dict[str, Any]:
+        try:
+            pool = await _get_mysql_pool(db_url)
+            async with pool.acquire() as conn:
+                async with conn.cursor() as cur:
+                    params = _parse_mysql_url(db_url)
+                    await cur.execute(
+                        "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_TYPE = 'BASE TABLE' ORDER BY TABLE_NAME",
+                        (params["db"],)
+                    )
+                    rows = await cur.fetchall()
+                    tables = [r[0] for r in rows]
+                    return {"status": "success", "message": f"Connected! Found {len(tables)} tables.", "tables": tables, "db_type": "mysql"}
+        except Exception as e:
+            return {"status": "error", "message": f"Connection failed: {type(e).__name__}: {e}", "tables": []}
+
+    @staticmethod
+    async def discover_schema(db_url: str, table_names: List[str]) -> List[Dict[str, Any]]:
+        pool = await _get_mysql_pool(db_url)
+        schemas = []
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                params = _parse_mysql_url(db_url)
+                for table in table_names:
+                    await cur.execute(
+                        "SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s ORDER BY ORDINAL_POSITION",
+                        (params["db"], table)
+                    )
+                    rows = await cur.fetchall()
+                    columns = [{"column_name": r[0], "data_type": r[1].upper(),
+                                "business_meaning": r[0].replace("_", " ").title(),
+                                "is_sensitive": any(kw in r[0].lower() for kw in ["password", "secret", "token", "hash", "ssn"])}
+                               for r in rows]
+                    schemas.append({"table_name": table, "business_name": table.replace("_", " ").title(),
+                                    "description": f"Data from the {table} table", "columns": columns})
+        return schemas
+
+    @staticmethod
+    async def execute_readonly(db_url: str, sql: str, params: Optional[Dict[str, Any]] = None, max_rows: int = 100) -> List[Dict[str, Any]]:
+        _validate_sql_safety(sql)
+        pool = await _get_mysql_pool(db_url)
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                if params:
+                    await cur.execute(sql, list(params.values()))
+                else:
+                    await cur.execute(sql)
+                rows = await cur.fetchmany(max_rows)
+                if not rows:
+                    return []
+                col_names = [desc[0] for desc in cur.description]
+                return [dict(zip(col_names, row)) for row in rows]
+
+
+# ══════════════════════════════════════════════════════════════
+#  MongoDB Executor (motor)
+# ══════════════════════════════════════════════════════════════
+
+_mongo_client_cache: Dict[str, Any] = {}
+
+
+async def _get_mongo_client(db_url: str):
+    import motor.motor_asyncio
+
+    if db_url in _mongo_client_cache:
+        client = _mongo_client_cache[db_url]
+        try:
+            await client.admin.command("ping")
+            return client
+        except Exception:
+            try:
+                client.close()
+            except Exception:
+                pass
+            del _mongo_client_cache[db_url]
+
+    client = motor.motor_asyncio.AsyncIOMotorClient(db_url, serverSelectionTimeoutMS=5000, maxPoolSize=3)
+    await client.admin.command("ping")
+    _mongo_client_cache[db_url] = client
+    return client
+
+
+async def _locate_mongo_collection(client, db_url: str, collection_name: str):
+    """
+    Finds and returns the collection object from the specified DB in URL
+    or locates it across all user databases in the cluster.
+    """
+    parsed = urlparse(db_url.split("?")[0])
+    db_name = (parsed.path or "/").lstrip("/")
+
+    # If database is specified in URL, use it directly
+    if db_name:
+        return client[db_name][collection_name]
+
+    # Otherwise search across all accessible user databases in cluster
+    try:
+        db_names = await client.list_database_names()
+        user_dbs = [d for d in db_names if d not in ("admin", "local", "config")]
+        for d in user_dbs:
+            colls = await client[d].list_collection_names()
+            if collection_name in colls:
+                return client[d][collection_name]
+        if user_dbs:
+            return client[user_dbs[0]][collection_name]
+    except Exception:
+        pass
+
+    return client["test"][collection_name]
+
+
+def _sanitize_mongo_value(val: Any) -> Any:
+    """Recursively converts ObjectIds, datetimes, and Decimals to JSON-serializable types."""
+    if val is None:
+        return None
+    if isinstance(val, (str, int, float, bool)):
+        return val
+    if isinstance(val, list):
+        return [_sanitize_mongo_value(item) for item in val]
+    if isinstance(val, dict):
+        return {str(k): _sanitize_mongo_value(v) for k, v in val.items()}
+    return str(val)
+
+
+class MongoDBExecutor:
+    @staticmethod
+    async def test_connection(db_url: str) -> Dict[str, Any]:
+        try:
+            client = await _get_mongo_client(db_url)
+            parsed = urlparse(db_url.split("?")[0])
+            db_name = (parsed.path or "/").lstrip("/")
+
+            # 1. If explicit database specified in URL path
+            if db_name:
+                db = client[db_name]
+                collections = await db.list_collection_names()
+                collections = sorted([c for c in collections if not c.startswith("system.")])
+                return {
+                    "status": "success",
+                    "message": f"Connected! Found {len(collections)} collection(s) in database '{db_name}'.",
+                    "tables": collections,
+                    "db_type": "mongodb"
+                }
+
+            # 2. If no database specified in URL path, discover across all user databases in cluster
+            all_collections = []
+            db_names = await client.list_database_names()
+            user_dbs = [d for d in db_names if d not in ("admin", "local", "config")]
+            db_count = len(user_dbs)
+
+            for d in user_dbs:
+                colls = await client[d].list_collection_names()
+                user_colls = [c for c in colls if not c.startswith("system.")]
+                all_collections.extend(user_colls)
+
+            all_collections = sorted(list(set(all_collections)))
+            return {
+                "status": "success",
+                "message": f"Connected to cluster! Found {len(all_collections)} collection(s) across {db_count} database(s).",
+                "tables": all_collections,
+                "db_type": "mongodb"
+            }
+        except Exception as e:
+            return {"status": "error", "message": f"Connection failed: {type(e).__name__}: {e}", "tables": []}
+
+    @staticmethod
+    async def discover_schema(db_url: str, collection_names: List[str]) -> List[Dict[str, Any]]:
+        """
+        MongoDB doesn't have a fixed schema, so we sample documents
+        to infer the field names and types.
+        """
+        client = await _get_mongo_client(db_url)
+        schemas = []
+
+        for coll_name in collection_names:
+            collection = await _locate_mongo_collection(client, db_url, coll_name)
+            # Sample up to 20 documents to infer schema
+            sample_docs = await collection.find().limit(20).to_list(length=20)
+
+            # Merge all keys from sampled documents
+            all_keys: Dict[str, str] = {}
+            for doc in sample_docs:
+                for key, value in doc.items():
+                    if key == "_id":
+                        continue  # Skip internal MongoDB id
+                    if key not in all_keys:
+                        all_keys[key] = type(value).__name__.upper()
+
+            columns = [{"column_name": k, "data_type": v,
+                         "business_meaning": k.replace("_", " ").replace(".", " ").title(),
+                         "is_sensitive": any(kw in k.lower() for kw in ["password", "secret", "token", "hash", "ssn"])}
+                        for k, v in all_keys.items()]
+
+            doc_count = await collection.estimated_document_count()
+            schemas.append({
+                "table_name": coll_name,
+                "business_name": coll_name.replace("_", " ").title(),
+                "description": f"Collection '{coll_name}' with ~{doc_count} documents in '{collection.database.name}'",
+                "columns": columns
+            })
+
+        return schemas
+
+    @staticmethod
+    async def execute_query(db_url: str, collection_name: str, pipeline: Any, max_rows: int = 100) -> List[Dict[str, Any]]:
+        """
+        Execute a MongoDB aggregation pipeline against a collection.
+        Returns documents as a list of dicts.
+        """
+        client = await _get_mongo_client(db_url)
+        collection = await _locate_mongo_collection(client, db_url, collection_name)
+
+        # Normalize pipeline
+        if isinstance(pipeline, dict):
+            if any(k.startswith("$") for k in pipeline.keys()):
+                pipeline = [pipeline]
+            else:
+                pipeline = [{"$match": pipeline}]
+        elif not isinstance(pipeline, list):
+            pipeline = []
+
+        # Safety: Add $limit if not present
+        has_limit = any("$limit" in stage for stage in pipeline if isinstance(stage, dict))
+        if not has_limit:
+            pipeline.append({"$limit": max_rows})
+
+        cursor = collection.aggregate(pipeline)
+        results = await cursor.to_list(length=max_rows)
+
+        # Deep sanitize for JSON safety
+        clean_results = []
+        for doc in results:
+            clean_results.append(_sanitize_mongo_value(doc))
+
+        return clean_results
+
+
+# ══════════════════════════════════════════════════════════════
+#  Unified Interface (auto-detects DB type)
+# ══════════════════════════════════════════════════════════════
+
+def _validate_sql_safety(sql: str):
+    """Block dangerous SQL operations."""
+    normalized = sql.strip().upper()
+    if not normalized.startswith("SELECT"):
+        raise ValueError(f"Only SELECT queries are allowed. Got: {normalized[:20]}")
+    blocked = ["DROP", "DELETE", "INSERT", "UPDATE", "ALTER", "TRUNCATE", "GRANT", "REVOKE"]
+    for kw in blocked:
+        if kw in normalized:
+            raise ValueError(f"Blocked dangerous SQL keyword: {kw}")
+
+
+class DirectDBExecutor:
+    """
+    Unified interface that auto-detects the database type from the URL
+    and delegates to the appropriate executor.
+    """
+
+    @staticmethod
+    def _get_executor(db_url: str):
+        db_type = detect_db_type(db_url)
+        if db_type == "postgresql":
+            return PostgresExecutor, db_type
+        elif db_type == "mysql":
+            return MySQLExecutor, db_type
+        elif db_type == "mongodb":
+            return MongoDBExecutor, db_type
+        raise ValueError(f"Unsupported database type: {db_type}")
+
+    @staticmethod
+    async def test_connection(db_url: str) -> Dict[str, Any]:
+        try:
+            executor, _ = DirectDBExecutor._get_executor(db_url)
+            import asyncio
+            return await asyncio.wait_for(executor.test_connection(db_url), timeout=3.5)
+        except (ValueError, asyncio.TimeoutError) as e:
+            msg = "Connection timed out (Host unreachable)" if isinstance(e, asyncio.TimeoutError) else str(e)
+            return {"status": "error", "message": msg, "tables": []}
+        except Exception as e:
+            return {"status": "error", "message": str(e), "tables": []}
+
+    @staticmethod
+    async def discover_schema(db_url: str, table_names: List[str]) -> List[Dict[str, Any]]:
+        executor, _ = DirectDBExecutor._get_executor(db_url)
+        import asyncio
+        return await asyncio.wait_for(executor.discover_schema(db_url, table_names), timeout=4.0)
+
+    @staticmethod
+    async def execute_readonly(db_url: str, sql: str, params: Optional[Dict[str, Any]] = None, max_rows: int = 100) -> List[Dict[str, Any]]:
+        """For SQL databases (PostgreSQL, MySQL). Runs a validated SELECT query."""
+        executor, db_type = DirectDBExecutor._get_executor(db_url)
+        if db_type == "mongodb":
+            raise ValueError("Use execute_mongo_query() for MongoDB connections.")
+        return await executor.execute_readonly(db_url, sql, params, max_rows)
+
+    @staticmethod
+    async def execute_mongo_query(db_url: str, collection_name: str, pipeline: list, max_rows: int = 100) -> List[Dict[str, Any]]:
+        """For MongoDB. Runs an aggregation pipeline against a collection."""
+        return await MongoDBExecutor.execute_query(db_url, collection_name, pipeline, max_rows)
+
+    @staticmethod
+    async def close_all_pools():
+        """Close all cached connection pools. Call on app shutdown."""
+        for _, pool in _pg_pool_cache.items():
+            try:
+                await pool.close()
+            except Exception:
+                pass
+        _pg_pool_cache.clear()
+
+        for _, pool in _mysql_pool_cache.items():
+            try:
+                pool.close()
+                await pool.wait_closed()
+            except Exception:
+                pass
+        _mysql_pool_cache.clear()
+
+        for _, client in _mongo_client_cache.items():
+            try:
+                client.close()
+            except Exception:
+                pass
+        _mongo_client_cache.clear()

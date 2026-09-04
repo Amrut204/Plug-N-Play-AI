@@ -1,0 +1,11 @@
+student_id,full_name,department,semester,cgpa,attendance_pct,fee_status,hostel_block
+STU101,Aarav Sharma,Computer Science,6,8.92,88.5,Paid,Block-A
+STU102,Priya Patel,Information Technology,6,9.15,94.0,Paid,Block-C
+STU103,Rohan Verma,Mechanical Engineering,4,6.45,71.0,Pending,Block-B
+STU104,Ananya Iyer,Electronics & Comm,8,8.78,82.0,Paid,Block-C
+STU105,Vikram Singh,Civil Engineering,6,5.80,62.5,Paid,Block-A
+STU106,Sneha Kulkarni,Data Science,4,9.40,96.0,Paid,DayScholar
+STU107,Aditya Nair,Computer Science,8,7.65,79.0,Paid,Block-B
+STU108,Meera Joshi,Biotechnology,4,8.10,85.0,Pending,Block-C
+STU109,Karan Malhotra,Artificial Intelligence,6,8.55,91.0,Paid,Block-A
+STU110,Divya Menon,Computer Science,8,9.60,98.0,Paid,Block-C

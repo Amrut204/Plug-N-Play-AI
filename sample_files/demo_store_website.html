@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrendyStore — Electronics &amp; Accessories</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #09090b;
+      color: #f8fafc;
+      line-height: 1.6;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(18, 18, 21, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+    }
+    .logo { font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; }
+    .nav-links { display: flex; gap: 24px; list-style: none; font-size: 14px; font-weight: 500; color: #a1a1aa; }
+    .nav-links li:hover { color: #ffffff; cursor: pointer; }
+    .hero {
+      text-align: center;
+      padding: 80px 24px 60px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .hero-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #22c55e;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+    .hero h1 { font-size: 48px; font-weight: 800; line-height: 1.15; margin-bottom: 16px; letter-spacing: -0.03em; }
+    .hero p { font-size: 16px; color: #a1a1aa; max-width: 620px; margin: 0 auto 32px; }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+    .p-card {
+      background: #121215;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 24px;
+      transition: all 0.2s;
+    }
+    .p-card:hover { transform: translateY(-3px); border-color: rgba(255, 255, 255, 0.2); }
+    .p-badge { font-size: 11px; font-weight: 700; color: #38bdf8; text-transform: uppercase; }
+    .p-title { font-size: 17px; font-weight: 700; margin: 6px 0 8px; }
+    .p-price { font-size: 20px; font-weight: 800; color: #22c55e; margin-bottom: 12px; }
+    .p-desc { font-size: 13px; color: #a1a1aa; margin-bottom: 18px; }
+    .btn-buy {
+      width: 100%;
+      background: #ffffff;
+      color: #09090b;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn-buy:hover { background: #e4e4e7; }
+    footer {
+      text-align: center;
+      padding: 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: #71717a;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">🛍️ TrendyStore</div>
+    <ul class="nav-links">
+      <li>Products</li>
+      <li>Deals</li>
+      <li>Warranty</li>
+      <li>Returns &amp; FAQ</li>
+    </ul>
+  </nav>
+
+  <div class="hero">
+    <span class="hero-tag">✨ Summer Tech Drop 2026</span>
+    <h1>Premium Audio &amp; Productivity Gear</h1>
+    <p>Discover flagship headphones, high-speed accessories, and ultra-durable essentials with free shipping on orders over $50.</p>
+  </div>
+
+  <div class="products-grid">
+    <div class="p-card">
+      <span class="p-badge">Electronics</span>
+      <div class="p-title">Sony WH-1000XM5 Wireless</div>
+      <div class="p-price">$349.99</div>
+      <div class="p-desc">Industry-leading noise cancellation with 30-hour battery life and quick charging.</div>
+      <button class="btn-buy">Add to Cart</button>
+    </div>
+
+    <div class="p-card">
+      <span class="p-badge">Accessories</span>
+      <div class="p-title">Logitech MX Master 3S</div>
+      <div class="p-price">$99.99</div>
+      <div class="p-desc">Quiet clicks, 8K DPI any-surface tracking, and ergonomic thumb rest design.</div>
+      <button class="btn-buy">Add to Cart</button>
+    </div>
+
+    <div class="p-card">
+      <span class="p-badge">Displays</span>
+      <div class="p-title">Samsung 27" 4K UHD Monitor</div>
+      <div class="p-price">$279.99</div>
+      <div class="p-desc">HDR10 support, borderless design, and USB-C single cable connectivity.</div>
+      <button class="btn-buy">Add to Cart</button>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 TrendyStore Retail Inc. All rights reserved. Look at the bottom-right corner to chat with our AI Assistant!
+  </footer>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- PLUG-N-PLAY AI WIDGET EMBED CODE (TEST READY)              -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <script 
+    src="http://127.0.0.1:8000/static/pnp-widget.js"
+    data-api-host="http://127.0.0.1:8000"
+    data-agent-id="default"
+    data-title="TrendyStore Support"
+    data-primary-color="#09090b"
+    data-accent-color="#22c55e"
+    data-position="bottom-right"
+    data-welcome="Hi there! Welcome to TrendyStore. Ask me about our 30-day return policy, express shipping, or product warranties!">
+  </script>
+
+</body>
+</html>

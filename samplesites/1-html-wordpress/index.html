@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura Audio &amp; Gear — Sample HTML/WordPress Site</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span>🎧 Aura Gear</span>
+      <span class="brand-badge">Official Store</span>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#products">Products</a></li>
+        <li><a href="#shipping">Shipping &amp; Delivery</a></li>
+        <li><a href="#returns">Returns &amp; FAQ</a></li>
+        <li><a href="#warranty">Warranty</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Studio Sound. Engineered for Anywhere.</h1>
+      <p>Explore flagship ANC headphones, high-fidelity wireless earbuds, and ergonomic creator tools with 30-day risk-free home trials.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="alert('Viewing Catalog')">Shop Collection</button>
+        <button class="btn-secondary" onclick="alert('Viewing 30-Day Policy')">Read Return Policy</button>
+      </div>
+    </section>
+
+    <section class="products-section" id="products">
+      <div class="section-header">
+        <h2>Featured Gear</h2>
+      </div>
+      <div class="products-grid">
+        <div class="product-card">
+          <div class="product-tag">Flagship ANC</div>
+          <div class="product-title">Aura Pro Wireless Headphones</div>
+          <div class="product-price">$349.99</div>
+          <div class="product-desc">40mm custom drivers, 38-hour battery with ultra-fast Type-C quick charging.</div>
+          <button class="btn-cart">Add to Bag</button>
+        </div>
+        <div class="product-card">
+          <div class="product-tag">Productivity</div>
+          <div class="product-title">Precision Studio Dial Mouse</div>
+          <div class="product-price">$119.00</div>
+          <div class="product-desc">Dual magnetic scroll wheel, silent mechanical micro-switches, and multi-host pairing.</div>
+          <button class="btn-cart">Add to Bag</button>
+        </div>
+        <div class="product-card">
+          <div class="product-tag">Audiophile</div>
+          <div class="product-title">Spatial Audio DAC Amplifier</div>
+          <div class="product-price">$199.50</div>
+          <div class="product-desc">32-bit/768kHz lossless playback with balanced 4.4mm output.</div>
+          <button class="btn-cart">Add to Bag</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="features-row" id="shipping">
+      <div class="feature-box">
+        <h3>🚀 Fast Global Shipping</h3>
+        <p>Orders dispatched within 24 hours. Free standard express on orders over $50.</p>
+      </div>
+      <div class="feature-box" id="returns">
+        <h3>🔄 30-Day Hassle-Free Returns</h3>
+        <p>Not completely in love? Return within 30 days for a full refund or exchange.</p>
+      </div>
+      <div class="feature-box" id="warranty">
+        <h3>🛡️ 1-Year Full Warranty</h3>
+        <p>Comprehensive manufacturer warranty covering hardware defects and technical support.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Aura Gear Inc. Built for testing Plug-N-Play AI universal widget.</p>
+  </footer>
+
+  <!-- ================================================================= -->
+  <!-- 🔌 PLUG-N-PLAY AI EMBED SCRIPT: HTML / WORDPRESS / WEBFLOW TARGET  -->
+  <!-- Live Action Event Receiver Banner -->
+  <div id="pnp-action-toast" style="display:none; position:fixed; top:20px; right:20px; z-index:999999; background:#0f172a; color:#fff; border:1px solid #22c55e; border-radius:10px; padding:14px 18px; box-shadow:0 12px 35px rgba(0,0,0,0.6); font-family:system-ui, -apple-system, sans-serif; max-width:380px;">
+    <div style="font-weight:700; color:#4ade80; font-size:12px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+      <span>⚡ HOST APP RECEIVED ACTION:</span> <span id="pnp-toast-name"></span>
+    </div>
+    <div id="pnp-toast-payload" style="font-size:11.5px; font-family:monospace; background:rgba(0,0,0,0.5); padding:6px 8px; border-radius:6px; color:#e2e8f0; word-break:break-all;"></div>
+  </div>
+
+  <script>
+    // 1. Client-Side Action Handler for Browser Relay Mode
+    const _origFetch = window.fetch;
+    window.fetch = async function(url, opts) {
+      if (typeof url === 'string' && (url === '/api/orders/cancel' || url.endsWith('/api/orders/cancel'))) {
+        const body = opts?.body ? JSON.parse(opts.body) : {};
+        showClientActionToast('cancel_order', body);
+        return new Response(JSON.stringify({
+          status: 'success',
+          order_id: body.order_id,
+          refund_amount: 349.99,
+          reference_id: `CAN-${body.order_id}-${Math.floor(Math.random()*9000+1000)}`,
+          message: 'Order cancelled directly via host app session!'
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+      if (typeof url === 'string' && (url === '/api/appointments/reschedule' || url.endsWith('/api/appointments/reschedule'))) {
+        const body = opts?.body ? JSON.parse(opts.body) : {};
+        showClientActionToast('reschedule_appointment', body);
+        return new Response(JSON.stringify({
+          status: 'success',
+          booking_id: body.booking_id,
+          new_date: body.preferred_date,
+          reference_id: `RESCHED-${Math.floor(Math.random()*9000+1000)}`
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+      return _origFetch.apply(this, arguments);
+    };
+
+    // 2. CustomEvent Listener for WebSocket / Event-Driven integrations
+    window.addEventListener('pnp:action:execute', (e) => {
+      showClientActionToast(e.detail?.display_name || e.detail?.name, e.detail?.parameters);
+    });
+
+    function showClientActionToast(name, payload) {
+      const toast = document.getElementById('pnp-action-toast');
+      const nEl = document.getElementById('pnp-toast-name');
+      const pEl = document.getElementById('pnp-toast-payload');
+      if (toast && nEl && pEl) {
+        nEl.innerText = name;
+        pEl.innerText = JSON.stringify(payload, null, 2);
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 6000);
+      }
+    }
+  </script>
+
+  <!-- Plug-N-Play AI Universal Widget -->
+  <script 
+    src="http://127.0.0.1:8000/static/pnp-widget.js"
+    data-api-host="http://127.0.0.1:8000"
+    data-agent-id="49e431f4-893a-414e-a42e-7582d3fbf0c6"
+    data-title="OmniAction Enterprise AI"
+    data-primary-color="#09090b"
+    data-accent-color="#22c55e"
+    data-bg-color="#09090b"
+    data-header-bg="#121215"
+    data-text-color="#f8fafc"
+    data-user-bubble="#22c55e"
+    data-position="bottom-right"
+    data-widget-size="medium"
+    data-btn-shape="circle"
+    data-border-radius="24"
+    data-theme="dark"
+    data-welcome="Hello! I am OmniAction Enterprise AI. I can cancel orders or reschedule appointments. Try an action prompt below:"
+    data-starter-questions="Please cancel my order 1001,Please reschedule appointment BKG-992 to tomorrow"
+    data-show-branding="true">
+  </script>
+</body>
+</html>

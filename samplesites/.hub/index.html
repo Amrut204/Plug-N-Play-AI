@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plug-N-Play AI — Multi-Framework Sample Sites Launchpad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #121215;
+      --surface-hover: #18181b;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.2);
+      --text: #f8fafc;
+      --muted: #a1a1aa;
+      --accent: #22c55e;
+      --accent-blue: #38bdf8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 48px 24px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      padding: 4px 12px;
+      border-radius: 99px;
+      margin-bottom: 14px;
+    }
+    h1 { font-size: 36px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 12px; }
+    p.lead { color: var(--muted); font-size: 16px; max-width: 680px; margin: 0 auto; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+    }
+    .site-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.2s;
+    }
+    .site-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-hover);
+      box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.6);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      padding: 3px 9px;
+      border-radius: 6px;
+    }
+    .port-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      flex: 1;
+    }
+    .btn-open {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: #ffffff;
+      color: #09090b;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 10px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .btn-open:hover {
+      background: #e4e4e7;
+      transform: scale(1.02);
+    }
+    .footer-bar {
+      margin-top: 60px;
+      text-align: center;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="header-badge">✓ 10 Sample Environments Active</span>
+      <h1>Multi-Framework Verification Hub</h1>
+      <p class="lead">Click any sample website below to test your Plug-N-Play AI widget or zero-knowledge backend bridge live in your browser.</p>
+    </header>
+
+    <div class="grid">
+      
+        <div class="site-card">
+          <div class="card-top">
+            <span class="badge">🌐 Pure HTML5</span>
+            <span class="port-tag">Port 8081</span>
+          </div>
+          <div class="card-title">HTML / WordPress / Webflow</div>
+          <div class="card-desc">Storefront (Aura Gear)</div>
+          <div class="card-actions">
+            <a href="http://127.0.0.1:8081" target="_blank" class="btn-open">
+              Open Sample Site ↗
+            </a>
+          </div>
+        </div>
+        
+        <div class="site-card">
+          <div class="card-top">
+            <span class="badge">⚛️ React 18 + TS</span>
+            <span class="port-tag">Port 5173</span>
+          </div>
+          <div class="card-title">React (TypeScript TSX)</div>
+          <div class="card-desc">SaaS Cloud Analytics Dashboard</div>
+          <div class="card-actions">
+            <a href="http://127.0.0.1:5173" target="_blank" class="btn-open">
+              Open Sample Site ↗
+            </a>
+          </div>
+        </div>
+        
+        <div class="site-card">
+          <div class="card-top">
+            <span class="badge">⚛️ React 18 + JSX</span>
+            <span class="port-tag">Port 5174</span>
+          </div>
+          <div class="card-title">React (JavaScript JSX)</div>
+          <div class="card-desc">Private Banking Web App</div>
+          <div class="card-actions">
+            <a href="http://127.0.0.1:5174" target="_blank" class="btn-open">
+              Open Sample Site ↗
+            </a>
+          </div>
+        </div>
+        
+        <div class="site-card">
+          <div class="card-top">
+            <span class="badge">⚡ Next.js 14/15</span>
+            <span class="port-tag">Port 3001</span>
+          </div>
+          <div class="card-title">Next.js (App Router)</div>
+          <div class="card-desc">OmniCloud Serverless Hub</div>
+          <div class="card-actions">
+            <a href="http://127.0.0.1:3001" target="_blank" class="btn-open">
+              Open Sample Site ↗
+            </a>
+          </div>
+        </div>
+        
+        <div class="site-card">
+          <div class="card-top">
+            <span class="badge">🅰️ Angular 17+</span>
+            <span class="port-tag">Port 4200</span>
+          </div>
+          <div class="card-title">Angular (TS Component)</div>
+          <div class="card-desc">Apex Institute Student ERP</div>
+          <div class="card-actions">
+            <a href="http://127.0.0.1:4200" target="_blank" class="btn-open">
+              Open Sample Site ↗
+            </a>
+          </div>
+        </div>
+        
+        <div class="site-card">
+          <div class="card-top">
+            <span class="badge">🟢 Vue 3 Composition</span>
+            <span class="port-tag">Port 5175</span>
+          </div>
+          <div class="card-title">Vue 3 / Nuxt 3</div>
+          <div class="card-desc">MetroHealth Patient Portal</div>
+          <div class="card-actions">
+            <a href="http://127.0.0.1:5175" target="_blank" class="btn-open">
+              Open Sample Site ↗
+            </a>
+          </div>
+        </div>
+        
+        <div class="site-card">
+          <div class="card-top">
+            <span class="badge">🟠 Svelte 4/5</span>
+            <span class="port-tag">Port 5176</span>
+          </div>
+          <div class="card-title">Svelte / SvelteKit</div>
+          <div class="card-desc">Pacific Freight Logistics Hub</div>
+          <div class="card-actions">
+            <a href="http://127.0.0.1:5176" target="_blank" class="btn-open">
+              Open Sample Site ↗
+            </a>
+          </div>
+        </div>
+        
+        <div class="site-card">
+          <div class="card-top">
+            <span class="badge">🟢 Node.js Express</span>
+            <span class="port-tag">Port 3000</span>
+          </div>
+          <div class="card-title">Node.js Bridge (Zero-Knowledge)</div>
+          <div class="card-desc">Private VPC Backend Bridge</div>
+          <div class="card-actions">
+            <a href="http://127.0.0.1:3000" target="_blank" class="btn-open">
+              Open Sample Site ↗
+            </a>
+          </div>
+        </div>
+        
+        <div class="site-card">
+          <div class="card-top">
+            <span class="badge">🐍 Python FastAPI</span>
+            <span class="port-tag">Port 5000</span>
+          </div>
+          <div class="card-title">Python Bridge (FastAPI)</div>
+          <div class="card-desc">Firewalled SQL Bridge Server</div>
+          <div class="card-actions">
+            <a href="http://127.0.0.1:5000" target="_blank" class="btn-open">
+              Open Sample Site ↗
+            </a>
+          </div>
+        </div>
+        
+        <div class="site-card">
+          <div class="card-top">
+            <span class="badge">🐘 PHP / Laravel</span>
+            <span class="port-tag">Port 8082</span>
+          </div>
+          <div class="card-title">PHP Bridge (Laravel)</div>
+          <div class="card-desc">MySQL / SQLite Bridge Client</div>
+          <div class="card-actions">
+            <a href="http://127.0.0.1:8082" target="_blank" class="btn-open">
+              Open Sample Site ↗
+            </a>
+          </div>
+        </div>
+        
+    </div>
+
+    <div class="footer-bar">
+      Plug-N-Play AI Master Studio running on <a href="http://127.0.0.1:8000" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 700;">http://127.0.0.1:8000</a>
+    </div>
+  </div>
+</body>
+</html>

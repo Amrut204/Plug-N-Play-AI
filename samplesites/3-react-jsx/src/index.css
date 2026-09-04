@@ -1,0 +1,58 @@
+:root {
+  --bg: #09090b;
+  --surface: #121215;
+  --surface-hover: #18181b;
+  --border: rgba(255, 255, 255, 0.08);
+  --text-main: #f8fafc;
+  --text-muted: #a1a1aa;
+  --accent-purple: #c084fc;
+  --accent-green: #22c55e;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-main);
+  min-height: 100vh;
+}
+.app-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.logo { font-size: 20px; font-weight: 800; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+.bank-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+}
+.account-type { font-size: 12px; color: var(--accent-purple); font-weight: 700; text-transform: uppercase; }
+.balance { font-size: 34px; font-weight: 800; margin: 12px 0 20px; }
+.actions-row { display: flex; gap: 10px; }
+.btn-action {
+  flex: 1;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-action:hover { background: #ffffff; color: #09090b; }

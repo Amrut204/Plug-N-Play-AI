@@ -1,0 +1,35 @@
+# Apex Institute of Technology — Academic Regulations & Student Handbook
+
+## 1. Attendance Regulations
+- **Minimum Requirement:** Students must maintain a minimum of 75% aggregate attendance in each registered subject to be eligible for end-semester examinations.
+- **Medical Condensation:** Students with attendance between 65% and 74.9% may apply for medical condonation by submitting verified hospital certificates within 3 working days of absence.
+- **Debarred Status:** Any student with attendance below 65% is strictly debarred from sitting for the final exams and must re-register for the course in the subsequent semester.
+
+## 2. Examination & Grading System
+- **Evaluation Breakdown:**
+  - Continuous Internal Assessment (CIA): 40% (Quizzes, Midterms, Lab assignments)
+  - End-Semester Examination: 60%
+- **Passing Criteria:** Minimum 40% in internal assessments AND minimum 40% in final examination, with an aggregate score of at least 45%.
+- **Grading Scale:**
+  - 90% - 100%: Grade O (Outstanding, 10.0 points)
+  - 80% - 89%: Grade A+ (Excellent, 9.0 points)
+  - 70% - 79%: Grade A (Very Good, 8.0 points)
+  - 60% - 69%: Grade B+ (Good, 7.0 points)
+  - 50% - 59%: Grade B (Above Average, 6.0 points)
+  - 45% - 49%: Grade C (Pass, 5.0 points)
+  - Below 45%: Grade F (Fail / Arrear)
+
+## 3. Placement & Training (TPO) Eligibility
+- **Academic Eligibility:** Students must maintain a minimum cumulative CGPA of 6.50 with zero active arrears/backlogs to participate in on-campus recruitment drives.
+- **Dream Offers:** Students securing an initial offer with CTC < 6 LPA remain eligible to sit for "Dream Tier" companies offering > 10 LPA.
+- **Dress Code for Interviews:** Formal western business attire is strictly required for all placement interviews and company presentations.
+
+## 4. Hostel Rules & Curfew Timings
+- **Entry Curfew:** Hostel main gates close promptly at 9:30 PM on weekdays and 10:30 PM on weekends and public holidays.
+- **Night Out Passes:** Students requesting an overnight leave must submit an online request through the Student ERP portal at least 24 hours in advance with parent SMS approval.
+- **Quiet Hours:** 11:00 PM to 6:00 AM are observed as mandatory quiet study hours in all residential blocks.
+
+## 5. Library & Digital Resources
+- **Borrowing Limit:** Undergraduate students may borrow up to 4 physical books for a duration of 14 days. Renewal is allowed once online.
+- **Late Fines:** $0.50 per book per day after the due date.
+- **Digital Access:** IEEE Xplore, ScienceDirect, and ACM Digital Library are accessible on-campus and off-campus via institutional SSO login.
