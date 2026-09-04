@@ -5,8 +5,8 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const PNP_HOST = process.env.PNP_HOST || 'http://127.0.0.1:8000';
-const AGENT_ID = process.env.PNP_AGENT_ID || '109fab0d-20f5-4282-a6e4-181cda45b086';
+const PNP_HOST = process.env.PNP_HOST || 'https://plug-n-play-rag.onrender.com';
+const AGENT_ID = process.env.PNP_AGENT_ID || 'YOUR_AGENT_ID';
 const MASTER_KEY = process.env.PNP_MASTER_API_KEY || '';
 
 app.use(express.json());

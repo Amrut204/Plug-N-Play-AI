@@ -15,8 +15,8 @@ class AIChatController extends Controller
         $userId = $request->input('user_id', 'guest_user');
         $userRole = $request->input('user_role', 'user');
 
-        $pnpHost = env('PNP_HOST', 'http://127.0.0.1:8000');
-        $agentId = env('PNP_AGENT_ID', 'default');
+        $pnpHost = env('PNP_HOST', 'https://plug-n-play-rag.onrender.com');
+        $agentId = env('PNP_AGENT_ID', 'YOUR_AGENT_ID');
         $masterKey = env('PNP_MASTER_API_KEY', '');
 
         // Step 1: Request safe SQL generation from Plug-N-Play AI

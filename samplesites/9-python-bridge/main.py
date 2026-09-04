@@ -12,8 +12,8 @@ load_dotenv()
 
 app = FastAPI(title="Plug-N-Play Python Zero-Knowledge Bridge")
 
-PNP_HOST = os.getenv("PNP_HOST", "http://127.0.0.1:8000")
-AGENT_ID = os.getenv("PNP_AGENT_ID", "109fab0d-20f5-4282-a6e4-181cda45b086")
+PNP_HOST = os.getenv("PNP_HOST", "https://plug-n-play-rag.onrender.com")
+AGENT_ID = os.getenv("PNP_AGENT_ID", "YOUR_AGENT_ID")
 MASTER_KEY = os.getenv("PNP_MASTER_API_KEY", "")
 
 # Simulated private on-premise records (Inside client's firewall)

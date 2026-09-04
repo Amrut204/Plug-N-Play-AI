@@ -15,23 +15,12 @@ export class AIWidgetComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.scriptElement = document.createElement('script');
-      this.scriptElement.src = 'http://127.0.0.1:8000/static/pnp-widget.js';
-      this.scriptElement.setAttribute('data-api-host', 'http://127.0.0.1:8000');
-      this.scriptElement.setAttribute('data-agent-id', '9b7f7f22-a73c-472a-8f14-0b97c6e0e63d');
-      this.scriptElement.setAttribute('data-title', 'customersupport');
-      this.scriptElement.setAttribute('data-primary-color', '#09090b');
-      this.scriptElement.setAttribute('data-accent-color', '#318c52');
-      this.scriptElement.setAttribute('data-bg-color', '#09090b');
-      this.scriptElement.setAttribute('data-header-bg', '#121215');
-      this.scriptElement.setAttribute('data-text-color', '#f8fafc');
-      this.scriptElement.setAttribute('data-user-bubble', '#ffffff');
-      this.scriptElement.setAttribute('data-position', 'bottom-right');
-      this.scriptElement.setAttribute('data-widget-size', 'medium');
-      this.scriptElement.setAttribute('data-btn-shape', 'circle');
-      this.scriptElement.setAttribute('data-border-radius', '24');
+      // Paste your exported Angular component configuration from Agent Studio below:
+      this.scriptElement.src = 'https://plug-n-play-rag.onrender.com/static/pnp-widget.js';
+      this.scriptElement.setAttribute('data-api-host', 'https://plug-n-play-rag.onrender.com');
+      this.scriptElement.setAttribute('data-agent-id', 'YOUR_AGENT_ID');
+      this.scriptElement.setAttribute('data-title', 'Campus AI Advisor');
       this.scriptElement.setAttribute('data-theme', 'dark');
-      this.scriptElement.setAttribute('data-welcome', 'Hello! I am your AI Assistant. Ask me anything or tap the mic to speak:');
-      this.scriptElement.setAttribute('data-show-branding', 'true');
       this.scriptElement.async = true;
       document.body.appendChild(this.scriptElement);
     }
