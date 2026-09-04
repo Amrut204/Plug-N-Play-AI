@@ -255,6 +255,35 @@ class EmailService:
         smtp_pass = os.getenv("SMTP_PASS")
         from_email = os.getenv("SMTP_FROM", "auth@plugnplay-ai.com")
 
+        # 1. Try Resend HTTP API if configured (Port 443 — never blocked by Render/cloud firewalls)
+        resend_api_key = os.getenv("RESEND_API_KEY")
+        if resend_api_key:
+            try:
+                import httpx
+                resend_from = os.getenv("RESEND_FROM", "onboarding@resend.dev")
+                res_resp = httpx.post(
+                    "https://api.resend.com/emails",
+                    headers={
+                        "Authorization": f"Bearer {resend_api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "from": resend_from,
+                        "to": [clean_email],
+                        "subject": subject,
+                        "html": html_content
+                    },
+                    timeout=5.0
+                )
+                if res_resp.status_code in (200, 201):
+                    logger.info(f"OTP email successfully sent via Resend HTTPS API to {clean_email}")
+                    return {"status": "success", "mode": "resend", "recipient": clean_email}
+                else:
+                    logger.warning(f"Resend dispatch returned {res_resp.status_code}: {res_resp.text}")
+            except Exception as res_err:
+                logger.error(f"Resend dispatch error: {res_err}")
+
+        # 2. Try Standard SMTP (if host/user/pass configured)
         if smtp_host and smtp_user and smtp_pass:
             try:
                 msg = MIMEMultipart("alternative")
@@ -264,11 +293,11 @@ class EmailService:
                 msg.attach(MIMEText(html_content, "html"))
 
                 if smtp_port == 465:
-                    with IPv4SMTP_SSL(smtp_host, smtp_port, timeout=12.0) as server:
+                    with IPv4SMTP_SSL(smtp_host, smtp_port, timeout=3.5) as server:
                         server.login(smtp_user, smtp_pass)
                         server.sendmail(from_email, [clean_email], msg.as_string())
                 else:
-                    with IPv4SMTP(smtp_host, smtp_port, timeout=12.0) as server:
+                    with IPv4SMTP(smtp_host, smtp_port, timeout=3.5) as server:
                         server.starttls()
                         server.login(smtp_user, smtp_pass)
                         server.sendmail(from_email, [clean_email], msg.as_string())
@@ -276,7 +305,7 @@ class EmailService:
                 logger.info(f"OTP email successfully sent via SMTP to {clean_email}")
                 return {"status": "success", "mode": "smtp", "recipient": clean_email}
             except Exception as e:
-                logger.error(f"SMTP OTP dispatch failed: {e}. Falling back to simulated.")
+                logger.warning(f"SMTP OTP dispatch failed ({type(e).__name__}: {e}). Falling back to simulated.")
                 return {"status": "success", "mode": "simulated", "recipient": clean_email, "otp": otp_code, "error": str(e)}
         else:
             logger.info(f"[SIMULATED OTP DISPATCH] Verification code {otp_code} generated for {clean_email}")
