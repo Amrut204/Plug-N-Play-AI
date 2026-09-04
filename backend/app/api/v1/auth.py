@@ -85,6 +85,69 @@ class ChangePasswordRequest(BaseModel):
     new_password: str = Field(..., min_length=6, description="New password (minimum 6 characters)")
 
 
+@router.get("/smtp-diag")
+async def smtp_diagnostics():
+    """
+    Diagnostic endpoint to test outbound SMTP connectivity from the server host.
+    """
+    import socket
+    import smtplib
+
+    host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    port = int(os.getenv("SMTP_PORT", "587"))
+    user = os.getenv("SMTP_USER")
+    passwd = os.getenv("SMTP_PASS")
+    sender = os.getenv("SMTP_FROM")
+
+    results = {
+        "env_vars": {
+            "SMTP_HOST": host,
+            "SMTP_PORT": port,
+            "SMTP_USER_SET": bool(user),
+            "SMTP_USER_PREVIEW": f"{user[:3]}***@{user.split('@')[-1]}" if user and "@" in user else None,
+            "SMTP_PASS_SET": bool(passwd),
+            "SMTP_PASS_LEN": len(passwd) if passwd else 0,
+            "SMTP_FROM": sender,
+        },
+        "port_tests": {},
+        "auth_test": {}
+    }
+
+    # Test raw TCP connectivity to port 587
+    for test_port in [587, 465, 25]:
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(4.0)
+            res = s.connect_ex((host, test_port))
+            s.close()
+            results["port_tests"][f"{host}:{test_port}"] = "OPEN (0)" if res == 0 else f"CLOSED/BLOCKED ({res})"
+        except Exception as err:
+            results["port_tests"][f"{host}:{test_port}"] = f"EXCEPTION: {type(err).__name__}: {err}"
+
+    # Test SMTP handshake and login
+    if user and passwd:
+        try:
+            if port == 465:
+                with smtplib.SMTP_SSL(host, port, timeout=6.0) as server:
+                    server.login(user, passwd)
+                    results["auth_test"] = {"status": "success", "mode": "SSL (465)"}
+            else:
+                with smtplib.SMTP(host, port, timeout=6.0) as server:
+                    server.starttls()
+                    server.login(user, passwd)
+                    results["auth_test"] = {"status": "success", "mode": "STARTTLS (587)"}
+        except Exception as auth_err:
+            results["auth_test"] = {
+                "status": "failed",
+                "error_type": type(auth_err).__name__,
+                "error_detail": str(auth_err)
+            }
+    else:
+        results["auth_test"] = {"status": "skipped", "reason": "SMTP_USER or SMTP_PASS missing in environment"}
+
+    return results
+
+
 @router.post("/register-otp", status_code=status.HTTP_200_OK)
 async def request_registration_otp(payload: RegisterRequestOTP, db: AsyncSession = Depends(get_db)):
     """
