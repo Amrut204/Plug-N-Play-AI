@@ -21,6 +21,7 @@ class Agent(Base):
     
     # Flags & Guardrails
     guardrail_config = Column(Text, nullable=True)  # JSON-encoded structured safety rules
+    allowed_domains = Column(String(500), nullable=True)  # Comma-separated domain allowlist for web widget embedding
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

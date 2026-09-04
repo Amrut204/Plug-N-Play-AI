@@ -1,6 +1,10 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional, List
 import os
+import secrets
+import logging
+
+logger = logging.getLogger("app.core.config")
 
 
 class Settings(BaseSettings):
@@ -21,6 +25,11 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
     SESSION_TOKEN_EXPIRE_MINUTES: int = 15      # Short-lived widget session
+
+    # Rate Limiting & Upload Guardrails
+    CHAT_RATE_LIMIT_PER_MINUTE: int = int(os.getenv("CHAT_RATE_LIMIT_PER_MINUTE", "60"))
+    MAX_UPLOAD_SIZE_BYTES: int = int(os.getenv("MAX_UPLOAD_SIZE_BYTES", str(25 * 1024 * 1024)))  # 25 MB
+    ENABLE_LOCAL_EMBEDDINGS: bool = os.getenv("ENABLE_LOCAL_EMBEDDINGS", "true").lower() == "true"
     
     # Database
     # Default to sqlite+aiosqlite for local testing/dev if Postgres is not running
@@ -74,3 +83,12 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Production Security Safeguard
+if settings.ENVIRONMENT == "production" and settings.SECRET_KEY == "enterprise_super_secret_pnp_jwt_key_32_bytes_long_change_in_prod":
+    settings.SECRET_KEY = secrets.token_hex(32)
+    logger.warning(
+        "⚠️ [SECURITY WARNING] Default insecure SECRET_KEY detected in production! "
+        "Generated an ephemeral 256-bit cryptographically secure key for this session. "
+        "Please configure SECRET_KEY in your Render environment variables."
+    )

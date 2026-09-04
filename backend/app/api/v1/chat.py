@@ -8,6 +8,8 @@ from sqlalchemy import select
 from typing import Optional, Any
 from pydantic import BaseModel, Field
 
+from urllib.parse import urlparse
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import create_widget_session_token, decode_session_token
 from app.models.agents import Agent
@@ -19,8 +21,51 @@ from app.services.cache.redis_cache import RedisService
 router = APIRouter(prefix="/chat", tags=["Widget Chat & Sessions"])
 
 
+def verify_agent_origin(agent: Optional[Agent], origin: Optional[str], referer: Optional[str]) -> bool:
+    """
+    Validates browser cross-origin requests against the Agent's configured allowed_domains.
+    If allowed_domains is not configured or is '*', all origins are allowed.
+    If an Origin or Referer is supplied from a browser, it must match one of the allowed domains.
+    """
+    if not agent or not getattr(agent, "allowed_domains", None) or agent.allowed_domains.strip() in ("", "*"):
+        return True
+
+    domains = [d.strip().lower() for d in agent.allowed_domains.split(",") if d.strip()]
+    if not domains or "*" in domains:
+        return True
+
+    header_val = origin or referer
+    if not header_val:
+        # Non-browser server-to-server call (e.g. backend bridge with API key)
+        return True
+
+    try:
+        parsed = urlparse(header_val)
+        host = (parsed.hostname or "").lower()
+    except Exception:
+        host = header_val.lower()
+
+    if not host:
+        return True
+
+    # Always permit local development hosts
+    if host in ("localhost", "127.0.0.1", "0.0.0.0"):
+        return True
+
+    for allowed in domains:
+        if host == allowed or host.endswith("." + allowed):
+            return True
+
+    return False
+
+
 @router.post("/sessions/create", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
-async def create_chat_session(payload: SessionCreateRequest, db: AsyncSession = Depends(get_db)):
+async def create_chat_session(
+    payload: SessionCreateRequest,
+    origin: Optional[str] = Header(None),
+    referer: Optional[str] = Header(None),
+    db: AsyncSession = Depends(get_db)
+):
     """
     Called by Client Backend to initialize a secure short-lived AI session for a logged-in user.
     Returns a signed JWT session token for the embeddable widget.
@@ -36,6 +81,13 @@ async def create_chat_session(payload: SessionCreateRequest, db: AsyncSession = 
 
     if not agent:
         raise HTTPException(status_code=404, detail="No active Agent configured.")
+
+    # Server-Side Domain Allowlist Enforcement
+    if not verify_agent_origin(agent, origin, referer):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Origin '{origin or referer}' is not authorized for this agent. Allowed domains: {agent.allowed_domains}"
+        )
 
     session = ChatSession(
         tenant_id=agent.tenant_id,
@@ -73,6 +125,8 @@ async def send_chat_message(
     payload: ChatMessageRequest,
     authorization: Optional[str] = Header(None),
     session_id: Optional[str] = Query(None),
+    origin: Optional[str] = Header(None),
+    referer: Optional[str] = Header(None),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -115,13 +169,27 @@ async def send_chat_message(
     if not session:
         raise HTTPException(status_code=401, detail="Missing or invalid session credentials.")
 
+    # Server-Side Domain Allowlist Enforcement
+    stmt_ag = select(Agent).where(Agent.id == session.agent_id)
+    res_ag = await db.execute(stmt_ag)
+    agent = res_ag.scalars().first()
+    if not verify_agent_origin(agent, origin, referer):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Origin '{origin or referer}' is not authorized for this agent."
+        )
+
     # Distributed Rate Limiting via Redis
     rate_key = f"{session.tenant_id}:{session.external_user_id or session.id}"
-    allowed, current_count, retry_after = await RedisService.check_rate_limit(rate_key, limit=60, window_seconds=60)
+    allowed, current_count, retry_after = await RedisService.check_rate_limit(
+        rate_key, 
+        limit=settings.CHAT_RATE_LIMIT_PER_MINUTE, 
+        window_seconds=60
+    )
     if not allowed:
         raise HTTPException(
             status_code=429,
-            detail=f"Rate limit exceeded. Maximum 60 requests per minute. Try again in {retry_after} seconds.",
+            detail=f"Rate limit exceeded. Maximum {settings.CHAT_RATE_LIMIT_PER_MINUTE} requests per minute. Try again in {retry_after} seconds.",
             headers={"Retry-After": str(retry_after)}
         )
 
@@ -165,6 +233,8 @@ async def stream_chat_post(
     payload: ChatMessageRequest,
     authorization: Optional[str] = Header(None),
     session_id: Optional[str] = Query(None),
+    origin: Optional[str] = Header(None),
+    referer: Optional[str] = Header(None),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -206,6 +276,30 @@ async def stream_chat_post(
     if not session:
         raise HTTPException(status_code=401, detail="Missing or invalid session credentials.")
 
+    # Server-Side Domain Allowlist Enforcement
+    stmt_ag = select(Agent).where(Agent.id == session.agent_id)
+    res_ag = await db.execute(stmt_ag)
+    agent = res_ag.scalars().first()
+    if not verify_agent_origin(agent, origin, referer):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Origin '{origin or referer}' is not authorized for this agent."
+        )
+
+    # Distributed Rate Limiting via Redis
+    rate_key = f"{session.tenant_id}:{session.external_user_id or session.id}"
+    allowed, current_count, retry_after = await RedisService.check_rate_limit(
+        rate_key, 
+        limit=settings.CHAT_RATE_LIMIT_PER_MINUTE, 
+        window_seconds=60
+    )
+    if not allowed:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Rate limit exceeded. Maximum {settings.CHAT_RATE_LIMIT_PER_MINUTE} requests per minute. Try again in {retry_after} seconds.",
+            headers={"Retry-After": str(retry_after)}
+        )
+
     # Save user message
     user_msg = ChatMessage(session_id=session.id, role="user", content=payload.query)
     db.add(user_msg)
@@ -221,6 +315,8 @@ async def stream_chat_post(
 async def stream_chat_get(
     query: str = Query(...),
     token: str = Query(...),
+    origin: Optional[str] = Header(None),
+    referer: Optional[str] = Header(None),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -239,6 +335,30 @@ async def stream_chat_get(
     db.add(session)
     await db.commit()
     await db.refresh(session)
+
+    # Server-Side Domain Allowlist Enforcement
+    stmt_ag = select(Agent).where(Agent.id == session.agent_id)
+    res_ag = await db.execute(stmt_ag)
+    agent = res_ag.scalars().first()
+    if not verify_agent_origin(agent, origin, referer):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Origin '{origin or referer}' is not authorized for this agent."
+        )
+
+    # Distributed Rate Limiting via Redis
+    rate_key = f"{session.tenant_id}:{session.external_user_id or session.id}"
+    allowed, current_count, retry_after = await RedisService.check_rate_limit(
+        rate_key, 
+        limit=settings.CHAT_RATE_LIMIT_PER_MINUTE, 
+        window_seconds=60
+    )
+    if not allowed:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Rate limit exceeded. Maximum {settings.CHAT_RATE_LIMIT_PER_MINUTE} requests per minute. Try again in {retry_after} seconds.",
+            headers={"Retry-After": str(retry_after)}
+        )
 
     # Save user message
     user_msg = ChatMessage(session_id=session.id, role="user", content=query)

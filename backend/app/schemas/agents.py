@@ -11,6 +11,7 @@ class AgentCreate(BaseModel):
     model_name: str = Field(default="gpt-4o-mini")
     temperature: float = Field(default=0.1, ge=0.0, le=1.0)
     guardrail_config: Optional[str] = None
+    allowed_domains: Optional[str] = None
 
 
 class AgentUpdate(BaseModel):
@@ -21,6 +22,7 @@ class AgentUpdate(BaseModel):
     model_name: Optional[str] = None
     temperature: Optional[float] = None
     guardrail_config: Optional[str] = None
+    allowed_domains: Optional[str] = None
     is_active: Optional[bool] = None
 
 
@@ -36,5 +38,6 @@ class AgentResponse(BaseModel):
     model_name: str
     temperature: float
     guardrail_config: Optional[str] = None
+    allowed_domains: Optional[str] = None
     is_active: bool
     created_at: datetime

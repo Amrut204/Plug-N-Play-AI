@@ -6,6 +6,7 @@ from app.core.database import get_db
 from app.models.rag import RAGSource, RAGChunk
 from app.models.agents import Agent
 from app.schemas.rag import RAGSourceCreate, RAGSourceResponse, DocumentIngestRequest
+from app.core.config import settings
 from app.services.rag.chunker import TextChunker
 from app.services.rag.embedder import EmbeddingService
 
@@ -52,15 +53,19 @@ async def ingest_documents(source_id: str, payload: DocumentIngestRequest, db: A
             chunk_size=payload.chunk_size, 
             chunk_overlap=payload.chunk_overlap
         )
-        for chunk_str in chunks:
-            # Generate embedding
-            embedding_vec = await EmbeddingService.get_embedding(chunk_str)
-            chunk_meta = {
-                "title": doc.title,
-                "category": doc.category,
-                "allowed_roles": doc.allowed_roles,
-                **(doc.metadata or {})
-            }
+        if not chunks:
+            continue
+
+        # Fast parallel batch vector embeddings
+        embeddings = await EmbeddingService.get_embeddings_batch(chunks)
+
+        chunk_meta = {
+            "title": doc.title,
+            "category": doc.category,
+            "allowed_roles": doc.allowed_roles,
+            **(doc.metadata or {})
+        }
+        for chunk_str, embedding_vec in zip(chunks, embeddings):
             rag_chunk = RAGChunk(
                 tenant_id=source.tenant_id,
                 rag_source_id=source.id,
@@ -92,10 +97,26 @@ async def upload_document_file(
     """
     Parses an uploaded file (PDF, Excel, CSV, DOCX, TXT, MD), extracts its text,
     and returns the extracted title and content ready for indexing.
+    Enforces maximum upload file size guardrail.
     """
+    # Guardrail: Check declared file size if provided
+    if file.size and file.size > settings.MAX_UPLOAD_SIZE_BYTES:
+        max_mb = settings.MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Uploaded file exceeds maximum limit of {max_mb}MB."
+        )
+
     content_bytes = await file.read()
     if not content_bytes:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+
+    if len(content_bytes) > settings.MAX_UPLOAD_SIZE_BYTES:
+        max_mb = settings.MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Uploaded file exceeds maximum limit of {max_mb}MB."
+        )
 
     parsed = DocumentParser.parse_file(file.filename, content_bytes)
     extracted_text = parsed.get("text", "")
@@ -119,15 +140,31 @@ async def upload_multiple_files(
     """
     Parses multiple files in batch (PDF, Excel, CSV, DOCX, TXT), merges their text,
     and returns structured extraction metadata for all files.
+    Enforces maximum upload file size guardrail.
     """
     results = []
     combined_texts = []
     total_chars = 0
 
     for file in files:
+        if file.size and file.size > settings.MAX_UPLOAD_SIZE_BYTES:
+            max_mb = settings.MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"File '{file.filename}' exceeds maximum limit of {max_mb}MB."
+            )
+
         content_bytes = await file.read()
         if not content_bytes:
             continue
+
+        if len(content_bytes) > settings.MAX_UPLOAD_SIZE_BYTES:
+            max_mb = settings.MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"File '{file.filename}' exceeds maximum limit of {max_mb}MB."
+            )
+
         parsed = DocumentParser.parse_file(file.filename, content_bytes)
         results.append(parsed)
         if parsed.get("text"):

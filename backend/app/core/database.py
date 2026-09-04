@@ -84,6 +84,7 @@ async def init_db():
 
             alter_statements = [
                 "ALTER TABLE agents ADD COLUMN IF NOT EXISTS guardrail_config TEXT;",
+                "ALTER TABLE agents ADD COLUMN IF NOT EXISTS allowed_domains VARCHAR(500);",
                 "ALTER TABLE tenants ADD COLUMN IF NOT EXISTS subscription_tier VARCHAR(50) DEFAULT 'free';",
                 "ALTER TABLE tenants ADD COLUMN IF NOT EXISTS billing_cycle VARCHAR(20) DEFAULT 'monthly';",
                 "ALTER TABLE tenants ADD COLUMN IF NOT EXISTS monthly_query_limit INTEGER DEFAULT 150;",
