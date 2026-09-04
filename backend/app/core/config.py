@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     # Rate Limiting & Upload Guardrails
     CHAT_RATE_LIMIT_PER_MINUTE: int = int(os.getenv("CHAT_RATE_LIMIT_PER_MINUTE", "60"))
     MAX_UPLOAD_SIZE_BYTES: int = int(os.getenv("MAX_UPLOAD_SIZE_BYTES", str(25 * 1024 * 1024)))  # 25 MB
-    ENABLE_LOCAL_EMBEDDINGS: bool = os.getenv("ENABLE_LOCAL_EMBEDDINGS", "true").lower() == "true"
+    ENABLE_LOCAL_EMBEDDINGS: bool = os.getenv("ENABLE_LOCAL_EMBEDDINGS", "false").lower() == "true"
     
     # Database
     # Default to sqlite+aiosqlite for local testing/dev if Postgres is not running
