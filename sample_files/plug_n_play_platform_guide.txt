@@ -1,92 +1,224 @@
-# Plug-N-Play AI — Complete Platform Documentation & Knowledge Base
-# Document Version: 2.4 | Enterprise Agent Studio & Data Layer
-# Target Audience: Platform Assistant AI Agent, Client Developers, System Administrators
+# ================================================================================
+# PLUG-N-PLAY AI — COMPLETE ENTERPRISE PLATFORM & CLIENT KNOWLEDGE BASE
+# Official Guide for Platform AI Assistant, Client Onboarding & Technical Support
+# Version: 3.0 | Status: Production Ready | Platform: https://plug-n-play-rag.onrender.com/
+# ================================================================================
 
 ================================================================================
-1. PLATFORM OVERVIEW & ARCHITECTURAL PHILOSOPHY
+TABLE OF CONTENTS
 ================================================================================
-Plug-N-Play AI is an enterprise-grade, zero-write AI data layer and autonomous agent orchestration platform. It enables businesses, developers, and organizations to connect their private databases, unstructured documents, and web services to AI agents and embed intelligent assistants directly into any website or web application within minutes.
-
-Key Value Proposition:
-- "Bring AI to your data, never your data to an external black box."
-- Dual-Engine Architecture: Unlike single-purpose chatbots that only do document search, Plug-N-Play AI seamlessly unifies two distinct retrieval engines:
-  1. Unstructured Document Retrieval (RAG via Vector Embeddings)
-  2. Structured Operational Database Querying (Text-to-SQL with AST Safety)
-- Multi-Tenant Isolation: Every workspace is strictly sandboxed. Workspaces cannot access or query data, vector embeddings, or chat histories belonging to any other tenant.
-- Zero Database Write Access: The platform operates under a non-negotiable read-only mandate. Destructive SQL operations (DROP, DELETE, UPDATE, INSERT, ALTER) are blocked at the abstract syntax tree (AST) level before reaching any database.
+1. Platform Overview & Core Architectural Philosophy
+2. The Agent Studio & Creation Wizard (Step-by-Step)
+3. Deep-Dive: Database Integration Architectures & Multiple DB URLs
+   - Direct Cloud Connect vs Zero-Knowledge Schema Mode
+   - Why is there an option to add another Database URL? (Multi-DB Federation)
+   - Supported Database Engines & Connection Formats
+   - AST SQL Syntax Safety & Read-Only Guarantee
+4. Deep-Dive: Knowledge Base Ingestion (Unstructured RAG)
+5. Deep-Dive: Action Agents & Ambient Browser Action Relays
+6. Deep-Dive: Audience Guardrails, Boundary Presets & Anti-Hallucination
+7. Deep-Dive: Live Human Escalation & Support Handover
+8. Universal Widget Embed & Framework Integration Guide
+9. Workspace Dashboard, Telemetry & Client Testing Free Tier
+10. Comprehensive Client FAQ & Troubleshooting Directory (Q&A)
 
 ================================================================================
-2. CORE AGENT TYPES & CAPABILITIES
+1. PLATFORM OVERVIEW & CORE ARCHITECTURAL PHILOSOPHY
 ================================================================================
-Plug-N-Play AI supports three distinct agent modes that can be combined or configured independently:
+Plug-N-Play AI is an enterprise-grade AI data layer and autonomous agent orchestration platform. It allows businesses, developers, universities, and organizations to connect their private databases, unstructured documents, and web services to AI assistants and deploy embeddable widgets onto any website or web application in under five minutes.
 
-A. KNOWLEDGE BASE (UNSTRUCTURED RAG AGENTS)
-- Purpose: Answers customer inquiries, support questions, policy lookups, and handbook references from uploaded documents.
-- Supported Ingestion Formats: PDF (.pdf), Plain Text (.txt), Markdown (.md), CSV (.csv), JSON (.json), and DOCX (.docx).
+Core Architectural Pillars:
+1. "Bring AI to your data, never your data to an external black box":
+   - You do not need to export, migrate, or rebuild your databases. Plug-N-Play AI bridges directly to your existing systems.
+2. Dual-Engine Retrieval (Unstructured RAG + Structured Text-to-SQL):
+   - Typical chatbots only perform document search (RAG) and cannot query live relational databases. Plug-N-Play AI unifies both: an agent can look up policies in a PDF and query live order status in PostgreSQL in the exact same conversation!
+3. Non-Negotiable Zero Database Write Mandate:
+   - The platform never modifies, updates, inserts, or deletes records. Destructive queries are mathematically blocked at the Abstract Syntax Tree (AST) level before touching your database.
+4. Cryptographic Multi-Tenant Isolation:
+   - Every workspace is isolated by a unique Tenant UUID. No tenant can ever access, search, or view another tenant's documents, databases, vector embeddings, or chat histories.
+
+================================================================================
+2. THE AGENT STUDIO & CREATION WIZARD (STEP-BY-STEP)
+================================================================================
+The Agent Studio guides you through creating an autonomous AI agent in 4 simple steps:
+
+STEP 1: AGENT IDENTITY & ROLE
+- Agent Name: The display name visible to your visitors in the widget header (e.g., "Acme Store Concierge", "Campus Academic Advisor", "Plug-N-Play Platform Guide").
+- Primary Role / Persona: Defines the tone, identity, and behavioral boundaries of the bot.
+- System Prompt: Custom behavioral guidelines tailored to your brand voice.
+
+STEP 2: KNOWLEDGE INGESTION & DATA SOURCES
+- Knowledge Base Documents (RAG): Upload PDFs, Markdown, TXT, Word, or CSV files for semantic vector search.
+- Operational Database (SQL / NoSQL): Connect live databases via connection string or paste SQL DDL schema for Text-to-SQL queries.
+
+STEP 3: AUDIENCE GUARDRAILS & PERMISSIONS
+- Select your target audience boundary preset:
+  - End-User / Customer: Strict Row Isolation (`WHERE user_id = :id`). Prevents exposing other users' private data.
+  - Internal Staff / Support: Team-level query access with sensitive column masking.
+  - Executive / Admin: High-level cross-departmental reporting.
+
+STEP 4: LIVE HUMAN ESCALATION & ACTIONS
+- Configure alert channels (Direct Email, Slack/Discord Webhooks, or In-Widget Contact Cards) to notify human managers when a user requests live support.
+- Configure Action Webhooks or Ambient Browser Relays for automated task execution.
+
+================================================================================
+3. DEEP-DIVE: DATABASE INTEGRATION ARCHITECTURES & MULTIPLE DB URLS
+================================================================================
+One of the most powerful and unique features of Plug-N-Play AI is its operational database query engine.
+
+--------------------------------------------------------------------------------
+A. WHY IS THERE AN OPTION TO ADD ANOTHER DATABASE (DATABASE #1, DATABASE #2)?
+--------------------------------------------------------------------------------
+In modern software architectures, organizations rarely keep all their data in a single monolithic database. Plug-N-Play AI supports MULTI-DATABASE FEDERATION out of the box:
+
+Why clients use multiple database cards:
+1. Cross-Domain Data Federation:
+   - Example (E-Commerce):
+     * Database #1: PostgreSQL containing `orders`, `customers`, and `shipping_tracking`.
+     * Database #2: MySQL containing `inventory_catalog`, `warehouse_stock`, and `suppliers`.
+     * The AI agent can answer: "Is my order #4012 delayed due to warehouse stock?" by querying Database #1 for the order items and Database #2 for warehouse status in a single unified response!
+2. University & College Administration:
+   - Database #1: Student Information System (SIS) for attendance and course enrollments.
+   - Database #2: Bursar & Finance DB for tuition fees, scholarships, and outstanding balances.
+3. Microservices Architecture:
+   - If your application separates user accounts (Auth DB) from billing (Payments DB), you can add both databases to one agent so it has holistic context.
+4. Read-Replica Splitting:
+   - Direct high-frequency analytics to an AWS Aurora read replica while querying a transactional database for recent records.
+
+If you only have one database, you simply use Database #1 and ignore the "+ Add Another Database" button!
+
+--------------------------------------------------------------------------------
+B. DIRECT CLOUD CONNECT VS. ZERO-KNOWLEDGE SCHEMA MODE
+--------------------------------------------------------------------------------
+Plug-N-Play AI offers two distinct connection architectures depending on your security preferences:
+
+1. DIRECT CLOUD CONNECT MODE (Default):
+   - How it works: You paste your database connection string (URL) and click "Test & Discover".
+   - The platform auto-introspects your database schema, lists all public tables, and lets you check/uncheck which tables the agent is allowed to see.
+   - When a visitor asks a question, the agent translates the question into a safe `SELECT` query, executes it over an encrypted SSL connection, and formats the result into natural language.
+   - Best for: Cloud-hosted databases (Neon, Supabase, AWS RDS, Render PostgreSQL, DigitalOcean, PlanetScale) where you want automatic real-time queries.
+   - Security Recommendation: Create a dedicated read-only user (e.g. `CREATE USER pnp_readonly WITH PASSWORD '...'`, `GRANT SELECT ON ALL TABLES IN SCHEMA public TO pnp_readonly;`).
+
+2. ZERO-KNOWLEDGE SCHEMA ONLY MODE:
+   - How it works: If your database is behind a corporate VPC, on-premise firewall, or strict compliance rules prevent sharing live database credentials, YOU NEVER PROVIDE YOUR DATABASE URL OR PASSWORD!
+   - Instead, you simply paste your SQL DDL schema (e.g. `CREATE TABLE orders (...)`, Prisma schema, or JSON schema).
+   - When a visitor asks a question, the AI generates the exact SQL query against your schema structure.
+   - Your local application receives the query via our SDK/API or Connector Bridge, executes it locally behind your firewall, and returns only the query result to the agent.
+   - Best for: Banks, healthcare providers, local offline databases, and privacy-sensitive enterprises.
+
+--------------------------------------------------------------------------------
+C. SUPPORTED DATABASE ENGINES & CONNECTION URL FORMATS
+--------------------------------------------------------------------------------
+Plug-N-Play AI automatically normalizes and supports all standard database connection formats:
+
+1. PostgreSQL:
+   - Standard: `postgresql://user:password@host:port/dbname?sslmode=require`
+   - SQLAlchemy / Neon format: `postgresql+asyncpg://user:password@host:port/dbname?ssl=require`
+   - Supabase / AWS RDS: Supports pooled and direct connection strings with SSL.
+2. MySQL & MariaDB:
+   - Standard: `mysql://user:password@host:3306/dbname`
+   - Async formats: `mysql+aiomysql://...`, `mysql+pymysql://...`
+3. MongoDB (NoSQL):
+   - Standard: `mongodb://user:password@host:27017/dbname`
+   - Cloud Atlas SRV: `mongodb+srv://user:password@cluster.mongodb.net/dbname`
+   - For MongoDB, the engine translates queries into MongoDB aggregation pipelines with automatic `$limit` protections.
+4. SQLite (Testing & Local):
+   - `sqlite:///path/to/database.db`
+
+--------------------------------------------------------------------------------
+D. AST SQL SYNTAX SAFETY ENGINE (HOW WE PREVENT HACKS & CORRUPTION)
+--------------------------------------------------------------------------------
+Can a malicious user trick the AI into dropping or altering your database?
+NO. Plug-N-Play AI features an Abstract Syntax Tree (AST) Security Gate:
+- Abstract Syntax Tree (AST) Validation: Before any generated query is sent to the database, it is compiled into an AST syntax tree and validated against strict rules.
+- Whitelist Only: Only pure `SELECT` queries are permitted.
+- Destructive Keyword Rejection: Any query containing `DROP`, `DELETE`, `UPDATE`, `INSERT`, `ALTER`, `TRUNCATE`, `GRANT`, `REVOKE`, or `EXEC` is rejected immediately with a security alert logged.
+- Semicolon Chaining Blocked: Attackers cannot append `; DROP TABLE users;`. Multi-statement executions are rejected.
+- Comment Stripping: SQL injection comments (`--`, `/* */`) are forbidden.
+- Sensitive Column Masking: Password hashes, salt tokens, social security numbers, and private keys are filtered out of LLM contexts automatically.
+- Self-Healing Retries: If a query has a minor syntax mistake or column typo, the engine reflects the schema back to the LLM and self-corrects up to 3 times automatically.
+
+================================================================================
+4. DEEP-DIVE: KNOWLEDGE BASE INGESTION (UNSTRUCTURED RAG)
+================================================================================
+The Knowledge Base allows agents to read unstructured company documents to answer questions.
+
+- Supported File Types: PDF (.pdf), Plain Text (.txt), Markdown (.md), CSV (.csv), JSON (.json), Microsoft Word (.docx), and Excel (.xlsx, .xls).
 - Ingestion Pipeline:
-  1. Document Parsing: Extracts text and tabular content while stripping formatting artifacts.
-  2. Semantic Chunking: Splits content into overlapping semantic windows (default 500 characters with 100 character overlap) to preserve conversational context across chunk boundaries.
-  3. Vector Embedding: Generates dense vector representations using state-of-the-art embedding models.
-  4. Hybrid Retrieval: Queries are compared against vector indexes using cosine similarity; top-k relevant snippets are injected dynamically into the LLM system prompt.
-
-B. DATABASE QUERYING (OPERATIONAL TEXT-TO-SQL AGENTS)
-- Purpose: Answers natural-language questions about live structured operational data (e.g., "What is the status of order #9821?", "How many students have attendance above 85%?").
-- Supported Engines: SQLite, PostgreSQL, MySQL.
-- Security & AST Validation Engine:
-  - Every SQL query generated by the LLM is inspected by an Abstract Syntax Tree (AST) validator before execution.
-  - Queries must strictly be pure `SELECT` statements.
-  - Semicolon chaining (multiple queries), comments, file execution (`INTO OUTFILE`), and schema tampering (`DROP`, `ALTER`, `TRUNCATE`, `UPDATE`, `INSERT`) are instantly intercepted and rejected with security violations logged.
-  - Self-Healing Query Retries: If a SQL query fails due to a syntax error or non-existent column, the platform captures the error, reflects the schema back to the LLM, and retries automatically up to 3 times.
-
-C. ACTION AGENTS & AMBIENT BROWSER RELAYS
-- Purpose: Enables agents to trigger real-world business actions on behalf of the user directly within their browser session.
-- Capabilities:
-  - External API Callouts: Dispatch authenticated HTTP POST/GET requests to client backends and webhooks.
-  - Ambient Browser Relays: Uses the visitor's existing session cookies and CSRF tokens to execute actions inside the web page (such as adding items to cart, opening a specific tab, or submitting a feedback form) without exposing backend administrative API keys.
+  1. Document Parsing: Extracts text and tabular records cleanly.
+  2. Overlapping Semantic Windows: Splits documents into 500-character chunks with a 100-character overlap, ensuring context is never lost across sentence boundaries.
+  3. High-Dimensional Vector Embeddings: Embedded using 384-dimensional dense vectors.
+  4. Hybrid Cosine Retrieval: Compares user queries against vector embeddings, pulling the top most relevant passages and injecting them into the prompt.
+- Anti-Hallucination Scope Handling:
+  If a user asks about something not contained in the knowledge base, the agent does NOT guess, apologize, or make up facts. It states:
+  "I don't have that information on file currently. Please click 'Support' below to connect with our team."
 
 ================================================================================
-3. CLIENT TESTING FREE TIER
+5. DEEP-DIVE: ACTION AGENTS & AMBIENT BROWSER ACTION RELAYS
 ================================================================================
-Plug-N-Play AI provides a complimentary "Client Testing (Free Tier)" for all newly registered workspaces:
-- Purpose: Allows client developers and enterprises to evaluate AI agents directly inside their staging and production websites with zero billing friction.
-- Included Features:
-  - Unlimited Agent Studio access: Create and configure multiple RAG, Text-to-SQL, and Action agents.
-  - Full Universal Widget Embedding across all web frameworks.
-  - Real-Time Fleet Telemetry: Track CSAT ratings, query volumes, shield blocks, and latency metrics in the Workspace Dashboard.
-  - Zero-Knowledge Schema Testing: Connect local databases (SQLite) or remote test instances.
-- Enterprise Upgrades: Available for high-volume dedicated vector clusters, private VPC peering, custom fine-tuned LLM checkpoints, and custom SLA agreements.
+Unlike passive chatbots that only talk, Plug-N-Play AI agents can TAKE ACTION on your website.
+
+1. Ambient Browser Relays:
+   - What it is: The agent can execute client-side UI actions directly inside the visitor's browser session.
+   - Examples: Adding items to an e-commerce shopping cart, navigating to a checkout page, opening a specific setting modal, or pre-filling a form.
+   - Security Advantage: It runs using the visitor's existing session cookies and CSRF tokens in their browser! You do not need to share administrative API keys or master credentials with the AI.
+2. External API Webhook Triggers:
+   - The agent can dispatch authenticated HTTP `POST` or `GET` webhooks to your backend when certain conditions or customer intents are met (e.g., creating a support ticket in Zendesk or canceling an order in Shopify).
 
 ================================================================================
-4. WEB APPLICATION INTEGRATION & EMBEDDING GUIDE
+6. DEEP-DIVE: AUDIENCE GUARDRAILS & DATA BOUNDARY PRESETS
 ================================================================================
-Integrating an agent into any website requires only a single script snippet generated in the Agent Studio.
+When creating an agent, you select an Audience Boundary Preset in Step 3:
+1. End-User / Customer (Strict Row Isolation):
+   - Appends `WHERE user_id = :authenticated_user_id` to all database lookups.
+   - Prevents one customer from ever seeing another customer's order history, personal address, grades, or medical records.
+2. Internal Staff / Customer Support:
+   - Permits broad operational lookups while masking highly sensitive columns (like encrypted passwords and billing CVV codes).
+3. Executive / Management:
+   - Allows aggregate business queries (e.g. "What was our total revenue this week?").
 
-A. EMBED SCRIPT SNIPPET FORMAT
+================================================================================
+7. DEEP-DIVE: LIVE HUMAN ESCALATION & SUPPORT HANDOVER
+================================================================================
+When an AI bot cannot resolve an issue, or when a customer explicitly demands to talk to a human:
+1. Automated Detection:
+   - Triggered when a user says "I want to talk to an agent", "Help me with a human", or clicks the in-widget "Support" button.
+2. Escalation Channels (Configurable in Step 4):
+   - Direct Email Alert: Dispatches a formatted HTML alert via HTTPS APIs (Resend, Brevo, SendGrid) to your support team's email.
+   - Slack / Discord Webhook: Sends an instant message into your team's Slack or Discord channel.
+   - In-Widget Contact Card: Displays a phone number, support email, or live chat link directly inside the widget.
+3. Information Delivered in Alerts:
+   - Customer's contact info, recent query, conversation transcript summary, and a direct link to the live session in Agent Studio.
+
+================================================================================
+8. UNIVERSAL WIDGET EMBED & FRAMEWORK INTEGRATION GUIDE
+================================================================================
+Deploying an agent to any website requires a single HTML `<script>` tag.
+
+Universal Embed Snippet:
 ```html
 <script 
   src="https://plug-n-play-rag.onrender.com/static/widget.js" 
-  data-agent-id="YOUR_AGENT_ID_HERE"
+  data-agent-id="YOUR_AGENT_ID" 
   async>
 </script>
 ```
 
-B. FRAMEWORK-SPECIFIC IMPLEMENTATIONS:
-1. Static HTML & WordPress:
-   - Paste the `<script>` tag inside `index.html` just before the closing `</body>` tag, or in your WordPress theme's `footer.php`.
+Framework Integration Examples:
+1. HTML, WordPress & Shopify:
+   - Paste the snippet right before the closing `</body>` tag (e.g. in `footer.php` or `theme.liquid`).
 2. React (TSX / JSX):
-   - In your root `index.html` or inside a top-level component's `useEffect()`:
-   ```typescript
+   - Place in `public/index.html` or inject in `useEffect()`:
+   ```javascript
    useEffect(() => {
-     const script = document.createElement('script');
-     script.src = "https://plug-n-play-rag.onrender.com/static/widget.js";
-     script.setAttribute('data-agent-id', 'YOUR_AGENT_ID');
-     script.async = true;
-     document.body.appendChild(script);
-     return () => { document.body.removeChild(script); };
+     const s = document.createElement('script');
+     s.src = "https://plug-n-play-rag.onrender.com/static/widget.js";
+     s.setAttribute('data-agent-id', 'YOUR_AGENT_ID');
+     s.async = true;
+     document.body.appendChild(s);
    }, []);
    ```
-3. Next.js (App Router / Pages Router):
-   - Use Next.js `<Script>`:
+3. Next.js (App Router):
    ```tsx
    import Script from 'next/script';
    <Script 
@@ -95,59 +227,85 @@ B. FRAMEWORK-SPECIFIC IMPLEMENTATIONS:
      strategy="afterInteractive" 
    />
    ```
-4. Angular:
-   - Add the script URL to `angular.json` under `"scripts": []`, or inject dynamically in `app.component.ts`.
-5. Vue 3 & Nuxt 3:
-   - In `App.vue` inside `onMounted()`, or in `nuxt.config.ts` under `app.head.script`.
-6. Backend Server Bridges (Python, Node.js, PHP/Laravel):
-   - Query agents programmatically via REST API:
-     `POST /api/v1/chat/query` with headers `{"X-API-Key": "YOUR_MASTER_KEY"}` and JSON `{"agent_id": "...", "query": "..."}`.
+4. Angular: Add script URL to `angular.json` under `"scripts": []`.
+5. Vue 3 & Nuxt 3: Add in `App.vue` `onMounted()` or `nuxt.config.ts`.
+6. Programmatic Server-to-Server API:
+   - Call `POST https://plug-n-play-rag.onrender.com/api/v1/chat/query`
+   - Headers: `{"Content-Type": "application/json", "Authorization": "Bearer YOUR_MASTER_API_KEY"}`
+   - Body: `{"agent_id": "YOUR_AGENT_ID", "query": "Your question here"}`
+
+Custom Widget Attributes:
+- `data-theme="dark"` or `"light"`: Forces dark or light mode.
+- `data-accent="#38bdf8"`: Customizes brand theme color.
+- `data-position="bottom-right"` or `"bottom-left"`: Controls widget placement.
+- `data-user-id="USER_123"`: Injects active user ID for row-level security.
+- `data-user-role="student"`: Injects role for role-based document access.
 
 ================================================================================
-5. SECURITY, COMPLIANCE & TENANT ISOLATION
+9. WORKSPACE DASHBOARD, TELEMETRY & CLIENT TESTING FREE TIER
 ================================================================================
-1. Zero Database Write Guarantee:
-   - The platform never requests administrative or write database credentials.
-   - All queries run under strict read-only execution modes with AST validation.
-2. Data Privacy:
-   - Uploaded documents and vector embeddings are segregated by Tenant ID.
-   - Query data is never used to train foundational public LLMs.
-3. Authentication & Credential Safeguards:
-   - Google OAuth (GIS) token verification performed securely server-to-server over HTTPS (Port 443).
-   - Passwords hashed using industry-standard salted Argon2/Bcrypt.
-   - Master API keys are cryptographically generated with SHA-256 validation.
-
-================================================================================
-6. HUMAN ESCALATION & LIVE SUPPORT HANDOVER
-================================================================================
-When a customer conversation requires human intervention:
-- Trigger: A user explicitly asks to speak with a human, or the agent detects severe frustration / policy ambiguity.
-- Escalation Flow:
-  1. The agent asks the visitor for their preferred contact info (email or phone).
-  2. The system triggers `EmailService.send_escalation_email`.
-  3. A rich, branded HTML escalation dispatch is routed to the workspace's configured support email via secure HTTPS APIs (Resend/Brevo/SendGrid).
-  4. The dispatch contains the visitor contact, latest query, conversation transcript, and a direct link to the Master Studio session.
+1. Client Testing (Free Tier):
+   - Every registered workspace receives unrestricted complimentary access for testing and integrating AI agents on live websites.
+   - Includes full Agent Studio features, RAG document parsing, direct database querying, and unlimited widget embeds.
+2. Real-Time Fleet Telemetry:
+   - The Workspace Dashboard displays live analytics:
+     - Configured Bot Fleet: Manage and edit all active agents.
+     - Total Queries Processed: Track monthly volume.
+     - User CSAT Score: Aggregated thumbs up / thumbs down visitor satisfaction.
+     - Shield Blocks: Tracks prevented SQL injection attempts and restricted column access attempts.
+3. Profile Management & Security:
+   - Clicking your profile avatar opens the Account Center in read-only view.
+   - Click "Edit Profile" to modify your Full Name or Company Name.
+   - Click "Logout" in the top navigation header or modal footer to securely clear session tokens.
 
 ================================================================================
-7. FREQUENTLY ASKED QUESTIONS (FAQ) FOR PLATFORM ASSISTANT
+10. COMPREHENSIVE CLIENT FAQ & TROUBLESHOOTING DIRECTORY (Q&A)
 ================================================================================
-Q: What is Plug-N-Play AI?
-A: Plug-N-Play AI is an enterprise AI platform that connects private databases (Text-to-SQL) and documents (RAG) to embeddable AI agents for any website or app in minutes.
+Q: What is the purpose of the "Add Another Database" option?
+A: It enables Multi-Database Federation! Modern businesses frequently store customer orders in one database (e.g., PostgreSQL) and warehouse inventory in another (e.g., MySQL). Adding multiple databases allows your AI agent to query across both databases simultaneously in a single conversational turn. If you only have one database, you simply fill in Database #1 and ignore the extra card.
 
-Q: Can the agent modify or delete records in my database?
-A: Absolutely not. Plug-N-Play AI enforces a strict Zero Database Write policy. Our AST SQL Validator rejects any INSERT, UPDATE, DELETE, DROP, or schema-altering query before execution.
+Q: What if I only have one database? Do I need to fill in both?
+A: No. If you have only one database, configure Database #1. The second database card is completely optional and can be left blank or removed.
 
-Q: What document types can I upload to train my agent?
-A: You can upload PDF (.pdf), plain text (.txt), Markdown (.md), CSV (.csv), JSON (.json), and Microsoft Word (.docx) files.
+Q: Can I connect different database engines at the same time?
+A: Yes! For example, Database #1 can be PostgreSQL and Database #2 can be MySQL or MongoDB. The AI's dual-engine orchestrator parses table schemas from each connection and generates the appropriate dialect automatically.
 
-Q: How do I embed the agent on my website?
-A: Go to the Agent Studio, select your agent, and copy the embed code snippet. Paste the `<script>` tag before the `</body>` tag on your website (compatible with WordPress, React, Next.js, Angular, Vue, and plain HTML).
+Q: How does the AI agent know which database to query?
+A: During ingestion, the platform introspects the table schemas of all connected databases. When a visitor asks a question, the orchestrator inspects which tables contain the relevant attributes (e.g., orders vs. inventory) and dispatches queries to the appropriate database.
 
-Q: How do I sign in or create an account?
-A: You can use 1-Click Google Sign-In with your Google account, or register with your email and password. Email verification codes are delivered over secure HTTPS.
+Q: What is the difference between Direct Cloud Connect and Zero-Knowledge Schema mode?
+A: Direct Cloud Connect connects directly to your database over an encrypted SSL connection to run real-time SELECT queries. Zero-Knowledge Schema mode is for organizations that cannot share their database credentials; you only paste your SQL DDL schema, and the AI outputs the exact query for your local backend to run behind your private firewall.
 
-Q: Can I log out or update my profile?
-A: Yes. Click your profile avatar in the top right to view your account details in read-only mode. Click "Edit Profile" to change your name or company, or click the "Logout" button in the navigation header to sign out.
+Q: Can the AI agent delete, alter, or drop tables in my database?
+A: No. Plug-N-Play AI has an AST SQL validator that intercepts and rejects all DROP, DELETE, UPDATE, INSERT, ALTER, and destructive operations before they ever touch your database. Only safe SELECT statements are executed.
 
-Q: Which LLM models power Plug-N-Play AI?
-A: The platform utilizes ultra-fast inference engines powered by Groq, supporting LLaMA 3.3 70B, Qwen 2.5 32B, DeepSeek R1 distillation, and OpenAI-compatible endpoints with automatic failover.
+Q: What connection strings are supported for PostgreSQL?
+A: Both standard postgresql://user:pass@host:port/db?sslmode=require and SQLAlchemy / Neon async format postgresql+asyncpg://user:pass@host:port/db?ssl=require. The system automatically normalizes them.
+
+Q: Why do I experience a 2–4 second delay when testing a Neon database?
+A: Serverless databases like Neon spin down to sleep when idle. When the AI sends a query, the database takes 2–4 seconds to cold-start. Our connector includes automatic retries and extended timeouts (7.0s) to handle serverless cold starts seamlessly.
+
+Q: What should I put in the "Live Human Escalation" email section?
+A: Enter your personal or support email (e.g. support@yourcompany.com). When a customer says "I want to talk to a human" or clicks the Support button, a detailed summary and conversation transcript is emailed to that address immediately.
+
+Q: Why did my agent say "I don't have that information on file currently"?
+A: Plug-N-Play AI agents have strict anti-hallucination guardrails. If a question cannot be answered from the uploaded documents or database records, the agent will never guess or hallucinate. To teach the agent new information, upload the document (or click the template chip) in Step 2 of the Agent Studio and republish.
+
+Q: Can I embed the chatbot on my WordPress or Shopify site?
+A: Yes! Simply copy the <script> tag from the Agent Studio and paste it before the closing </body> tag in your WordPress footer.php or Shopify theme.liquid. The widget will appear immediately.
+
+Q: Can the agent execute actions like adding products to cart?
+A: Yes! Using our Ambient Browser Relays, the agent can trigger client-side actions inside the visitor's browser using their existing session cookies and CSRF tokens without exposing server secrets.
+
+Q: Which LLM models power the platform?
+A: Ultra-fast inference is provided by Groq, supporting LLaMA 3.3 70B, Qwen 2.5 32B, DeepSeek R1 distillation, and OpenAI-compatible endpoints with automatic high-availability failover.
+
+Q: Is my company's proprietary data used to train public AI models?
+A: Never. All customer data and vector embeddings are cryptographically segregated by Tenant ID and never sent to third-party public models for retraining.
+
+Q: How do I edit my profile or log out?
+A: In the top navigation bar, click your profile avatar to view your account details in read-only mode. Click "Edit Profile" to modify your name or company, or click "Logout" in the top bar or modal footer to sign out securely.
+
+Q: Is the platform free for client testing and integration?
+A: Yes. Every workspace has access to the Client Testing Free Tier, which includes full Agent Studio capabilities, RAG document ingestion, direct database querying, and unlimited widget embeds.
+

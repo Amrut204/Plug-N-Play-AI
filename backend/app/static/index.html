@@ -4271,14 +4271,16 @@ CREATE TABLE courses (
         title: "Plug-N-Play AI Platform Guide & Knowledge Base",
         content: `Plug-N-Play AI is an enterprise-grade, zero-write AI data layer and autonomous agent orchestration platform. It enables businesses, developers, and organizations to connect their private databases, unstructured documents, and web services to conversational AI agents and embed intelligent assistants directly into any website or application within minutes.
 
-Key Features & Capabilities:
+Key Features & Architectural Highlights:
 1. Dual-Engine Architecture: Combines unstructured document retrieval (RAG with 384-dimensional vector embeddings) and live structured database querying (Text-to-SQL with AST validation).
-2. Zero Database Write Mandate: All state-modifying SQL queries (DROP, DELETE, UPDATE, INSERT, ALTER) are intercepted and rejected at the AST level. Only safe SELECT queries execute.
-3. Multi-Tenant Isolation: Workspaces are cryptographically isolated by Tenant UUID. Cross-tenant data leakage is impossible.
-4. Universal 1-Line Embed Script: Embed on WordPress, HTML, React, Next.js, Angular, or Vue with a single <script src="https://plug-n-play-rag.onrender.com/static/widget.js" data-agent-id="..."></script> tag.
-5. Client Testing Free Tier: Unrestricted access for developers to test AI agents directly in live web applications with CSAT telemetry, query logs, and shield metrics.
-6. Live Human Escalation: Automated fallback alerts dispatched via HTTPS email (Resend/Brevo) when visitors request real-time human assistance.
-7. Model Providers: Ultra-fast inference powered by Groq (LLaMA 3.3 70B, Qwen 2.5 32B, DeepSeek R1) with automatic failover.`
+2. Multi-Database Federation (Why is there another DB URL option?): Organizations frequently separate customer orders (PostgreSQL) from warehouse inventory (MySQL), or student SIS records from finance bursar balances. The "+ Add Another Database" option lets the AI query across multiple databases simultaneously in a single conversation! If you only have one database, you simply use Database #1 and ignore the extra card.
+3. Zero Database Write Mandate: All state-modifying SQL queries (DROP, DELETE, UPDATE, INSERT, ALTER, TRUNCATE) are intercepted and rejected at the AST level. Only safe SELECT queries execute. Multi-statement semicolons and SQL comments are blocked.
+4. Direct Cloud Connect vs. Zero-Knowledge Schema Mode: Direct Connect connects over SSL to run real-time queries. Zero-Knowledge Schema mode never takes credentials—you only paste your SQL DDL schema, and the AI outputs the exact query for your local backend to run behind your private firewall.
+5. Universal 1-Line Embed Script: Embed on WordPress, Shopify, HTML, React, Next.js, Angular, or Vue with a single <script src="https://plug-n-play-rag.onrender.com/static/widget.js" data-agent-id="..."></script> tag.
+6. Client Testing Free Tier: Unrestricted access for developers to test AI agents directly in live web applications with CSAT telemetry, query logs, and shield metrics.
+7. Live Human Escalation: Fallback alerts dispatched via HTTPS email (Resend/Brevo/SendGrid) or Slack webhooks when visitors request human support or click the Support button.
+8. Anti-Hallucination Guardrails: If a query cannot be answered from uploaded documents or databases, the agent states: "I don't have that information on file currently. Please click 'Support' below to connect with our team."
+9. Model Providers: Ultra-fast inference powered by Groq (LLaMA 3.3 70B, Qwen 2.5 32B, DeepSeek R1) with automatic failover.`
       }
     };
 
