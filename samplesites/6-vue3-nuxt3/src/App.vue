@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import AIWidget from './components/AIWidget.vue';
 
 const patientId = ref('pt_metro_8841');
 const selectedDepartment = ref('Cardiology');
@@ -41,8 +40,8 @@ const selectedDepartment = ref('Cardiology');
     </main>
 
     <!-- ================================================================= -->
-    <!-- 🔌 PLUG-N-PLAY AI WIDGET COMPONENT (VUE 3 / NUXT 3 TARGET)         -->
+    <!-- 🔌 PASTE YOUR VUE COMPONENT OR EMBED WIDGET HERE                    -->
+    <!-- (Generate from Agent Studio -> Embed Code -> Vue Export)           -->
     <!-- ================================================================= -->
-    <AIWidget :userId="patientId" userRole="user" />
   </div>
 </template>

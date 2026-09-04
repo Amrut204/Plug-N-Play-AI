@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AIWidgetComponent } from './components/ai-widget.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, AIWidgetComponent],
+  imports: [CommonModule],
   templateUrl: './app.component.html',
   styleUrls: []
 })

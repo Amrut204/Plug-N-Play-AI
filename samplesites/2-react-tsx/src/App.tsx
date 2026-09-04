@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { AIWidget } from './components/AIWidget';
 
 export default function App() {
   const [role, setRole] = useState<'user' | 'admin'>('user');
@@ -49,9 +48,9 @@ export default function App() {
       </main>
 
       {/* ================================================================= */}
-      {/* 🔌 PLUG-N-PLAY AI WIDGET COMPONENT (REACT TSX HOOK)               */}
+      {/* 🔌 PASTE YOUR REACT COMPONENT OR EMBED WIDGET HERE                 */}
+      {/* (Generate from Agent Studio -> Embed Code -> React Export)        */}
       {/* ================================================================= */}
-      <AIWidget userId="user_demo_101" userRole={role} />
     </div>
   );
 }

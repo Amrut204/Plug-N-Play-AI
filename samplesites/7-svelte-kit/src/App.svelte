@@ -1,6 +1,4 @@
 <script>
-  import AIWidget from './lib/AIWidget.svelte';
-
   let manifestId = 'MF-80492-US';
 </script>
 
@@ -38,7 +36,7 @@
   </main>
 
   <!-- ================================================================= -->
-  <!-- 🔌 PLUG-N-PLAY AI WIDGET COMPONENT (SVELTE / SVELTEKIT TARGET)     -->
+  <!-- 🔌 PASTE YOUR SVELTE COMPONENT OR EMBED WIDGET HERE                 -->
+  <!-- (Generate from Agent Studio -> Embed Code -> Svelte Export)        -->
   <!-- ================================================================= -->
-  <AIWidget userId="dock_manager_22" userRole="user" />
 </div>

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import AIWidget from './components/AIWidget';
 
 export default function App() {
   const [activeAccount, setActiveAccount] = useState('Checking');
@@ -40,9 +39,9 @@ export default function App() {
       </main>
 
       {/* ================================================================= */}
-      {/* 🔌 PLUG-N-PLAY AI WIDGET COMPONENT (REACT JSX HOOK)                */}
+      {/* 🔌 PASTE YOUR REACT COMPONENT OR EMBED WIDGET HERE                 */}
+      {/* (Generate from Agent Studio -> Embed Code -> React Export)        */}
       {/* ================================================================= */}
-      <AIWidget userId="cust_sterling_99" userRole="user" />
     </div>
   );
 }
