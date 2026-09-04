@@ -281,6 +281,7 @@ class EmailService:
                 else:
                     logger.warning(f"Resend dispatch returned {res_resp.status_code}: {res_resp.text}")
             except Exception as res_err:
+                logger.warning(f"Resend dispatch error: {res_err}")
         # 2. Try SendGrid HTTP API if configured (Port 443 — free with GitHub Student Developer Pack)
         sendgrid_api_key = os.getenv("SENDGRID_API_KEY")
         if sendgrid_api_key:

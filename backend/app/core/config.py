@@ -68,6 +68,10 @@ class Settings(BaseSettings):
     SMTP_PASS: Optional[str] = os.getenv("SMTP_PASS", None)
     SMTP_FROM: Optional[str] = os.getenv("SMTP_FROM", None)
 
+    # Google OAuth Configuration
+    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "629754361477-2sitaqfnnqs4n5qi8v0ivt2cnbeirg6e.apps.googleusercontent.com")
+    GOOGLE_CLIENT_SECRET: Optional[str] = os.getenv("GOOGLE_CLIENT_SECRET", "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")
+
     # CORS Configuration
     CORS_ORIGINS: str = os.getenv("CORS_ORIGINS", "*")
 

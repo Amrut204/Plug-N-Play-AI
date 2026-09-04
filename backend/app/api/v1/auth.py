@@ -86,6 +86,119 @@ class ChangePasswordRequest(BaseModel):
     new_password: str = Field(..., min_length=6, description="New password (minimum 6 characters)")
 
 
+class GoogleAuthRequest(BaseModel):
+    credential: str = Field(..., description="Google ID Token from Google Identity Services")
+
+
+@router.post("/google", status_code=status.HTTP_200_OK)
+async def google_auth(payload: GoogleAuthRequest, db: AsyncSession = Depends(get_db)):
+    """
+    1-Click Google Authentication & Workspace Registration.
+    Verifies Google ID token over HTTPS, creates or activates the tenant, and issues a JWT.
+    Zero SMTP/OTP required since Google verifies email ownership.
+    """
+    import httpx
+    raw_token = payload.credential.strip()
+    if not raw_token:
+        raise HTTPException(status_code=400, detail="Google credential token is required.")
+
+    # Verify ID token with Google tokeninfo endpoint over HTTPS (Port 443)
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        try:
+            resp = await client.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={raw_token}")
+            if resp.status_code != 200:
+                raise HTTPException(status_code=400, detail="Invalid Google token or token expired.")
+            google_data = resp.json()
+        except HTTPException:
+            raise
+        except Exception as err:
+            raise HTTPException(status_code=500, detail=f"Failed to communicate with Google: {err}")
+
+    # Validate client audience matches our configured Client ID
+    expected_client_id = os.getenv("GOOGLE_CLIENT_ID", "629754361477-2sitaqfnnqs4n5qi8v0ivt2cnbeirg6e.apps.googleusercontent.com")
+    aud = google_data.get("aud")
+    if aud != expected_client_id:
+        raise HTTPException(status_code=400, detail="Google token audience mismatch.")
+
+    email = google_data.get("email", "").strip().lower()
+    email_verified = google_data.get("email_verified")
+    if not email or (email_verified is not True and str(email_verified).lower() != "true"):
+        raise HTTPException(status_code=400, detail="Google account email is not verified.")
+
+    full_name = google_data.get("name") or email.split("@")[0]
+    avatar_url = google_data.get("picture")
+
+    # Find existing tenant by email
+    stmt = select(Tenant).where(Tenant.email == email)
+    res = await db.execute(stmt)
+    tenant = res.scalars().first()
+
+    if not tenant:
+        first_name = full_name.split()[0] if full_name else "My"
+        clean_org = f"{first_name}'s Workspace"
+        base_slug = re.sub(r"[^a-z0-9]+", "-", clean_org.lower()).strip("-") or "workspace"
+        slug = f"{base_slug}-{uuid.uuid4().hex[:4]}"
+
+        stmt_slug = select(Tenant).where(Tenant.slug == slug)
+        res_slug = await db.execute(stmt_slug)
+        if res_slug.scalars().first():
+            slug = f"{slug}-{uuid.uuid4().hex[:4]}"
+
+        dummy_pwd = secrets.token_urlsafe(32)
+        hashed_pwd = get_password_hash(dummy_pwd)
+
+        tenant = Tenant(
+            name=clean_org,
+            slug=slug,
+            email=email,
+            password_hash=hashed_pwd,
+            full_name=full_name,
+            avatar_url=avatar_url,
+            subscription_tier="free",
+            is_active=True,
+            otp_code=None,
+            otp_expires_at=None
+        )
+        db.add(tenant)
+        await db.commit()
+        await db.refresh(tenant)
+    else:
+        if not tenant.is_active:
+            tenant.is_active = True
+            tenant.otp_code = None
+            tenant.otp_expires_at = None
+        if full_name and not tenant.full_name:
+            tenant.full_name = full_name
+        if avatar_url and not getattr(tenant, "avatar_url", None):
+            tenant.avatar_url = avatar_url
+        tenant.updated_at = datetime.now(timezone.utc)
+        await db.commit()
+        await db.refresh(tenant)
+
+    jwt_token = create_access_token({
+        "sub": tenant.id,
+        "tenant_id": tenant.id,
+        "slug": tenant.slug,
+        "email": tenant.email,
+        "role": "admin"
+    })
+
+    return {
+        "status": "success",
+        "message": f"Welcome, {tenant.full_name or tenant.email}! Signed in with Google.",
+        "token": jwt_token,
+        "user": {
+            "id": tenant.id,
+            "full_name": tenant.full_name,
+            "email": tenant.email,
+            "org_name": tenant.name,
+            "slug": tenant.slug,
+            "tier": tenant.subscription_tier or "free",
+            "avatar_url": getattr(tenant, "avatar_url", None)
+        }
+    }
+
+
 @router.get("/smtp-diag")
 async def smtp_diagnostics():
     """

@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Google Identity Services (OAuth 2.0 / 1-Click Authentication) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root, [data-theme="dark"] {
       --bg: #09090b;
@@ -215,6 +217,11 @@
         transform: scale(3.5);
         opacity: 0;
       }
+    }
+
+    @keyframes pnpSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     /* Navbar */
@@ -1757,7 +1764,19 @@
 
       <!-- PANE 1: LOGIN -->
       <div id="auth-login-fields">
-        <div style="font-size: 13px; color: var(--text-3); margin-bottom: 16px;">Sign in with your email or organization identifier.</div>
+        <div style="font-size: 13px; color: var(--text-3); margin-bottom: 14px;">Sign in with your workspace account or continue with Google.</div>
+
+        <!-- Google 1-Click Fast Sign In -->
+        <div style="margin-bottom: 14px;">
+          <div id="google-signin-btn-login" style="display: flex; justify-content: center; min-height: 42px;"></div>
+        </div>
+
+        <div style="display: flex; align-items: center; margin: 16px 0; color: var(--text-4); font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;">
+          <span style="flex: 1; height: 1px; background: var(--border-subtle);"></span>
+          <span style="padding: 0 12px; font-weight: 600;">or sign in with password</span>
+          <span style="flex: 1; height: 1px; background: var(--border-subtle);"></span>
+        </div>
+
         <div class="form-group">
           <label>Email or Workspace Name *</label>
           <input type="text" id="auth-login-ident" placeholder="e.g. alex@company.com or acme-workspace" />
@@ -1785,7 +1804,19 @@
         
         <!-- Step 1: User Account Inputs -->
         <div id="reg-step-inputs">
-          <div style="font-size: 13px; color: var(--text-3); margin-bottom: 16px;">Create your developer account to build and host AI agents.</div>
+          <div style="font-size: 13px; color: var(--text-3); margin-bottom: 14px;">Create your developer account to build and host AI agents instantly.</div>
+
+          <!-- Google 1-Click Instant Workspace Setup -->
+          <div style="margin-bottom: 14px;">
+            <div id="google-signin-btn-reg" style="display: flex; justify-content: center; min-height: 42px;"></div>
+          </div>
+
+          <div style="display: flex; align-items: center; margin: 16px 0; color: var(--text-4); font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;">
+            <span style="flex: 1; height: 1px; background: var(--border-subtle);"></span>
+            <span style="padding: 0 12px; font-weight: 600;">or register with email</span>
+            <span style="flex: 1; height: 1px; background: var(--border-subtle);"></span>
+          </div>
+
           <div class="form-group">
             <label>Full Name *</label>
             <input type="text" id="auth-reg-fullname" placeholder="e.g. Alex Morgan" />
@@ -4281,6 +4312,123 @@ CREATE TABLE courses (
       }
     }
 
+    // =========================================================================
+    // Google Identity Services (OAuth 2.0 / 1-Click Verification & Sign In)
+    // =========================================================================
+    const PNP_GOOGLE_CLIENT_ID = "629754361477-2sitaqfnnqs4n5qi8v0ivt2cnbeirg6e.apps.googleusercontent.com";
+    let isGoogleGISReady = false;
+
+    function initGoogleGIS() {
+      if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+        setTimeout(initGoogleGIS, 250);
+        return;
+      }
+      if (isGoogleGISReady) return;
+      try {
+        google.accounts.id.initialize({
+          client_id: PNP_GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+        isGoogleGISReady = true;
+      } catch (err) {
+        console.warn('Google Identity Services initialization warning:', err);
+      }
+    }
+
+    function renderGoogleButton(type) {
+      if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+        setTimeout(() => renderGoogleButton(type), 250);
+        return;
+      }
+      initGoogleGIS();
+
+      const targetId = type === 'login' ? 'google-signin-btn-login' : 'google-signin-btn-reg';
+      const el = document.getElementById(targetId);
+      if (!el) return;
+
+      el.innerHTML = '';
+      try {
+        google.accounts.id.renderButton(el, {
+          type: 'standard',
+          theme: 'filled_blue',
+          size: 'large',
+          text: type === 'login' ? 'continue_with' : 'signup_with',
+          shape: 'rectangular',
+          logo_alignment: 'left',
+          width: 370
+        });
+      } catch (err) {
+        console.error('Google button render error:', err);
+      }
+    }
+
+    async function handleGoogleCredentialResponse(response) {
+      if (!response || !response.credential) {
+        alert('Google authentication error: No credential returned by Google.');
+        return;
+      }
+
+      const overlay = document.createElement('div');
+      overlay.id = 'google-auth-loading-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(9,9,11,0.88);backdrop-filter:blur(6px);z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ffffff;font-family:var(--font-sans);';
+      overlay.innerHTML = `
+        <div style="width:44px;height:44px;border:3px solid rgba(255,255,255,0.15);border-top-color:#38bdf8;border-radius:50%;animation:pnpSpin 0.75s linear infinite;margin-bottom:16px;"></div>
+        <div style="font-weight:700;font-size:16px;letter-spacing:-0.01em;">Authenticating with Google...</div>
+        <div style="font-size:12.5px;color:#a1a1aa;margin-top:6px;">Activating workspace &amp; issuing secure token</div>
+      `;
+      document.body.appendChild(overlay);
+
+      try {
+        const res = await fetch('/api/v1/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: response.credential })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          currentAuth = data;
+          localStorage.setItem('pnp_auth', JSON.stringify(data));
+          updateNavAuthUI();
+          closeAuthModal();
+          switchView('dashboard');
+          showToast(`Welcome, ${data.user?.full_name || data.user?.email || 'Developer'}! Signed in with Google.`, 'success');
+        } else {
+          alert('Google Sign-In failed: ' + (data.detail || 'Could not verify token.'));
+        }
+      } catch (err) {
+        alert('Network error connecting to auth service: ' + err.message);
+      } finally {
+        const loader = document.getElementById('google-auth-loading-overlay');
+        if (loader) loader.remove();
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      let toastContainer = document.getElementById('pnp-toast-container');
+      if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'pnp-toast-container';
+        toastContainer.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:999999;display:flex;flex-direction:column;gap:10px;pointer-events:none;';
+        document.body.appendChild(toastContainer);
+      }
+      const toast = document.createElement('div');
+      const bg = type === 'success' ? 'rgba(34, 197, 94, 0.95)' : (type === 'error' ? 'rgba(244, 63, 94, 0.95)' : 'rgba(24, 24, 27, 0.95)');
+      toast.style.cssText = `background:${bg};color:#ffffff;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);pointer-events:auto;transition:all 0.3s cubic-bezier(0.16,1,0.3,1);transform:translateY(20px);opacity:0;`;
+      toast.innerText = message;
+      toastContainer.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
+      });
+      setTimeout(() => {
+        toast.style.transform = 'translateY(20px)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
     function openAuthModal(mode = 'login') {
       document.getElementById('modal-auth').style.display = 'flex';
       switchAuthMode(mode);
@@ -4307,6 +4455,7 @@ CREATE TABLE courses (
         fReg.style.display = 'none';
         fForgot.style.display = 'none';
         if (headerTitle) headerTitle.innerText = 'Welcome Back';
+        renderGoogleButton('login');
       } else if (mode === 'register') {
         tabList.style.display = 'flex';
         tabReg.classList.add('active');
@@ -4316,6 +4465,7 @@ CREATE TABLE courses (
         fForgot.style.display = 'none';
         backToRegisterInputs();
         if (headerTitle) headerTitle.innerText = 'Create Workspace';
+        renderGoogleButton('register');
       } else if (mode === 'forgot') {
         tabList.style.display = 'none';
         fForgot.style.display = 'block';
@@ -7804,11 +7954,12 @@ CREATE TABLE scholarships (
       }
     }
 
-    // Initialize preview, usage, and support escalations on load
+    // Initialize preview, usage, support escalations, and Google Identity Services on load
     setTimeout(() => {
       updateWidgetPreview();
       loadBillingUsage();
       updateEscalationsBadge();
+      initGoogleGIS();
     }, 150);
 
     // ==========================================================================

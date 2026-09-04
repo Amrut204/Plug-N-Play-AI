@@ -9,6 +9,8 @@
 *.pem
 *.key
 *.cert
+client_secret*.json
+*.credentials.json
 
 # Node.js & Frontend dependencies
 node_modules/
