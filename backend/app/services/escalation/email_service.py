@@ -1,5 +1,7 @@
 import logging
 import os
+import socket
+import ssl
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -10,6 +12,30 @@ from dotenv import load_dotenv
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+
+class IPv4SMTP(smtplib.SMTP):
+    """SMTP client that forces IPv4 resolution to prevent [Errno 101] Network is unreachable on Docker/Render."""
+    def _get_socket(self, host, port, timeout):
+        ipv4 = socket.gethostbyname(host)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if timeout is not None:
+            s.settimeout(timeout)
+        s.connect((ipv4, port))
+        return s
+
+
+class IPv4SMTP_SSL(smtplib.SMTP_SSL):
+    """SMTP_SSL client that forces IPv4 resolution to prevent [Errno 101] Network is unreachable on Docker/Render."""
+    def _get_socket(self, host, port, timeout):
+        ipv4 = socket.gethostbyname(host)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if timeout is not None:
+            s.settimeout(timeout)
+        s.connect((ipv4, port))
+        if self.context is None:
+            self.context = ssl._create_stdlib_context()
+        return self.context.wrap_socket(s, server_hostname=self._host)
 
 
 class EmailService:
@@ -121,10 +147,15 @@ class EmailService:
                 msg["To"] = clean_email
                 msg.attach(MIMEText(html_content, "html"))
 
-                with smtplib.SMTP(smtp_host, smtp_port, timeout=10.0) as server:
-                    server.starttls()
-                    server.login(smtp_user, smtp_pass)
-                    server.sendmail(from_email, [clean_email], msg.as_string())
+                if smtp_port == 465:
+                    with IPv4SMTP_SSL(smtp_host, smtp_port, timeout=12.0) as server:
+                        server.login(smtp_user, smtp_pass)
+                        server.sendmail(from_email, [clean_email], msg.as_string())
+                else:
+                    with IPv4SMTP(smtp_host, smtp_port, timeout=12.0) as server:
+                        server.starttls()
+                        server.login(smtp_user, smtp_pass)
+                        server.sendmail(from_email, [clean_email], msg.as_string())
 
                 logger.info(f"Escalation email successfully sent via SMTP to {clean_email}")
                 return {"status": "success", "mode": "smtp", "recipient": clean_email}
@@ -218,7 +249,7 @@ class EmailService:
 </html>
 """
 
-        smtp_host = os.getenv("SMTP_HOST")
+        smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
         smtp_port = int(os.getenv("SMTP_PORT", "587"))
         smtp_user = os.getenv("SMTP_USER")
         smtp_pass = os.getenv("SMTP_PASS")
@@ -233,11 +264,11 @@ class EmailService:
                 msg.attach(MIMEText(html_content, "html"))
 
                 if smtp_port == 465:
-                    with smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=12.0) as server:
+                    with IPv4SMTP_SSL(smtp_host, smtp_port, timeout=12.0) as server:
                         server.login(smtp_user, smtp_pass)
                         server.sendmail(from_email, [clean_email], msg.as_string())
                 else:
-                    with smtplib.SMTP(smtp_host, smtp_port, timeout=12.0) as server:
+                    with IPv4SMTP(smtp_host, smtp_port, timeout=12.0) as server:
                         server.starttls()
                         server.login(smtp_user, smtp_pass)
                         server.sendmail(from_email, [clean_email], msg.as_string())
@@ -305,7 +336,7 @@ class EmailService:
 </body>
 </html>
 """
-        smtp_host = os.getenv("SMTP_HOST")
+        smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
         smtp_port = int(os.getenv("SMTP_PORT", "587"))
         smtp_user = os.getenv("SMTP_USER")
         smtp_pass = os.getenv("SMTP_PASS")
@@ -319,10 +350,15 @@ class EmailService:
                 msg["To"] = clean_email
                 msg.attach(MIMEText(html_content, "html"))
 
-                with smtplib.SMTP(smtp_host, smtp_port, timeout=10.0) as server:
-                    server.starttls()
-                    server.login(smtp_user, smtp_pass)
-                    server.sendmail(from_email, [clean_email], msg.as_string())
+                if smtp_port == 465:
+                    with IPv4SMTP_SSL(smtp_host, smtp_port, timeout=12.0) as server:
+                        server.login(smtp_user, smtp_pass)
+                        server.sendmail(from_email, [clean_email], msg.as_string())
+                else:
+                    with IPv4SMTP(smtp_host, smtp_port, timeout=12.0) as server:
+                        server.starttls()
+                        server.login(smtp_user, smtp_pass)
+                        server.sendmail(from_email, [clean_email], msg.as_string())
                 return {"status": "success", "mode": "smtp"}
             except Exception as e:
                 logger.error(f"Password changed notice failed: {e}")

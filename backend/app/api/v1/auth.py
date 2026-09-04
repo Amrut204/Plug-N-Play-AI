@@ -22,7 +22,7 @@ from app.models.tenants import Tenant, ApiKey
 from app.models.agents import Agent
 from app.schemas.tenants import TenantCreate, TenantResponse, ApiKeyCreate, ApiKeyResponse
 from app.schemas.agents import AgentResponse
-from app.services.escalation.email_service import EmailService
+from app.services.escalation.email_service import EmailService, IPv4SMTP, IPv4SMTP_SSL
 
 router = APIRouter(prefix="/auth", tags=["Tenants & Auth"])
 
@@ -129,14 +129,14 @@ async def smtp_diagnostics():
     if user and passwd:
         try:
             if port == 465:
-                with smtplib.SMTP_SSL(host, port, timeout=6.0) as server:
+                with IPv4SMTP_SSL(host, port, timeout=8.0) as server:
                     server.login(user, passwd)
-                    results["auth_test"] = {"status": "success", "mode": "SSL (465)"}
+                    results["auth_test"] = {"status": "success", "mode": "IPv4 SSL (465)"}
             else:
-                with smtplib.SMTP(host, port, timeout=6.0) as server:
+                with IPv4SMTP(host, port, timeout=8.0) as server:
                     server.starttls()
                     server.login(user, passwd)
-                    results["auth_test"] = {"status": "success", "mode": "STARTTLS (587)"}
+                    results["auth_test"] = {"status": "success", "mode": "IPv4 STARTTLS (587)"}
         except Exception as auth_err:
             results["auth_test"] = {
                 "status": "failed",
