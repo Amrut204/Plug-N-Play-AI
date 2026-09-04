@@ -3049,6 +3049,7 @@
             <div style="margin-bottom: 10px;">
               <span style="font-size: 11px; color: var(--text-3); display: block; margin-bottom: 6px;">Sample Policy Templates:</span>
               <div class="template-chips">
+                <button type="button" class="template-chip" onclick="loadRAGTemplate('pnp')" style="border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; background: rgba(56, 189, 248, 0.08);">⚡ Plug-N-Play AI Guide</button>
                 <button type="button" class="template-chip" onclick="loadRAGTemplate('ecommerce')">E-Commerce Returns</button>
                 <button type="button" class="template-chip" onclick="loadRAGTemplate('hr')">HR Leave Policy</button>
                 <button type="button" class="template-chip" onclick="loadRAGTemplate('saas')">SaaS SLA &amp; API Rules</button>
@@ -4265,6 +4266,19 @@ CREATE TABLE courses (
       saas: {
         title: "SaaS API Rate Limits & SLA Agreement",
         content: `Rate Limits: Free tier is 60 req/min. Pro tier is 600 req/min. We guarantee 99.95% monthly uptime backed by our enterprise SLA credit policy.`
+      },
+      pnp: {
+        title: "Plug-N-Play AI Platform Guide & Knowledge Base",
+        content: `Plug-N-Play AI is an enterprise-grade, zero-write AI data layer and autonomous agent orchestration platform. It enables businesses, developers, and organizations to connect their private databases, unstructured documents, and web services to conversational AI agents and embed intelligent assistants directly into any website or application within minutes.
+
+Key Features & Capabilities:
+1. Dual-Engine Architecture: Combines unstructured document retrieval (RAG with 384-dimensional vector embeddings) and live structured database querying (Text-to-SQL with AST validation).
+2. Zero Database Write Mandate: All state-modifying SQL queries (DROP, DELETE, UPDATE, INSERT, ALTER) are intercepted and rejected at the AST level. Only safe SELECT queries execute.
+3. Multi-Tenant Isolation: Workspaces are cryptographically isolated by Tenant UUID. Cross-tenant data leakage is impossible.
+4. Universal 1-Line Embed Script: Embed on WordPress, HTML, React, Next.js, Angular, or Vue with a single <script src="https://plug-n-play-rag.onrender.com/static/widget.js" data-agent-id="..."></script> tag.
+5. Client Testing Free Tier: Unrestricted access for developers to test AI agents directly in live web applications with CSAT telemetry, query logs, and shield metrics.
+6. Live Human Escalation: Automated fallback alerts dispatched via HTTPS email (Resend/Brevo) when visitors request real-time human assistance.
+7. Model Providers: Ultra-fast inference powered by Groq (LLaMA 3.3 70B, Qwen 2.5 32B, DeepSeek R1) with automatic failover.`
       }
     };
 
