@@ -144,23 +144,24 @@ async def setup_custom_agent(payload: QuickstartSetupRequest, db: AsyncSession =
             await db.commit()
             await db.refresh(source)
 
-            chunks = TextChunker.chunk_text(payload.document_content, chunk_size=350, chunk_overlap=40)
-            for c in chunks:
-                emb = await EmbeddingService.get_embedding(c)
-                rag_chunk = RAGChunk(
-                    tenant_id=tenant.id,
-                    rag_source_id=source.id,
-                    content=c,
-                    doc_metadata={
-                        "title": doc_title,
-                        "allowed_roles": ["student", "faculty", "admin", "user", "customer"]
-                    },
-                    embedding=emb
-                )
-                db.add(rag_chunk)
-                chunks_indexed += 1
+            chunks = TextChunker.chunk_text(payload.document_content, chunk_size=600, chunk_overlap=80)
+            if chunks:
+                embeddings = await EmbeddingService.get_embeddings_batch(chunks, batch_size=32)
+                for c, emb in zip(chunks, embeddings):
+                    rag_chunk = RAGChunk(
+                        tenant_id=tenant.id,
+                        rag_source_id=source.id,
+                        content=c,
+                        doc_metadata={
+                            "title": doc_title,
+                            "allowed_roles": ["student", "faculty", "admin", "user", "customer"]
+                        },
+                        embedding=emb
+                    )
+                    db.add(rag_chunk)
+                    chunks_indexed += 1
 
-            await db.commit()
+                await db.commit()
             test_questions.append(f"What is the official policy regarding {doc_title}?")
 
     tables_synced = 0

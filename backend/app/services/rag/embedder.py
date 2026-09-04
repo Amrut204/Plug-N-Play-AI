@@ -55,12 +55,8 @@ class EmbeddingService:
             except Exception as e:
                 logger.warning(f"FastEmbed batch generation failed: {e}")
 
-        # Fallback: process individually via get_embedding
-        results = []
-        for text in texts:
-            vec = await cls.get_embedding(text)
-            results.append(vec)
-        return results
+        # Fallback: compute deterministic normalized embeddings instantaneously
+        return [cls._compute_deterministic_embedding(t) for t in texts]
 
     @classmethod
     async def get_embedding(cls, text: str) -> List[float]:

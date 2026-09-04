@@ -7022,9 +7022,14 @@ CREATE TABLE scholarships (
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        const data = await res.json();
+        let data = null;
+        try {
+          data = await res.json();
+        } catch (_) {
+          // Empty body or gateway timeout HTML
+        }
 
-        if (res.ok) {
+        if (res.ok && data) {
           currentAgent = data;
           if (data.tenant && (!currentAuth || currentAuth.tenant.id !== data.tenant.id)) {
             currentAuth = { tenant: data.tenant, user: null };
@@ -7058,7 +7063,12 @@ CREATE TABLE scholarships (
           updateStepper(3);
           document.getElementById('section-sandbox').scrollIntoView({ behavior: 'smooth' });
         } else {
-          alert('Agent creation failed: ' + (data.detail || 'Error'));
+          const errMsg = (data && data.detail)
+            ? data.detail
+            : (res.status === 504 || res.status === 502)
+              ? "Agent indexing took too long on the free tier container. Please try clicking Build again."
+              : `Server error (${res.status} ${res.statusText || 'Error'}). Please try again.`;
+          alert('Agent creation failed: ' + errMsg);
         }
       } catch (err) {
         alert('Network error: ' + err.message);
