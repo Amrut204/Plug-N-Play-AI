@@ -159,12 +159,16 @@ async def request_registration_otp(payload: RegisterRequestOTP, db: AsyncSession
         purpose="registration"
     )
 
-    return {
+    res_data = {
         "status": "success",
         "message": f"Verification code sent to {tenant.email}.",
         "email": tenant.email,
         "mode": email_result.get("mode", "smtp")
     }
+    if email_result.get("mode") == "simulated":
+        res_data["otp"] = otp
+
+    return res_data
 
 
 @router.post("/register-verify", status_code=status.HTTP_201_CREATED)
@@ -253,18 +257,23 @@ async def resend_registration_otp(payload: ResendRegisterOTP, db: AsyncSession =
     tenant.updated_at = datetime.now(timezone.utc)
     await db.commit()
 
-    await EmailService.send_otp_email(
+    email_result = await EmailService.send_otp_email(
         to_email=tenant.email,
         otp_code=otp,
         user_name=tenant.full_name,
         purpose="registration"
     )
 
-    return {
+    res_data = {
         "status": "success",
         "message": f"Fresh verification code sent to {tenant.email}.",
-        "email": tenant.email
+        "email": tenant.email,
+        "mode": email_result.get("mode", "smtp")
     }
+    if email_result.get("mode") == "simulated":
+        res_data["otp"] = otp
+
+    return res_data
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
@@ -465,12 +474,16 @@ async def forgot_password(payload: ForgotPasswordRequest, db: AsyncSession = Dep
         user_name=tenant.full_name or tenant.name
     )
 
-    return {
+    res_data = {
         "status": "success",
         "message": f"Verification code sent to {tenant.email}.",
         "email": tenant.email,
         "mode": email_result.get("mode", "smtp")
     }
+    if email_result.get("mode") == "simulated":
+        res_data["otp"] = otp
+
+    return res_data
 
 
 @router.post("/verify-otp", status_code=status.HTTP_200_OK)

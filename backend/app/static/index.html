@@ -4416,6 +4416,26 @@ CREATE TABLE courses (
           document.getElementById('reg-step-inputs').style.display = 'none';
           document.getElementById('reg-step-otp').style.display = 'block';
           document.getElementById('auth-reg-otp').value = '';
+
+          const statusBox = document.getElementById('reg-otp-sent-status');
+          if (data.mode === 'simulated' && data.otp) {
+            statusBox.style.background = 'rgba(245, 158, 11, 0.12)';
+            statusBox.style.borderColor = 'rgba(245, 158, 11, 0.35)';
+            statusBox.style.color = '#fbbf24';
+            statusBox.innerHTML = `
+              <div style="font-weight: 700; margin-bottom: 4px;">⚡ Demo Verification Mode</div>
+              <div style="color: #e2e8f0; font-size: 11.5px; line-height: 1.5;">
+                SMTP not active on Render. Your test code is: <b style="color: #38bdf8; font-family: monospace; font-size: 15px; letter-spacing: 2px;">${data.otp}</b>
+                <button type="button" onclick="document.getElementById('auth-reg-otp').value='${data.otp}'" style="background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #38bdf8; border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer; margin-left: 6px;">Auto-Fill</button>
+              </div>
+            `;
+          } else {
+            statusBox.style.background = 'rgba(56, 189, 248, 0.1)';
+            statusBox.style.borderColor = 'rgba(56, 189, 248, 0.25)';
+            statusBox.style.color = '#38bdf8';
+            statusBox.innerText = `Verification code sent via secure email to ${email}. Valid for 10 minutes.`;
+          }
+
           document.getElementById('auth-reg-otp').focus();
         } else {
           alert('Registration error: ' + (data.detail || 'Could not send verification code.'));
@@ -4482,7 +4502,21 @@ CREATE TABLE courses (
         });
         const data = await res.json();
         if (res.ok) {
-          document.getElementById('reg-otp-sent-status').innerText = `Fresh verification code sent to ${email}. Valid for 10 minutes.`;
+          const statusBox = document.getElementById('reg-otp-sent-status');
+          if (data.mode === 'simulated' && data.otp) {
+            statusBox.style.background = 'rgba(245, 158, 11, 0.12)';
+            statusBox.style.borderColor = 'rgba(245, 158, 11, 0.35)';
+            statusBox.style.color = '#fbbf24';
+            statusBox.innerHTML = `
+              <div style="font-weight: 700; margin-bottom: 4px;">⚡ Demo Verification Mode</div>
+              <div style="color: #e2e8f0; font-size: 11.5px; line-height: 1.5;">
+                Fresh code generated: <b style="color: #38bdf8; font-family: monospace; font-size: 15px; letter-spacing: 2px;">${data.otp}</b>
+                <button type="button" onclick="document.getElementById('auth-reg-otp').value='${data.otp}'" style="background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #38bdf8; border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer; margin-left: 6px;">Auto-Fill</button>
+              </div>
+            `;
+          } else {
+            statusBox.innerText = `Fresh verification code sent to ${email}. Valid for 10 minutes.`;
+          }
         } else {
           alert('Resend failed: ' + (data.detail || 'Could not send code.'));
         }
@@ -4544,7 +4578,21 @@ CREATE TABLE courses (
         if (res.ok) {
           document.getElementById('forgot-step-email').style.display = 'none';
           document.getElementById('forgot-step-reset').style.display = 'block';
-          document.getElementById('otp-sent-status').innerText = `A 6-digit verification code was sent to ${email}. Valid for 10 minutes.`;
+          const statusBox = document.getElementById('otp-sent-status');
+          if (data.mode === 'simulated' && data.otp) {
+            statusBox.style.background = 'rgba(245, 158, 11, 0.12)';
+            statusBox.style.borderColor = 'rgba(245, 158, 11, 0.35)';
+            statusBox.style.color = '#fbbf24';
+            statusBox.innerHTML = `
+              <div style="font-weight: 700; margin-bottom: 4px;">⚡ Demo Verification Mode</div>
+              <div style="color: #e2e8f0; font-size: 11.5px; line-height: 1.5;">
+                SMTP not active on Render. Your reset code is: <b style="color: #38bdf8; font-family: monospace; font-size: 15px; letter-spacing: 2px;">${data.otp}</b>
+                <button type="button" onclick="document.getElementById('auth-forgot-otp').value='${data.otp}'" style="background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #38bdf8; border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer; margin-left: 6px;">Auto-Fill</button>
+              </div>
+            `;
+          } else {
+            statusBox.innerText = `A 6-digit verification code was sent to ${email}. Valid for 10 minutes.`;
+          }
         } else {
           alert('Error: ' + (data.detail || 'Could not send verification code.'));
         }

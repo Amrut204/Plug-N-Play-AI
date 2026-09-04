@@ -232,10 +232,15 @@ class EmailService:
                 msg["To"] = clean_email
                 msg.attach(MIMEText(html_content, "html"))
 
-                with smtplib.SMTP(smtp_host, smtp_port, timeout=10.0) as server:
-                    server.starttls()
-                    server.login(smtp_user, smtp_pass)
-                    server.sendmail(from_email, [clean_email], msg.as_string())
+                if smtp_port == 465:
+                    with smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=12.0) as server:
+                        server.login(smtp_user, smtp_pass)
+                        server.sendmail(from_email, [clean_email], msg.as_string())
+                else:
+                    with smtplib.SMTP(smtp_host, smtp_port, timeout=12.0) as server:
+                        server.starttls()
+                        server.login(smtp_user, smtp_pass)
+                        server.sendmail(from_email, [clean_email], msg.as_string())
 
                 logger.info(f"OTP email successfully sent via SMTP to {clean_email}")
                 return {"status": "success", "mode": "smtp", "recipient": clean_email}
