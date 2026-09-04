@@ -28,6 +28,11 @@ class ParseSchemaRequest(BaseModel):
     schema_text: str
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 @router.post("/test-db", status_code=status.HTTP_200_OK)
 async def test_db_connection(payload: TestDBRequest):
     """
@@ -38,8 +43,12 @@ async def test_db_connection(payload: TestDBRequest):
     if not db_url:
         return {"status": "error", "message": "Database URL is required.", "tables": []}
 
-    result = await DirectDBExecutor.test_connection(db_url)
-    return result
+    try:
+        result = await DirectDBExecutor.test_connection(db_url)
+        return result
+    except Exception as e:
+        logger.error(f"Unexpected error testing DB connection: {e}")
+        return {"status": "error", "message": f"Connection error: {str(e)}", "tables": []}
 
 
 @router.post("/parse-schema", status_code=status.HTTP_200_OK)

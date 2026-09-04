@@ -5,27 +5,46 @@ No middleware, no connector endpoints.
 The client just provides a read-only database URL.
 """
 
+import asyncio
 import logging
-from typing import List, Dict, Any, Optional
+import re
+from typing import List, Dict, Any, Optional, Tuple
 from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
 
-def detect_db_type(db_url: str) -> str:
-    """Auto-detect database type from URL scheme."""
-    url = db_url.strip().lower()
-    if url.startswith("mongodb://") or url.startswith("mongodb+srv://"):
-        return "mongodb"
-    elif url.startswith("mysql://") or url.startswith("mysql+"):
-        return "mysql"
-    elif url.startswith("postgresql://") or url.startswith("postgres://"):
-        return "postgresql"
+def normalize_db_url(db_url: str) -> Tuple[str, str]:
+    """
+    Normalizes dialect-specific database URLs into driver-compatible DSNs.
+    Handles SQLAlchemy formats like postgresql+asyncpg://, postgresql+psycopg2://,
+    mysql+pymysql://, etc.
+    Returns (normalized_url, db_type).
+    """
+    raw = db_url.strip()
+    lower = raw.lower()
+
+    if lower.startswith("mongodb://") or lower.startswith("mongodb+srv://"):
+        return raw, "mongodb"
+    elif lower.startswith("mysql") or lower.startswith("mariadb"):
+        # Normalize mysql+pymysql:// or mysql+aiomysql:// -> mysql://
+        clean = re.sub(r"^(mysql|mariadb)(\+[a-zA-Z0-9_-]+)?://", "mysql://", raw, flags=re.IGNORECASE)
+        return clean, "mysql"
+    elif lower.startswith("postgres") or lower.startswith("postgresql"):
+        # Normalize postgresql+asyncpg://, postgresql+psycopg2:// -> postgresql://
+        clean = re.sub(r"^(postgres|postgresql)(\+[a-zA-Z0-9_-]+)?://", "postgresql://", raw, flags=re.IGNORECASE)
+        return clean, "postgresql"
     else:
         raise ValueError(
-            f"Unsupported database URL scheme. "
-            f"Supported: postgresql://, mysql://, mongodb://, mongodb+srv://"
+            f"Unsupported database URL scheme '{raw.split('://')[0] if '://' in raw else raw}'. "
+            f"Supported: PostgreSQL (postgresql://, postgresql+asyncpg://), MySQL (mysql://), MongoDB (mongodb://, mongodb+srv://)"
         )
+
+
+def detect_db_type(db_url: str) -> str:
+    """Auto-detect database type from URL scheme."""
+    _, db_type = normalize_db_url(db_url)
+    return db_type
 
 
 # ══════════════════════════════════════════════════════════════
@@ -38,8 +57,13 @@ _pg_pool_cache: Dict[str, Any] = {}
 async def _get_pg_pool(db_url: str):
     import asyncpg
 
-    if db_url in _pg_pool_cache:
-        pool = _pg_pool_cache[db_url]
+    clean_url, _ = normalize_db_url(db_url)
+    base_url = clean_url.split("?")[0]
+    ssl_mode = "require" if ("ssl=require" in db_url.lower() or "sslmode=require" in db_url.lower()) else None
+
+    cache_key = f"{base_url}?ssl={ssl_mode}"
+    if cache_key in _pg_pool_cache:
+        pool = _pg_pool_cache[cache_key]
         try:
             async with pool.acquire(timeout=3) as conn:
                 await conn.fetchval("SELECT 1")
@@ -49,13 +73,10 @@ async def _get_pg_pool(db_url: str):
                 await pool.close()
             except Exception:
                 pass
-            del _pg_pool_cache[db_url]
+            del _pg_pool_cache[cache_key]
 
-    clean_url = db_url.split("?")[0]
-    ssl_mode = "require" if ("ssl=require" in db_url or "sslmode=require" in db_url) else None
-
-    pool = await asyncpg.create_pool(clean_url, min_size=1, max_size=3, command_timeout=10, timeout=3.0, ssl=ssl_mode)
-    _pg_pool_cache[db_url] = pool
+    pool = await asyncpg.create_pool(base_url, min_size=1, max_size=3, command_timeout=10, timeout=6.0, ssl=ssl_mode)
+    _pg_pool_cache[cache_key] = pool
     return pool
 
 
@@ -414,19 +435,21 @@ class DirectDBExecutor:
     async def test_connection(db_url: str) -> Dict[str, Any]:
         try:
             executor, _ = DirectDBExecutor._get_executor(db_url)
-            import asyncio
-            return await asyncio.wait_for(executor.test_connection(db_url), timeout=3.5)
+            return await asyncio.wait_for(executor.test_connection(db_url), timeout=7.0)
         except (ValueError, asyncio.TimeoutError) as e:
-            msg = "Connection timed out (Host unreachable)" if isinstance(e, asyncio.TimeoutError) else str(e)
+            msg = "Connection timed out (Host unreachable or waking up from sleep)" if isinstance(e, asyncio.TimeoutError) else str(e)
             return {"status": "error", "message": msg, "tables": []}
         except Exception as e:
             return {"status": "error", "message": str(e), "tables": []}
 
     @staticmethod
     async def discover_schema(db_url: str, table_names: List[str]) -> List[Dict[str, Any]]:
-        executor, _ = DirectDBExecutor._get_executor(db_url)
-        import asyncio
-        return await asyncio.wait_for(executor.discover_schema(db_url, table_names), timeout=4.0)
+        try:
+            executor, _ = DirectDBExecutor._get_executor(db_url)
+            return await asyncio.wait_for(executor.discover_schema(db_url, table_names), timeout=8.0)
+        except Exception as e:
+            logger.error(f"Error discovering schema: {e}")
+            return []
 
     @staticmethod
     async def execute_readonly(db_url: str, sql: str, params: Optional[Dict[str, Any]] = None, max_rows: int = 100) -> List[Dict[str, Any]]:

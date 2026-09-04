@@ -6324,7 +6324,13 @@ CREATE TABLE scholarships (
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ database_url: url })
         });
-        const data = await res.json();
+        let data;
+        try {
+          data = await res.json();
+        } catch (jsonErr) {
+          const rawText = await res.text().catch(() => '');
+          data = { status: 'error', message: rawText || `Server returned HTTP ${res.status}` };
+        }
         if (data.status === 'success') {
           card.discoveredTables = data.tables || [];
           card.selectedTables = [...(data.tables || [])];
