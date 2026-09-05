@@ -447,9 +447,15 @@
     }
     /* Master Video Walkthrough Card */
     .landing-video-showcase {
+      display: none;
       margin: 36px auto 36px auto;
       max-width: 980px;
       text-align: left;
+      animation: fadeInVideo 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes fadeInVideo {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .landing-video-card {
       background: linear-gradient(180deg, rgba(24, 24, 32, 0.9) 0%, rgba(12, 12, 16, 0.98) 100%);
@@ -2523,21 +2529,25 @@
           Plug-N-Play AI seamlessly bridges unstructured documents and operational databases with Zero Database Write Access, AST SQL validation, and ambient browser action relays.
         </p>
 
-        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap; align-items: center;">
           <button class="btn-primary" style="width: auto; padding: 12px 28px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);" onclick="openAuthModal('register')">
             Get Started Free
           </button>
-          <button class="btn-watch-video" onclick="scrollToLandingVideo()" title="Watch complete 6-minute studio demo">
+          <button class="btn-watch-video" id="btn-toggle-video" onclick="toggleLandingVideo()" title="Click to view 6-minute studio demo">
             <svg class="svg-icon" viewBox="0 0 24 24" style="width: 15px; height: 15px; fill: currentColor;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            <span>Watch Video Demo (6 Min)</span>
+            <span id="btn-toggle-video-text">Watch Video Demo (6 Min)</span>
           </button>
+          <a href="https://drive.google.com/file/d/1IrKmqTuj6LjLkFNGd4J_XrdiV_zx_SeV/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="btn-action-subtle" style="padding: 12px 20px; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; color: var(--text-2);" title="Watch Video Demo on Google Drive">
+            <svg class="svg-icon" viewBox="0 0 24 24" style="width: 15px; height: 15px; fill: currentColor;"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+            <span>Watch on Google Drive ↗</span>
+          </a>
           <button class="btn-action-subtle" style="padding: 12px 24px; font-size: 14px; font-weight: 600;" onclick="openAuthModal('login')">
             Sign In to Workspace
           </button>
         </div>
 
-        <!-- Master Pitch Video Showcase Card -->
-        <div class="landing-video-showcase" id="landing-video-section">
+        <!-- Master Pitch Video Showcase Card (Hidden by default, shown on click) -->
+        <div class="landing-video-showcase" id="landing-video-section" style="display: none;">
           <div class="landing-video-card">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
               <div style="display: flex; align-items: center; gap: 12px;">
@@ -2555,8 +2565,14 @@
                   </div>
                 </div>
               </div>
-              <div style="font-size: 12px; color: var(--text-3);">
-                ⚡ Click any chapter chip below to jump to that section
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <a href="https://drive.google.com/file/d/1IrKmqTuj6LjLkFNGd4J_XrdiV_zx_SeV/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="video-chapter-chip" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.1); text-decoration: none; font-weight: 600;" title="Watch full video on Google Drive">
+                  <svg class="svg-icon" viewBox="0 0 24 24" style="width: 13px; height: 13px; fill: currentColor;"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+                  <span>Google Drive Link ↗</span>
+                </a>
+                <button type="button" class="video-chapter-chip" onclick="hideLandingVideo()" style="color: var(--text-3); border-color: rgba(255, 255, 255, 0.18);" title="Close video player">
+                  ✕ Close Video
+                </button>
               </div>
             </div>
 
@@ -4690,23 +4706,59 @@ Key Features & Architectural Highlights:
       }, 4000);
     }
 
-    function scrollToLandingVideo() {
+    function showLandingVideo() {
       const el = document.getElementById('landing-video-section');
+      const btnText = document.getElementById('btn-toggle-video-text');
       if (el) {
+        el.style.display = 'block';
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         const vid = document.getElementById('pnp-landing-master-video');
         if (vid && vid.paused) {
           vid.play().catch(() => {});
         }
+        if (btnText) btnText.textContent = 'Hide Video Demo';
       }
     }
 
+    function hideLandingVideo() {
+      const el = document.getElementById('landing-video-section');
+      const btnText = document.getElementById('btn-toggle-video-text');
+      if (el) {
+        el.style.display = 'none';
+        const vid = document.getElementById('pnp-landing-master-video');
+        if (vid) {
+          vid.pause();
+        }
+        if (btnText) btnText.textContent = 'Watch Video Demo (6 Min)';
+      }
+    }
+
+    function toggleLandingVideo() {
+      const el = document.getElementById('landing-video-section');
+      if (!el) return;
+      const isHidden = el.style.display === 'none' || getComputedStyle(el).display === 'none';
+      if (isHidden) {
+        showLandingVideo();
+      } else {
+        hideLandingVideo();
+      }
+    }
+
+    function scrollToLandingVideo() {
+      showLandingVideo();
+    }
+
     function seekLandingVideo(seconds) {
+      const el = document.getElementById('landing-video-section');
+      if (el && (el.style.display === 'none' || getComputedStyle(el).display === 'none')) {
+        el.style.display = 'block';
+        const btnText = document.getElementById('btn-toggle-video-text');
+        if (btnText) btnText.textContent = 'Hide Video Demo';
+      }
       const vid = document.getElementById('pnp-landing-master-video');
       if (vid) {
         vid.currentTime = seconds;
         vid.play().catch(() => {});
-        const el = document.getElementById('landing-video-section');
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
