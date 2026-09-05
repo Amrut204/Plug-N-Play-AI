@@ -56,6 +56,6 @@ services:
       - key: BREVO_API_KEY
         sync: false
       - key: GOOGLE_CLIENT_ID
-        value: "629754361477-2sitaqfnnqs4n5qi8v0ivt2cnbeirg6e.apps.googleusercontent.com"
+        sync: false
       - key: GOOGLE_CLIENT_SECRET
-        value: "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"
+        sync: false
