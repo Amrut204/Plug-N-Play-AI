@@ -10,6 +10,9 @@ from sqlalchemy import select
 from app.core.database import get_db
 from app.core.security import decode_session_token
 from app.models.tenants import Tenant
+from app.models.agents import Agent
+from app.models.connections import Connection
+from app.models.rag import RAGSource
 from app.services.concierge.concierge_service import PlatformConciergeService
 
 logger = logging.getLogger(__name__)
@@ -37,6 +40,7 @@ async def resolve_user_context(
     """
     Extract verified tenant context from JWT Bearer token.
     Guarantees strict tenant isolation by only looking up the authenticated user's workspace.
+    Queries live telemetry: configured agents, connected databases, and RAG sources.
     """
     if not authorization or not authorization.startswith("Bearer "):
         return {"is_authenticated": False}
@@ -59,13 +63,52 @@ async def resolve_user_context(
         tenant = res.scalars().first()
 
         if tenant:
+            # Query workspace live telemetry & resources
+            agents = []
+            connections = []
+            rag_count = 0
+            try:
+                stmt_agents = select(Agent).where(Agent.tenant_id == tenant.id)
+                res_agents = await db.execute(stmt_agents)
+                agents = res_agents.scalars().all()
+
+                stmt_conn = select(Connection).where(Connection.tenant_id == tenant.id)
+                res_conn = await db.execute(stmt_conn)
+                connections = res_conn.scalars().all()
+
+                stmt_rag = select(RAGSource).where(RAGSource.tenant_id == tenant.id)
+                res_rag = await db.execute(stmt_rag)
+                rag_count = len(res_rag.scalars().all())
+            except Exception as res_err:
+                logger.warning(f"[Concierge] Error querying workspace resources: {res_err}")
+
             return {
                 "is_authenticated": True,
                 "tenant_id": tenant.id,
                 "workspace_name": tenant.name,
                 "full_name": tenant.full_name or tenant.name,
                 "email": tenant.email,
-                "tier": tenant.subscription_tier or "free"
+                "tier": tenant.subscription_tier or "free",
+                "agent_count": len(agents),
+                "agents": [
+                    {
+                        "id": a.id,
+                        "name": a.name,
+                        "description": a.description or "",
+                        "model": a.model_name or "gpt-4o-mini",
+                        "is_active": a.is_active
+                    }
+                    for a in agents
+                ],
+                "connection_count": len(connections),
+                "connections": [
+                    {
+                        "name": c.name,
+                        "type": c.connection_type
+                    }
+                    for c in connections
+                ],
+                "document_count": rag_count
             }
     except Exception as e:
         logger.warning(f"[Concierge] Error resolving tenant context: {e}")

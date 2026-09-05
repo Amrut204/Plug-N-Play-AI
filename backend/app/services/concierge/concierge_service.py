@@ -159,6 +159,24 @@ class PlatformConciergeService:
             user_name = user_context.get("full_name") or user_context.get("email") or "Valued Client"
             email = user_context.get("email") or "Not provided"
             tier = user_context.get("tier") or "Free Tier"
+            agent_count = user_context.get("agent_count", 0)
+            agents = user_context.get("agents", [])
+            connection_count = user_context.get("connection_count", 0)
+            connections = user_context.get("connections", [])
+            doc_count = user_context.get("document_count", 0)
+
+            if agents:
+                agent_lines = "\n".join([
+                    f"  - **{a['name']}** (ID: `{a['id']}`, Model: `{a.get('model', 'gpt-4o-mini')}`, Status: {'Active' if a.get('is_active') else 'Inactive'})"
+                    for a in agents
+                ])
+            else:
+                agent_lines = "  - (No agents created yet. The user can create their first agent in the Agent Studio!)"
+
+            if connections:
+                conn_lines = "\n".join([f"  - **{c['name']}** (Type: `{c['type']}`)" for c in connections])
+            else:
+                conn_lines = "  - (No databases connected yet.)"
 
             user_block = f"""[AUTHENTICATED USER CONTEXT]
 - Authentication: Authenticated Active Dashboard User
@@ -166,9 +184,16 @@ class PlatformConciergeService:
 - User Name: {user_name}
 - Contact Email: {email}
 - Subscription Tier: {tier}
+- Workspace Agent Fleet ({agent_count} Total):
+{agent_lines}
+- Connected Databases ({connection_count} Total):
+{conn_lines}
+- Ingested Knowledge Sources ({doc_count} Total)
 
-TENANT ISOLATION MANDATE:
+TENANT ISOLATION & TELEMETRY MANDATE:
 - When asked "what is my workspace name?", "what is my company name?", or "who am I?", answer directly that their active workspace name is "{workspace_name}".
+- When asked "how many agents are there in our company/workspace?", "list our agents", or "what agents do we have?", answer accurately with the exact count ({agent_count}) and list each agent's name, ID, and status from the Workspace Agent Fleet above.
+- When asked about database connections or knowledge documents, accurately quote the counts and details from the context above.
 - NEVER disclose, invent, or mention any other workspace, project, or tenant names. You are strictly scoped to this user."""
         else:
             user_block = """[GUEST VISITOR CONTEXT]
@@ -220,8 +245,49 @@ CRITICAL RULES OF OPERATION:
         q_lower = user_query.lower()
         tokens = set(re.findall(r"\w+", q_lower))
 
-        # 1. Identity & workspace name queries
-        if tokens.intersection(IDENTITY_KEYWORDS) or "company" in q_lower or "who am i" in q_lower or "workspace" in q_lower:
+        # 1. Agent fleet count / list queries
+        is_agent_query = (
+            ("agent" in q_lower or "agents" in q_lower or "bot" in q_lower or "bots" in q_lower)
+            and ("how many" in q_lower or "count" in q_lower or "number" in q_lower or "list" in q_lower or "what" in q_lower or "show" in q_lower or "our" in q_lower or "we have" in q_lower or "my" in q_lower or "there" in q_lower or "comany" in q_lower or "company" in q_lower or "workspace" in q_lower)
+        )
+        if is_agent_query and not ("how" in q_lower and ("create" in q_lower or "build" in q_lower or "step" in q_lower)):
+            if user_context and user_context.get("is_authenticated"):
+                ws_name = user_context.get("workspace_name") or "Your Workspace"
+                agent_count = user_context.get("agent_count", 0)
+                agents = user_context.get("agents", [])
+                if agent_count == 0:
+                    return f"Your workspace **{ws_name}** currently has **0 agents** configured.\n\nYou can create your first AI agent in just a few minutes using the **Agent Studio** wizard!"
+                agent_list_str = "\n".join([
+                    f"• **{a['name']}** (Model: `{a.get('model', 'gpt-4o-mini')}`, Status: {'Active' if a.get('is_active') else 'Inactive'}) — ID: `{a.get('id', '')}`"
+                    for a in agents
+                ])
+                return f"Your workspace **{ws_name}** currently has **{agent_count} agent(s)** configured:\n\n{agent_list_str}\n\nYou can manage prompts, guardrails, and embed codes for any of these agents in the **Agent Studio** dashboard."
+            return (
+                "You are currently browsing as a guest visitor. "
+                "Please sign in or create an account to view and manage the agents configured in your workspace!"
+            )
+
+        # 2. Database connection queries
+        if ("database" in q_lower or "db" in q_lower or "connection" in q_lower) and ("how many" in q_lower or "count" in q_lower or "list" in q_lower or "what" in q_lower):
+            if user_context and user_context.get("is_authenticated"):
+                ws_name = user_context.get("workspace_name") or "Your Workspace"
+                conn_count = user_context.get("connection_count", 0)
+                conns = user_context.get("connections", [])
+                if conn_count == 0:
+                    return f"Your workspace **{ws_name}** currently has **0 database connections** configured. You can connect PostgreSQL, MySQL, SQLite, or MongoDB via the **Data Sources** tab."
+                conn_list = "\n".join([f"• **{c['name']}** (Type: `{c.get('type', 'connector_http')}`)" for c in conns])
+                return f"Your workspace **{ws_name}** has **{conn_count} connected database(s)**:\n\n{conn_list}"
+            return "Please sign in to view your connected databases."
+
+        # 3. Identity & workspace name queries (specific to name/identity)
+        is_identity_query = (
+            "who am i" in q_lower
+            or "my name" in q_lower
+            or (("what is" in q_lower or "tell me" in q_lower or "show" in q_lower) and ("workspace" in q_lower or "company" in q_lower or "org" in q_lower))
+            or (q_lower.strip() in {"workspace name", "company name", "my workspace", "my company"})
+            or (tokens.intersection(IDENTITY_KEYWORDS) and len(tokens) <= 6)
+        )
+        if is_identity_query:
             if user_context and user_context.get("is_authenticated"):
                 ws_name = user_context.get("workspace_name") or "Your Workspace"
                 return f"Your active workspace name is **{ws_name}**."
