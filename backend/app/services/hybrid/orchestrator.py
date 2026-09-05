@@ -120,9 +120,9 @@ class QueryOrchestrator:
         effective_query = await QueryContextualizer.contextualize_query(db, session.id, user_query)
 
         # 🛡️ GATE 1: Fast Intent Guardrail Evaluation (0 LLM tokens, sub-1ms)
-        is_blocked, refusal_msg = AIGuardrailCompiler.evaluate_query(effective_query, guardrail_config)
+        is_blocked, refusal_msg = AIGuardrailCompiler.evaluate_query(effective_query, guardrail_config, user_role=user_role)
         if not is_blocked and effective_query != user_query:
-            is_blocked, refusal_msg = AIGuardrailCompiler.evaluate_query(user_query, guardrail_config)
+            is_blocked, refusal_msg = AIGuardrailCompiler.evaluate_query(user_query, guardrail_config, user_role=user_role)
 
         if is_blocked:
             logger.info(f"Session {session.id} BLOCKED by guardrail: '{user_query}'")
@@ -299,6 +299,7 @@ class QueryOrchestrator:
                 sql_rows=sql_rows,
                 rag_chunks=rag_chunks,
                 user_role=user_role,
+                user_id=external_user_id,
                 guardrail_config=guardrail_config,
                 agent_name=agent_name,
                 workspace_name=workspace_name
@@ -543,11 +544,12 @@ class QueryOrchestrator:
         sql_rows: Optional[List[Dict[str, Any]]],
         rag_chunks: Optional[List[Dict[str, Any]]],
         user_role: str,
+        user_id: Optional[str] = None,
         guardrail_config: Optional[Dict[str, Any]] = None,
         agent_name: str = "Assistant",
         workspace_name: str = "Plug-N-Play AI"
     ) -> str:
-        """Synthesizes structured records and/or RAG documents into a confident, authoritative answer."""
+        """Synthesizes structured records and/or RAG documents into a confident, authoritative, role-aware answer."""
         context_parts = []
         if sql_rows is not None and len(sql_rows) > 0:
             compact_rows = sql_rows[:10]
@@ -562,6 +564,23 @@ class QueryOrchestrator:
 
         ctx = "\n\n".join(context_parts) if context_parts else "No specific records or document excerpts found matching the query."
 
+        # 🎭 Role-Aware Context & Custom Instructions
+        custom_role_hint = ""
+        if guardrail_config and isinstance(guardrail_config.get("role_instructions"), dict):
+            role_map = guardrail_config["role_instructions"]
+            custom_inst = role_map.get(user_role.lower()) or role_map.get(user_role) or ""
+            if custom_inst.strip():
+                custom_role_hint = f"\n- Custom Instructions for Role '{user_role}':\n  {custom_inst.strip()}"
+
+        role_section = f"""CURRENT USER CONTEXT & ROLE-BASED ACCESS CONTROL (RBAC):
+- User Role: **{user_role}**
+- User Identity / Auth ID: {user_id or 'anonymous'}
+- Adapt your response tone, detail level, and scope to this role:
+  * For end-users / students / customers: Use friendly, concise, and empowering language. Focus on their personal records, policies that affect them directly, and actionable next steps.
+  * For staff / faculty / support: Use professional detail. Include operational metrics, cross-references, administrative context, and procedures.
+  * For admin / management / executives: Provide full analytical depth, cross-table aggregate metrics, trends, and strategic insights.{custom_role_hint}
+- Never reveal information, documents, or data columns that exceed this user's role permission boundary."""
+
         # 🛡️ GATE 3: Anti-Jailbreak and Safety Directives Injection
         safety_hint = ""
         if guardrail_config:
@@ -574,6 +593,8 @@ class QueryOrchestrator:
                 safety_hint = "\nCOMPLIANCE & PRIVACY RESTRICTIONS:\n" + "\n".join(hints)
 
         system_prompt = f"""You are {agent_name}, the official AI assistant representing the organization / company / workspace: **{workspace_name}**.
+
+{role_section}
 
 ORGANIZATION & WORKSPACE CONTEXT:
 - Organization / Company / Workspace Name: **{workspace_name}**
@@ -633,11 +654,12 @@ Context Information:
         sql_rows: Optional[List[Dict[str, Any]]],
         rag_chunks: Optional[List[Dict[str, Any]]],
         user_role: str,
+        user_id: Optional[str] = None,
         guardrail_config: Optional[Dict[str, Any]] = None,
         agent_name: str = "Assistant",
         workspace_name: str = "Plug-N-Play AI"
     ) -> AsyncGenerator[str, None]:
-        """Streaming token generator for synthesis response with real-time preamble scrubbing."""
+        """Streaming token generator for synthesis response with real-time preamble scrubbing and role awareness."""
         context_parts = []
         if sql_rows is not None and len(sql_rows) > 0:
             compact_rows = sql_rows[:10]
@@ -652,6 +674,23 @@ Context Information:
 
         ctx = "\n\n".join(context_parts) if context_parts else "No specific records or document excerpts found matching the query."
 
+        # 🎭 Role-Aware Context & Custom Instructions
+        custom_role_hint = ""
+        if guardrail_config and isinstance(guardrail_config.get("role_instructions"), dict):
+            role_map = guardrail_config["role_instructions"]
+            custom_inst = role_map.get(user_role.lower()) or role_map.get(user_role) or ""
+            if custom_inst.strip():
+                custom_role_hint = f"\n- Custom Instructions for Role '{user_role}':\n  {custom_inst.strip()}"
+
+        role_section = f"""CURRENT USER CONTEXT & ROLE-BASED ACCESS CONTROL (RBAC):
+- User Role: **{user_role}**
+- User Identity / Auth ID: {user_id or 'anonymous'}
+- Adapt your response tone, detail level, and scope to this role:
+  * For end-users / students / customers: Use friendly, concise, and empowering language. Focus on their personal records, policies that affect them directly, and actionable next steps.
+  * For staff / faculty / support: Use professional detail. Include operational metrics, cross-references, administrative context, and procedures.
+  * For admin / management / executives: Provide full analytical depth, cross-table aggregate metrics, trends, and strategic insights.{custom_role_hint}
+- Never reveal information, documents, or data columns that exceed this user's role permission boundary."""
+
         safety_hint = ""
         if guardrail_config:
             instructions = guardrail_config.get("refusal_instructions") or []
@@ -663,6 +702,8 @@ Context Information:
                 safety_hint = "\nCOMPLIANCE & PRIVACY RESTRICTIONS:\n" + "\n".join(hints)
 
         system_prompt = f"""You are {agent_name}, the official AI assistant representing the organization / company / workspace: **{workspace_name}**.
+
+{role_section}
 
 ORGANIZATION & WORKSPACE CONTEXT:
 - Organization / Company / Workspace Name: **{workspace_name}**
@@ -810,9 +851,9 @@ Context Information:
         effective_query = await QueryContextualizer.contextualize_query(db, session.id, user_query)
 
         # Gate 1 Guardrails
-        is_blocked, refusal_msg = AIGuardrailCompiler.evaluate_query(effective_query, guardrail_config)
+        is_blocked, refusal_msg = AIGuardrailCompiler.evaluate_query(effective_query, guardrail_config, user_role=user_role)
         if not is_blocked and effective_query != user_query:
-            is_blocked, refusal_msg = AIGuardrailCompiler.evaluate_query(user_query, guardrail_config)
+            is_blocked, refusal_msg = AIGuardrailCompiler.evaluate_query(user_query, guardrail_config, user_role=user_role)
 
         if is_blocked:
             refusal = refusal_msg or "I cannot assist with this request due to platform safety restrictions."
@@ -999,6 +1040,7 @@ Context Information:
                 sql_rows=sql_rows,
                 rag_chunks=rag_chunks,
                 user_role=user_role,
+                user_id=external_user_id,
                 guardrail_config=guardrail_config,
                 agent_name=agent_name,
                 workspace_name=workspace_name

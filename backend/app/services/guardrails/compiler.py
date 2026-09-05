@@ -497,19 +497,29 @@ class AIGuardrailCompiler:
     def evaluate_query(
         cls,
         query: str,
-        guardrail_config: Optional[Dict[str, Any]]
+        guardrail_config: Optional[Dict[str, Any]],
+        user_role: Optional[str] = None
     ) -> Tuple[bool, Optional[str]]:
         """
         Gate 1: Ultra-fast sub-1ms check before invoking LLM or SQL execution.
+        Supports both universal banned intents and role-scoped banned intents.
         Returns: (is_blocked: bool, refusal_message: Optional[str])
         """
         if not query or not guardrail_config:
             return False, None
 
         q_low = query.lower().strip()
-        banned_intents = guardrail_config.get("banned_intents", [])
+        banned_intents = list(guardrail_config.get("banned_intents", []))
         restricted_cols = [str(c).lower().strip() for c in guardrail_config.get("restricted_columns", [])]
         refusal_msg = guardrail_config.get("refusal_message") or cls.DEFAULT_FALLBACK_REFUSAL
+
+        # 0. Role-scoped banned intent inclusion
+        if user_role and isinstance(guardrail_config, dict):
+            role_scoped = guardrail_config.get("role_scoped_bans", {})
+            if isinstance(role_scoped, dict):
+                role_bans = role_scoped.get(user_role.lower()) or role_scoped.get(user_role) or []
+                if isinstance(role_bans, list):
+                    banned_intents.extend(role_bans)
 
         # Universal bypass & jailbreak indicators
         universal_bypass_triggers = [
@@ -530,8 +540,12 @@ class AIGuardrailCompiler:
             # Regex word boundary check to avoid false positives on substrings
             if re.search(rf"\b{re.escape(col)}\b", q_low):
                 return True, refusal_msg
+            if "_" in col:
+                col_spaced = col.replace("_", " ")
+                if re.search(rf"\b{re.escape(col_spaced)}\b", q_low):
+                    return True, refusal_msg
 
-        # 3. Configured banned intent check
+        # 3. Configured banned intent check (Universal + Role-scoped)
         for intent in banned_intents:
             intent_clean = intent.replace("_", " ").lower().strip()
             if not intent_clean:

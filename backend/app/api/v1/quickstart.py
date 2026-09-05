@@ -32,6 +32,7 @@ class QuickstartSetupRequest(BaseModel):
     service_type: str = Field(default="hybrid", description="Service mode: 'rag', 'sql', or 'hybrid'")
     document_title: Optional[str] = Field(default=None, description="Title of document/policy")
     document_content: Optional[str] = Field(default=None, description="Text content of policy, FAQ, or documentation")
+    document_allowed_roles: Optional[List[str]] = Field(default=None, description="Optional list of user roles allowed to access this document")
     connection_mode: Optional[str] = Field(default="direct", description="Connection mode: 'direct' or 'schema_only'")
     databases: Optional[List[Dict[str, Any]]] = Field(default=None, description="List of multiple database connections, each with name, engine, database_url, selected_tables")
     database_url: Optional[str] = Field(default=None, description="Read-only database connection URL, e.g. postgresql://readonly:pass@host:5432/db")
@@ -147,6 +148,7 @@ async def setup_custom_agent(payload: QuickstartSetupRequest, db: AsyncSession =
             chunks = TextChunker.chunk_text(payload.document_content, chunk_size=600, chunk_overlap=80)
             if chunks:
                 embeddings = await EmbeddingService.get_embeddings_batch(chunks, batch_size=32)
+                doc_roles = payload.document_allowed_roles if payload.document_allowed_roles else ["student", "faculty", "admin", "user", "customer"]
                 for c, emb in zip(chunks, embeddings):
                     rag_chunk = RAGChunk(
                         tenant_id=tenant.id,
@@ -154,7 +156,7 @@ async def setup_custom_agent(payload: QuickstartSetupRequest, db: AsyncSession =
                         content=c,
                         doc_metadata={
                             "title": doc_title,
-                            "allowed_roles": ["student", "faculty", "admin", "user", "customer"]
+                            "allowed_roles": doc_roles
                         },
                         embedding=emb
                     )

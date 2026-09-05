@@ -1032,6 +1032,52 @@
       border-color: var(--text-1);
       box-shadow: 0 0 0 1px var(--text-1);
     }
+    .role-chip {
+      background: var(--surface-3);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-2);
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .role-chip:hover {
+      background: var(--surface-2);
+      color: var(--text-1);
+      border-color: var(--border-hover);
+    }
+    .role-chip.active {
+      background: rgba(99, 102, 241, 0.18);
+      border-color: var(--primary);
+      color: #c7d2fe;
+      font-weight: 600;
+      box-shadow: 0 0 8px rgba(99, 102, 241, 0.25);
+    }
+    .role-instruction-tab {
+      background: var(--surface-3);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-2);
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .role-instruction-tab:hover {
+      background: var(--surface-1);
+      color: var(--text-1);
+    }
+    .role-instruction-tab.active {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--primary);
+      color: #c7d2fe;
+      font-weight: 600;
+      box-shadow: 0 0 6px rgba(99, 102, 241, 0.2);
+    }
     .playbook-matrix-wrapper {
       background: var(--surface-2);
       border: 1px solid var(--border-subtle);
@@ -3241,6 +3287,40 @@
               <input type="text" id="wiz-refusal-message" placeholder="e.g. I am programmed to provide official policy information only and cannot assist with requests for confidential or restricted records." />
             </div>
 
+            <!-- Role-Specific Custom Directives (Adaptive RBAC) -->
+            <div style="background: var(--surface-2); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="font-size: 14px;">🎭</span>
+                  <strong style="font-size: 12px; color: var(--text-1); text-transform: uppercase; letter-spacing: 0.03em;">Role-Specific Directives (Adaptive RBAC)</strong>
+                </div>
+                <span class="s-badge s-badge-blue" style="font-size: 10px; font-weight: 600;">Adaptive Tone &amp; Scope</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-3); margin-bottom: 10px;">
+                Direct your single agent how to adapt its personality, depth, and boundary per user role:
+              </div>
+              
+              <!-- Tabs for roles -->
+              <div style="display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;" id="role-instruction-tabs-bar">
+                <button type="button" class="role-instruction-tab active" data-role="student" onclick="switchRoleInstructionTab('student')">🎓 Student</button>
+                <button type="button" class="role-instruction-tab" data-role="faculty" onclick="switchRoleInstructionTab('faculty')">👨‍🏫 Faculty</button>
+                <button type="button" class="role-instruction-tab" data-role="staff" onclick="switchRoleInstructionTab('staff')">💼 Staff</button>
+                <button type="button" class="role-instruction-tab" data-role="admin" onclick="switchRoleInstructionTab('admin')">👑 Admin</button>
+                <button type="button" class="role-instruction-tab" data-role="customer" onclick="switchRoleInstructionTab('customer')">🛍️ Customer</button>
+                <button type="button" class="role-instruction-tab" data-role="custom" onclick="switchRoleInstructionTab('custom')">+ Custom Role...</button>
+              </div>
+
+              <div id="role-instruction-custom-container" style="display: none; margin-bottom: 8px; gap: 6px; align-items: center;">
+                <input type="text" id="role-instruction-custom-name" placeholder="Enter custom role (e.g. tpo, hod, hr)" style="font-size: 11px; padding: 4px 8px; border-radius: 6px; background: var(--surface-3); border: 1px solid var(--border-subtle); color: var(--text-1); width: 200px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomRoleInstructionTab();}" />
+                <button type="button" class="btn-action-subtle" style="font-size: 10.5px; padding: 4px 8px;" onclick="addCustomRoleInstructionTab()">+ Add Tab</button>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label id="role-instruction-label" style="font-size: 11px; color: var(--text-2);">Instructions for Role: <strong>student</strong></label>
+                <textarea id="role-instruction-textarea" rows="2" style="font-size: 11.5px;" placeholder="e.g. Be encouraging, concise, and supportive. Focus strictly on their personal records and next steps." oninput="saveCurrentRoleInstruction()"></textarea>
+              </div>
+            </div>
+
             <div style="display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
               <button type="button" class="btn-action-subtle" onclick="compileGuardrails()">
                 <svg class="svg-icon" viewBox="0 0 24 24" style="width: 13px; height: 13px; color: var(--primary);"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
@@ -3305,6 +3385,29 @@
             <div class="form-group">
               <label>Document / Policy Title</label>
               <input type="text" id="wiz-doc-title" placeholder="e.g. Return &amp; Refund Policy, Company Leave Rules" />
+            </div>
+
+            <div class="form-group">
+              <label style="display: flex; align-items: center; justify-content: space-between;">
+                <span>Document Role Visibility (RBAC)</span>
+                <span class="s-badge s-badge-blue" style="font-size: 10px; font-weight: 600;">Vector Filter</span>
+              </label>
+              <div style="font-size: 11px; color: var(--text-3); margin-bottom: 6px;">
+                Specify which user roles are authorized to retrieve answers from this document:
+              </div>
+              <div id="doc-role-chips-container" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;">
+                <button type="button" class="role-chip active" data-role="all" onclick="toggleDocRoleChip('all')">🌐 All Roles (Public)</button>
+                <button type="button" class="role-chip" data-role="student" onclick="toggleDocRoleChip('student')">🎓 Student</button>
+                <button type="button" class="role-chip" data-role="faculty" onclick="toggleDocRoleChip('faculty')">👨‍🏫 Faculty</button>
+                <button type="button" class="role-chip" data-role="staff" onclick="toggleDocRoleChip('staff')">💼 Staff</button>
+                <button type="button" class="role-chip" data-role="admin" onclick="toggleDocRoleChip('admin')">👑 Admin</button>
+                <button type="button" class="role-chip" data-role="customer" onclick="toggleDocRoleChip('customer')">🛍️ Customer</button>
+                <button type="button" class="role-chip" data-role="end_user" onclick="toggleDocRoleChip('end_user')">👤 End User</button>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <input type="text" id="input-custom-doc-role" placeholder="+ Custom role (e.g. tpo, hod, hr)" style="font-size: 11px; padding: 4px 8px; border-radius: 6px; background: var(--surface-3); border: 1px solid var(--border-subtle); color: var(--text-1); width: 190px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomDocRole();}" />
+                <button type="button" class="btn-action-subtle" style="font-size: 10.5px; padding: 4px 8px;" onclick="addCustomDocRole()">+ Add Role</button>
+              </div>
             </div>
 
             <div class="form-group">
@@ -4412,6 +4515,127 @@ CREATE TABLE courses (
     let currentBannedTopics = [];
     let currentRestrictedColumns = [];
 
+    // --- Role-Aware RBAC & Custom Instructions State ---
+    let selectedDocRoles = ['all'];
+    let currentRoleInstructions = {
+      student: "Be encouraging, concise, and supportive. Focus strictly on their personal academic progress and remedial next steps.",
+      faculty: "Be analytical and professional. Include operational metrics, administrative context, and cross-references.",
+      staff: "Provide operational details, procedural guidance, and internal contact points.",
+      admin: "Provide full analytical depth, cross-table aggregate statistics, trends, and strategic insights.",
+      customer: "Be warm, sales-oriented, and proactive. Resolve issues quickly and provide direct product solutions."
+    };
+    let activeRoleInstructionKey = 'student';
+
+    function toggleDocRoleChip(role) {
+      if (role === 'all') {
+        selectedDocRoles = ['all'];
+      } else {
+        selectedDocRoles = selectedDocRoles.filter(r => r !== 'all');
+        const idx = selectedDocRoles.indexOf(role);
+        if (idx >= 0) {
+          selectedDocRoles.splice(idx, 1);
+        } else {
+          selectedDocRoles.push(role);
+        }
+        if (selectedDocRoles.length === 0) {
+          selectedDocRoles = ['all'];
+        }
+      }
+      renderDocRoleChips();
+    }
+
+    function renderDocRoleChips() {
+      const container = document.getElementById('doc-role-chips-container');
+      if (!container) return;
+      const buttons = container.querySelectorAll('.role-chip');
+      buttons.forEach(btn => {
+        const role = btn.getAttribute('data-role');
+        if (selectedDocRoles.includes(role)) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    function addCustomDocRole() {
+      const input = document.getElementById('input-custom-doc-role');
+      if (!input || !input.value.trim()) return;
+      const newRole = input.value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_');
+      input.value = '';
+      if (!newRole) return;
+
+      const container = document.getElementById('doc-role-chips-container');
+      if (container && !container.querySelector(`[data-role="${newRole}"]`)) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'role-chip';
+        btn.setAttribute('data-role', newRole);
+        btn.innerHTML = `🏷️ ${escapeHtml(newRole)}`;
+        btn.onclick = () => toggleDocRoleChip(newRole);
+        container.appendChild(btn);
+      }
+      toggleDocRoleChip(newRole);
+    }
+
+    function switchRoleInstructionTab(roleKey) {
+      if (roleKey === 'custom') {
+        const customContainer = document.getElementById('role-instruction-custom-container');
+        if (customContainer) customContainer.style.display = 'flex';
+        return;
+      }
+      activeRoleInstructionKey = roleKey;
+      const tabs = document.querySelectorAll('.role-instruction-tab');
+      tabs.forEach(t => {
+        if (t.getAttribute('data-role') === roleKey) t.classList.add('active');
+        else t.classList.remove('active');
+      });
+
+      const label = document.getElementById('role-instruction-label');
+      if (label) label.innerHTML = `Instructions for Role: <strong>${escapeHtml(roleKey)}</strong>`;
+
+      const textarea = document.getElementById('role-instruction-textarea');
+      if (textarea) textarea.value = currentRoleInstructions[roleKey] || '';
+    }
+
+    function saveCurrentRoleInstruction() {
+      const textarea = document.getElementById('role-instruction-textarea');
+      if (textarea && activeRoleInstructionKey) {
+        currentRoleInstructions[activeRoleInstructionKey] = textarea.value;
+      }
+    }
+
+    function addCustomRoleInstructionTab() {
+      const input = document.getElementById('role-instruction-custom-name');
+      if (!input || !input.value.trim()) return;
+      const newRole = input.value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_');
+      input.value = '';
+      if (!newRole) return;
+
+      if (!currentRoleInstructions[newRole]) {
+        currentRoleInstructions[newRole] = `Directives for role ${newRole}.`;
+      }
+
+      const tabsParent = document.getElementById('role-instruction-tabs-bar');
+      if (tabsParent && !tabsParent.querySelector(`[data-role="${newRole}"]`)) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'role-instruction-tab';
+        btn.setAttribute('data-role', newRole);
+        btn.innerHTML = `🏷️ ${escapeHtml(newRole)}`;
+        btn.onclick = () => switchRoleInstructionTab(newRole);
+        tabsParent.insertBefore(btn, tabsParent.lastElementChild);
+      }
+      const customContainer = document.getElementById('role-instruction-custom-container');
+      if (customContainer) customContainer.style.display = 'none';
+      switchRoleInstructionTab(newRole);
+    }
+
+    function initRoleFeatures() {
+      renderDocRoleChips();
+      switchRoleInstructionTab('student');
+    }
+
     function renderGuardrailChips() {
       const bannedContainer = document.getElementById('guardrail-banned-chips');
       const columnContainer = document.getElementById('guardrail-column-chips');
@@ -4597,6 +4821,7 @@ Key Features & Architectural Highlights:
       checkStoredAuth();
       selectIndustryPlaybook('ecommerce');
       renderDBCards();
+      initRoleFeatures();
     };
 
     // --- Theme Management ---
@@ -6250,6 +6475,9 @@ class AIChatController extends Controller {
       selectService('hybrid');
       selectAudience('end_user');
       selectIndustryPlaybook('ecommerce');
+      selectedDocRoles = ['all'];
+      renderDocRoleChips();
+      switchRoleInstructionTab('student');
 
       switchView('studio');
       updateStepper(1);
@@ -7397,7 +7625,8 @@ CREATE TABLE scholarships (
             ...data,
             banned_intents: [...new Set([...(data.banned_intents || []), ...currentBannedTopics])],
             restricted_columns: [...new Set([...(data.restricted_columns || []), ...currentRestrictedColumns])],
-            refusal_message: refusalMsg || data.refusal_message
+            refusal_message: refusalMsg || data.refusal_message,
+            role_instructions: currentRoleInstructions
           };
           if (statusEl) {
             statusEl.style.color = 'var(--accent-green)';
@@ -7445,6 +7674,9 @@ CREATE TABLE scholarships (
       btn.disabled = true;
       btn.innerText = 'Building & Indexing Agent...';
 
+      // Save current role instruction before assembling
+      saveCurrentRoleInstruction();
+
       // Assemble final guardrail config
       const finalGuardrailConfig = currentGuardrailConfig || {
         banned_intents: currentBannedTopics,
@@ -7452,6 +7684,7 @@ CREATE TABLE scholarships (
         refusal_message: customRefusal,
         raw_guidelines: guardrailGuidelines
       };
+      finalGuardrailConfig.role_instructions = currentRoleInstructions;
       if (escalationWebhookUrl) finalGuardrailConfig.escalation_webhook_url = escalationWebhookUrl;
       if (escalationEmail) finalGuardrailConfig.escalation_email = escalationEmail;
       if (supportPhone) finalGuardrailConfig.support_contact_phone = supportPhone;
@@ -7465,6 +7698,7 @@ CREATE TABLE scholarships (
         target_audience: selectedAudience,
         document_title: docTitle || null,
         document_content: docContent || null,
+        document_allowed_roles: selectedDocRoles.includes('all') ? null : selectedDocRoles,
         connection_mode: currentDBMode,
         databases: currentDBMode === 'direct' && validDatabases.length > 0 ? validDatabases : null,
         database_url: currentDBMode === 'direct' && validDatabases.length > 0 ? validDatabases[0].database_url : null,
