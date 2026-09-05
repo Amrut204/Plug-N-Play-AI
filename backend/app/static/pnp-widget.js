@@ -685,14 +685,29 @@
         });
     }
 
+    function getCurrentUserContext() {
+        const winCtx = window.PNP_USER_CONTEXT || window.PNP_USER || {};
+        const activeUserId = winCtx.userId || winCtx.id || winCtx.externalUserId || (scriptTag && scriptTag.getAttribute('data-user-id')) || userId || 'guest_user';
+        const activeUserRole = winCtx.userRole || winCtx.role || (scriptTag && scriptTag.getAttribute('data-user-role')) || userRole || 'user';
+        return { userId: String(activeUserId).trim(), userRole: String(activeUserRole).trim() };
+    }
+
+    let currentSessionUserId = null;
+    let currentSessionUserRole = null;
+
     // --- Session Persistence ---
     if (persistSession) {
         const savedSession = localStorage.getItem('pnp_session_' + agentId);
         if (savedSession) {
             try {
                 const s = JSON.parse(savedSession);
-                sessionToken = s.token;
-                activeSessionId = s.sessionId;
+                const ctx = getCurrentUserContext();
+                if (!s.userId || s.userId === ctx.userId) {
+                    sessionToken = s.token;
+                    activeSessionId = s.sessionId;
+                    currentSessionUserId = s.userId || ctx.userId;
+                    currentSessionUserRole = s.userRole || ctx.userRole;
+                }
             } catch (e) {}
         }
     }
@@ -885,23 +900,35 @@
     };
 
     async function ensureSession() {
-        if (sessionToken && activeSessionId) return sessionToken;
+        const ctx = getCurrentUserContext();
+        // If we already have an active session matching current authenticated user and role, reuse it
+        if (sessionToken && activeSessionId && currentSessionUserId === ctx.userId && currentSessionUserRole === ctx.userRole) {
+            return sessionToken;
+        }
+
         try {
             const sRes = await fetch(`${apiHost}/api/v1/chat/sessions/create`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     agent_id: agentId,
-                    external_user_id: userId,
-                    user_role: userRole
+                    external_user_id: ctx.userId,
+                    user_role: ctx.userRole
                 })
             });
             if (sRes.ok) {
                 const sData = await sRes.json();
                 sessionToken = sData.session_token;
                 activeSessionId = sData.session_id;
+                currentSessionUserId = ctx.userId;
+                currentSessionUserRole = ctx.userRole;
                 if (persistSession) {
-                    localStorage.setItem('pnp_session_' + agentId, JSON.stringify({ token: sessionToken, sessionId: activeSessionId }));
+                    localStorage.setItem('pnp_session_' + agentId, JSON.stringify({
+                        token: sessionToken,
+                        sessionId: activeSessionId,
+                        userId: ctx.userId,
+                        userRole: ctx.userRole
+                    }));
                 }
             }
         } catch (e) {
@@ -909,6 +936,27 @@
         }
         return sessionToken;
     }
+
+    // --- Developer API for Single Page Applications (React, Next.js, Vue, HTML) ---
+    window.PlugNPlayAI = window.PlugNPlayAI || {};
+    window.PlugNPlayAI.setUser = function(userCtx) {
+        if (!userCtx) return;
+        window.PNP_USER_CONTEXT = Object.assign({}, window.PNP_USER_CONTEXT || {}, userCtx);
+        sessionToken = null;
+        activeSessionId = null;
+        currentSessionUserId = null;
+        currentSessionUserRole = null;
+        try { localStorage.removeItem('pnp_session_' + agentId); } catch (e) {}
+        ensureSession();
+    };
+    window.PlugNPlayAI.resetSession = function() {
+        sessionToken = null;
+        activeSessionId = null;
+        currentSessionUserId = null;
+        currentSessionUserRole = null;
+        try { localStorage.removeItem('pnp_session_' + agentId); } catch (e) {}
+        ensureSession();
+    };
 
     async function sendFeedback(messageId, rating, btnEl) {
         try {

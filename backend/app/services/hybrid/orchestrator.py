@@ -403,10 +403,24 @@ class QueryOrchestrator:
             if not t.allowed_roles or user_role in t.allowed_roles or "admin" in t.allowed_roles
         }
 
+        # Define elevated roles that have authority to view departmental / cross-student records
+        ELEVATED_MANAGEMENT_ROLES = {
+            "admin", "tpo", "placement_officer", "faculty", "staff", 
+            "management", "manager", "superadmin", "recruiter", "director", "dean"
+        }
+        role_is_elevated = bool(user_role and user_role.lower() in ELEVATED_MANAGEMENT_ROLES)
+        is_self_query = bool(re.search(r"\b(my|mine|me|myself|i am|for me)\b", user_query.lower()))
+
         # 🛡️ GATE 2: Extract Restricted Columns from Guardrail Policy
         restricted_cols = set()
         if guardrail_config and guardrail_config.get("restricted_columns"):
-            restricted_cols = {c.lower().strip() for c in guardrail_config["restricted_columns"]}
+            raw_restricted = {c.lower().strip() for c in guardrail_config["restricted_columns"]}
+            ACADEMIC_FIELDS = {"cgpa", "gpa", "sgpa", "marks", "attendance", "grade", "grades", "score", "scores", "rank", "percentage"}
+            if role_is_elevated or is_self_query:
+                # Do not strip academic / performance columns for TPO or student's own inquiry
+                restricted_cols = {c for c in raw_restricted if c not in ACADEMIC_FIELDS}
+            else:
+                restricted_cols = raw_restricted
 
         # Decrypt the database URL for direct connections
         db_url = None
@@ -464,7 +478,7 @@ class QueryOrchestrator:
         for t in tables:
             if t.table_name in allowed_tables:
                 for c in t.columns:
-                    if c.row_identity_binding == "auth_user_id" and user_id and user_role != "admin":
+                    if c.row_identity_binding == "auth_user_id" and user_id and not role_is_elevated:
                         identity_filter = (t.table_name, c.column_name, user_id)
                         break
 

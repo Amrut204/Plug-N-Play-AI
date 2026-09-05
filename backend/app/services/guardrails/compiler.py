@@ -533,9 +533,23 @@ class AIGuardrailCompiler:
             if trig in q_low:
                 return True, refusal_msg
 
+        # Check if role is elevated management / staff (e.g. TPO, Admin, Faculty)
+        ELEVATED_ROLES = {"admin", "tpo", "placement_officer", "faculty", "staff", "management", "manager", "superadmin", "recruiter", "director", "dean"}
+        role_is_elevated = bool(user_role and user_role.lower() in ELEVATED_ROLES)
+
+        # Check if the query is a self-inquiry for personal metrics
+        is_self_query = bool(re.search(r"\b(my|mine|me|myself|i am|for me)\b", q_low))
+
+        # Academic & departmental operational metrics permissible for self-service or elevated roles
+        ACADEMIC_METRIC_FIELDS = {"cgpa", "gpa", "sgpa", "marks", "attendance", "grade", "grades", "score", "scores", "rank", "percentage"}
+
         # 2. Direct Restricted Column & PII extraction check
         for col in restricted_cols:
             if not col or len(col) < 3:
+                continue
+            col_lower = col.lower().strip()
+            # Allow academic/performance metrics for elevated roles (TPO/faculty) or self-queries
+            if col_lower in ACADEMIC_METRIC_FIELDS and (role_is_elevated or is_self_query):
                 continue
             # Regex word boundary check to avoid false positives on substrings
             if re.search(rf"\b{re.escape(col)}\b", q_low):
@@ -551,7 +565,11 @@ class AIGuardrailCompiler:
             if not intent_clean:
                 continue
             
-            # Single word intent check (e.g. 'cgpa', 'salary')
+            # Allow academic/performance metrics for elevated roles or self-queries
+            if intent_clean in ACADEMIC_METRIC_FIELDS and (role_is_elevated or is_self_query):
+                continue
+
+            # Single word intent check (e.g. 'salary', 'secret')
             if " " not in intent_clean and len(intent_clean) >= 3:
                 if re.search(rf"\b{re.escape(intent_clean)}\b", q_low):
                     return True, refusal_msg
