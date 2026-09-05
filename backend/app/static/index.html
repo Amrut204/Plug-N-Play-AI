@@ -8172,5 +8172,666 @@ CREATE TABLE scholarships (
     });
 
   </script>
+
+  <!-- ========================================================================= -->
+  <!-- Plug-N-Play AI Official Platform Copilot & Onboarding Assistant Widget    -->
+  <!-- Dedicated, Zero-SQL, 100% Tenant-Isolated Guidance Engine                 -->
+  <!-- ========================================================================= -->
+  <style>
+    /* Floating Platform Copilot Trigger Button */
+    .pnp-copilot-trigger {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9990;
+      height: 50px;
+      padding: 0 20px 0 16px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(30, 27, 75, 0.95), rgba(15, 23, 42, 0.98));
+      border: 1px solid rgba(129, 140, 248, 0.4);
+      box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.35), 0 0 20px rgba(99, 102, 241, 0.2);
+      color: #ffffff;
+      font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+      font-size: 13.5px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(12px);
+    }
+    .pnp-copilot-trigger:hover {
+      transform: translateY(-2px) scale(1.02);
+      border-color: rgba(165, 180, 252, 0.7);
+      box-shadow: 0 14px 35px -5px rgba(99, 102, 241, 0.5), 0 0 25px rgba(129, 140, 248, 0.3);
+    }
+    .pnp-copilot-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    }
+    .pnp-copilot-live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+      animation: pnpPulseDot 2s infinite ease-in-out;
+    }
+    @keyframes pnpPulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    /* Floating Copilot Modal Window */
+    .pnp-copilot-modal {
+      position: fixed;
+      bottom: 84px;
+      right: 24px;
+      width: 420px;
+      max-width: calc(100vw - 32px);
+      height: 620px;
+      max-height: calc(100vh - 110px);
+      z-index: 9995;
+      background: rgba(13, 17, 23, 0.96);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 22px;
+      box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.8), 0 0 40px rgba(99, 102, 241, 0.15);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: pnpFadeUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+    }
+    @keyframes pnpFadeUp {
+      from { opacity: 0; transform: translateY(16px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Copilot Header */
+    .pnp-copilot-header {
+      padding: 16px 18px;
+      background: linear-gradient(180deg, rgba(30, 27, 75, 0.6), rgba(15, 23, 42, 0.4));
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pnp-copilot-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .pnp-copilot-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #6366f1, #9333ea);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 15px;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+    }
+    .pnp-copilot-name {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pnp-copilot-badge {
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      background: rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      font-weight: 700;
+    }
+    .pnp-copilot-sub {
+      font-size: 11.5px;
+      color: #94a3b8;
+      margin-top: 1px;
+    }
+    .pnp-copilot-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pnp-copilot-btn-icon {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pnp-copilot-btn-icon:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+    }
+
+    /* Copilot Messages Body */
+    .pnp-copilot-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      scroll-behavior: smooth;
+    }
+    .pnp-copilot-messages::-webkit-scrollbar {
+      width: 5px;
+    }
+    .pnp-copilot-messages::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+    }
+
+    .pnp-chat-bubble {
+      max-width: 88%;
+      padding: 12px 15px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+    .pnp-chat-user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.25);
+    }
+    .pnp-chat-asst {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      color: #e2e8f0;
+      border-bottom-left-radius: 4px;
+    }
+    .pnp-chat-asst strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .pnp-chat-asst code {
+      background: rgba(0, 0, 0, 0.35);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11.5px;
+      color: #38bdf8;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* Starter Chips */
+    .pnp-copilot-chips {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .pnp-copilot-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pnp-copilot-chip:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: rgba(129, 140, 248, 0.4);
+      color: #ffffff;
+      transform: translateX(3px);
+    }
+
+    /* Copilot Input Area */
+    .pnp-copilot-input-bar {
+      padding: 12px 14px;
+      background: rgba(15, 23, 42, 0.7);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pnp-copilot-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: #f8fafc;
+      font-size: 13px;
+      outline: none;
+      transition: all 0.15s;
+    }
+    .pnp-copilot-input:focus {
+      border-color: #6366f1;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+    }
+    .pnp-copilot-mic-btn, .pnp-copilot-send-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .pnp-copilot-mic-btn {
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .pnp-copilot-mic-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+    .pnp-copilot-mic-btn.recording {
+      background: #ef4444;
+      color: #ffffff;
+      animation: pnpPulseRec 1.2s infinite;
+    }
+    @keyframes pnpPulseRec {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.75; transform: scale(1.05); }
+    }
+    .pnp-copilot-send-btn {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+    .pnp-copilot-send-btn:hover {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      transform: translateY(-1px);
+    }
+
+    /* Footer Trust Badge */
+    .pnp-copilot-footer {
+      padding: 6px 14px;
+      text-align: center;
+      font-size: 10.5px;
+      color: #64748b;
+      background: rgba(9, 9, 11, 0.8);
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+  </style>
+
+  <!-- Trigger Button -->
+  <button type="button" class="pnp-copilot-trigger" id="pnp-copilot-trigger-btn" aria-label="Open Platform Copilot">
+    <div class="pnp-copilot-icon">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+      </svg>
+    </div>
+    <span>Platform Copilot</span>
+    <span class="pnp-copilot-live-dot" title="Copilot Online"></span>
+  </button>
+
+  <!-- Copilot Modal -->
+  <div class="pnp-copilot-modal" id="pnp-copilot-modal-window">
+    <div class="pnp-copilot-header">
+      <div class="pnp-copilot-title-group">
+        <div class="pnp-copilot-avatar">✨</div>
+        <div>
+          <div class="pnp-copilot-name">
+            <span>Plug-N-Play Copilot</span>
+            <span class="pnp-copilot-badge">Official Guide</span>
+          </div>
+          <div class="pnp-copilot-sub" id="pnp-copilot-tenant-sub">Platform guide &amp; client onboarding</div>
+        </div>
+      </div>
+      <div class="pnp-copilot-header-actions">
+        <button type="button" class="pnp-copilot-btn-icon" id="pnp-copilot-clear-btn" title="Clear conversation">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+        <button type="button" class="pnp-copilot-btn-icon" id="pnp-copilot-close-btn" title="Close chat">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="pnp-copilot-messages" id="pnp-copilot-messages-list">
+      <div class="pnp-chat-bubble pnp-chat-asst" id="pnp-copilot-welcome-bubble">
+        <div>
+          👋 <strong>Welcome to Plug-N-Play AI!</strong> I am your dedicated Platform Copilot.<br><br>
+          I can guide you through creating agents, configuring multiple databases, understanding AST security, or verifying your workspace identity.
+        </div>
+        <div class="pnp-copilot-chips" id="pnp-copilot-starter-chips">
+          <button type="button" class="pnp-copilot-chip" data-query="How do I create an AI agent in the wizard?">
+            <span>✨</span> How do I create an AI agent?
+          </button>
+          <button type="button" class="pnp-copilot-chip" data-query="Why is there an option to add another Database URL?">
+            <span>🗄️</span> Why is there another Database URL option?
+          </button>
+          <button type="button" class="pnp-copilot-chip" data-query="What is the difference between Direct Connect and Zero-Knowledge Schema Mode?">
+            <span>🛡️</span> Direct Connect vs Schema Only mode?
+          </button>
+          <button type="button" class="pnp-copilot-chip" data-query="what is workspace name or comany name">
+            <span>🏢</span> What is my workspace name?
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pnp-copilot-input-bar">
+      <button type="button" class="pnp-copilot-mic-btn" id="pnp-copilot-mic" title="Voice input (speech-to-text)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+      </button>
+      <input type="text" class="pnp-copilot-input" id="pnp-copilot-input-field" placeholder="Ask anything about the platform or your workspace..." />
+      <button type="button" class="pnp-copilot-send-btn" id="pnp-copilot-send" title="Send question">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+
+    <div class="pnp-copilot-footer">
+      <span>🔒 Zero SQL Execution</span>
+      <span>•</span>
+      <span>100% Tenant-Isolated</span>
+      <span>•</span>
+      <span>Plug-N-Play AI</span>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // Platform Concierge Client Controller
+      const triggerBtn = document.getElementById('pnp-copilot-trigger-btn');
+      const modal = document.getElementById('pnp-copilot-modal-window');
+      const closeBtn = document.getElementById('pnp-copilot-close-btn');
+      const clearBtn = document.getElementById('pnp-copilot-clear-btn');
+      const msgList = document.getElementById('pnp-copilot-messages-list');
+      const inputField = document.getElementById('pnp-copilot-input-field');
+      const sendBtn = document.getElementById('pnp-copilot-send');
+      const micBtn = document.getElementById('pnp-copilot-mic');
+      const tenantSub = document.getElementById('pnp-copilot-tenant-sub');
+
+      let isOpen = false;
+      let isStreaming = false;
+      let chatHistory = [];
+
+      function getAuthToken() {
+        try {
+          const raw = localStorage.getItem('pnp_auth');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            return parsed.token || null;
+          }
+        } catch(e) {}
+        return null;
+      }
+
+      function updateTenantBadge() {
+        try {
+          const raw = localStorage.getItem('pnp_auth');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            const user = parsed.user || {};
+            const org = user.org_name || user.name || 'Your Workspace';
+            if (tenantSub) {
+              tenantSub.innerText = 'Active Workspace: ' + org;
+            }
+            return;
+          }
+        } catch(e) {}
+        if (tenantSub) {
+          tenantSub.innerText = 'Platform guide & client onboarding';
+        }
+      }
+
+      function toggleModal() {
+        isOpen = !isOpen;
+        modal.style.display = isOpen ? 'flex' : 'none';
+        if (isOpen) {
+          updateTenantBadge();
+          inputField.focus();
+        }
+      }
+
+      triggerBtn.onclick = toggleModal;
+      closeBtn.onclick = toggleModal;
+
+      clearBtn.onclick = () => {
+        chatHistory = [];
+        msgList.innerHTML = `
+          <div class="pnp-chat-bubble pnp-chat-asst">
+            <div>Chat cleared. How else can I assist you with the platform?</div>
+          </div>
+        `;
+      };
+
+      // Starter chips click handler
+      modal.addEventListener('click', (e) => {
+        const chip = e.target.closest('.pnp-copilot-chip');
+        if (chip && !isStreaming) {
+          const q = chip.getAttribute('data-query');
+          if (q) {
+            inputField.value = q;
+            sendCopilotMessage();
+          }
+        }
+      });
+
+      // Speech-to-Text
+      let recognition = null;
+      let isRecording = false;
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRec();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+          isRecording = true;
+          micBtn.classList.add('recording');
+          inputField.placeholder = 'Listening... Speak now';
+        };
+        recognition.onresult = (evt) => {
+          let trans = '';
+          for (let i = evt.resultIndex; i < evt.results.length; ++i) {
+            trans += evt.results[i][0].transcript;
+          }
+          inputField.value = trans;
+        };
+        recognition.onend = () => {
+          isRecording = false;
+          micBtn.classList.remove('recording');
+          inputField.placeholder = 'Ask anything about the platform or your workspace...';
+          if (inputField.value.trim() && !isStreaming) {
+            sendCopilotMessage();
+          }
+        };
+        recognition.onerror = () => {
+          isRecording = false;
+          micBtn.classList.remove('recording');
+          inputField.placeholder = 'Ask anything about the platform or your workspace...';
+        };
+      }
+
+      micBtn.onclick = () => {
+        if (!recognition) {
+          alert('Speech recognition is not supported in this browser.');
+          return;
+        }
+        if (isRecording) {
+          recognition.stop();
+        } else {
+          recognition.start();
+        }
+      };
+
+      // Markdown formatter
+      function formatCopilotMarkdown(text) {
+        if (!text) return '';
+        let s = text;
+        // Bold
+        s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Inline code
+        s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+        // Bullets
+        s = s.replace(/^[\*\-]\s+(.+)$/gm, '• $1');
+        // Line breaks
+        s = s.replace(/\n/g, '<br>');
+        return s;
+      }
+
+      async function sendCopilotMessage() {
+        const text = inputField.value.trim();
+        if (!text || isStreaming) return;
+        inputField.value = '';
+
+        // Hide starter chips after first user query
+        const starterContainer = document.getElementById('pnp-copilot-starter-chips');
+        if (starterContainer) starterContainer.style.display = 'none';
+
+        // Add user bubble
+        const userDiv = document.createElement('div');
+        userDiv.className = 'pnp-chat-bubble pnp-chat-user';
+        userDiv.innerText = text;
+        msgList.appendChild(userDiv);
+        msgList.scrollTop = msgList.scrollHeight;
+
+        // Add assistant placeholder bubble
+        const asstDiv = document.createElement('div');
+        asstDiv.className = 'pnp-chat-bubble pnp-chat-asst';
+        asstDiv.innerHTML = '<span style="opacity: 0.6;">Thinking...</span>';
+        msgList.appendChild(asstDiv);
+        msgList.scrollTop = msgList.scrollHeight;
+
+        isStreaming = true;
+        sendBtn.disabled = true;
+
+        const token = getAuthToken();
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) {
+          headers['Authorization'] = 'Bearer ' + token;
+        }
+
+        try {
+          const res = await fetch('/api/v1/concierge/chat', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({
+              query: text,
+              stream: true,
+              history: chatHistory
+            })
+          });
+
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            asstDiv.innerHTML = `<span style="color: #f87171;">${errData.detail || 'Could not reach Platform Copilot.'}</span>`;
+            isStreaming = false;
+            sendBtn.disabled = false;
+            return;
+          }
+
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder('utf-8');
+          let buffer = '';
+          let fullText = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const jsonStr = line.slice(6).trim();
+              if (!jsonStr || jsonStr === '[DONE]') continue;
+
+              try {
+                const data = JSON.parse(jsonStr);
+                if (data.event === 'token' && data.token) {
+                  fullText += data.token;
+                  asstDiv.innerHTML = formatCopilotMarkdown(fullText);
+                  msgList.scrollTop = msgList.scrollHeight;
+                }
+              } catch(err) {}
+            }
+          }
+
+          chatHistory.push({ role: 'user', content: text });
+          chatHistory.push({ role: 'assistant', content: fullText });
+          if (chatHistory.length > 8) chatHistory = chatHistory.slice(-8);
+
+        } catch(err) {
+          asstDiv.innerHTML = `<span style="color: #f87171;">Connection error. Please try again.</span>`;
+        } finally {
+          isStreaming = false;
+          sendBtn.disabled = false;
+          msgList.scrollTop = msgList.scrollHeight;
+        }
+      }
+
+      sendBtn.onclick = sendCopilotMessage;
+      inputField.onkeydown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendCopilotMessage();
+        }
+      };
+
+      // Periodic check of auth state
+      window.addEventListener('storage', updateTenantBadge);
+      updateTenantBadge();
+    })();
+  </script>
 </body>
 </html>

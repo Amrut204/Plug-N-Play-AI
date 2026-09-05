@@ -7,7 +7,7 @@ import os
 
 from app.core.config import settings
 from app.core.database import init_db
-from app.api.v1 import auth, agents, connections, rag, chat, analytics, quickstart, guardrails, billing, escalations, actions
+from app.api.v1 import auth, agents, connections, rag, chat, analytics, quickstart, guardrails, billing, escalations, actions, concierge
 
 
 @asynccontextmanager
@@ -51,6 +51,7 @@ app.include_router(guardrails.router, prefix=settings.API_V1_STR)
 app.include_router(billing.router, prefix=settings.API_V1_STR)
 app.include_router(escalations.router, prefix=settings.API_V1_STR)
 app.include_router(actions.router, prefix=settings.API_V1_STR)
+app.include_router(concierge.router, prefix=settings.API_V1_STR)
 
 
 @app.get("/", response_class=HTMLResponse)
