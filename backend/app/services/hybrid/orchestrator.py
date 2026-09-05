@@ -292,6 +292,7 @@ class QueryOrchestrator:
                 await asyncio.sleep(2.0)
             t0 = time.time()
             agent_name = agent.name if agent else "Plug-N-Play AI"
+            workspace_name = tenant.name if (tenant and tenant.name) else "Plug-N-Play AI"
             answer = await cls._synthesize_response(
                 user_query=effective_query,
                 intent=intent,
@@ -299,7 +300,8 @@ class QueryOrchestrator:
                 rag_chunks=rag_chunks,
                 user_role=user_role,
                 guardrail_config=guardrail_config,
-                agent_name=agent_name
+                agent_name=agent_name,
+                workspace_name=workspace_name
             )
             llm_time_ms = int((time.time() - t0) * 1000)
 
@@ -542,7 +544,8 @@ class QueryOrchestrator:
         rag_chunks: Optional[List[Dict[str, Any]]],
         user_role: str,
         guardrail_config: Optional[Dict[str, Any]] = None,
-        agent_name: str = "Assistant"
+        agent_name: str = "Assistant",
+        workspace_name: str = "Plug-N-Play AI"
     ) -> str:
         """Synthesizes structured records and/or RAG documents into a confident, authoritative answer."""
         context_parts = []
@@ -570,7 +573,16 @@ class QueryOrchestrator:
             if hints:
                 safety_hint = "\nCOMPLIANCE & PRIVACY RESTRICTIONS:\n" + "\n".join(hints)
 
-        system_prompt = f"""You are the official AI assistant representing {agent_name}.
+        system_prompt = f"""You are {agent_name}, the official AI assistant representing the organization / company / workspace: **{workspace_name}**.
+
+ORGANIZATION & WORKSPACE CONTEXT:
+- Organization / Company / Workspace Name: **{workspace_name}**
+- Assistant / Agent Name: **{agent_name}**
+- If the user asks for the company name, workspace name, organization name, or who you represent:
+  * State directly that your organization / workspace / company name is **{workspace_name}**.
+  * State that you are {agent_name}, representing {workspace_name}.
+  * If {workspace_name} is "Plug-N-Play AI" (or contains "Plug-N-Play"), explain that you represent the Plug-N-Play AI enterprise data and agent orchestration platform.
+  * Inform the user that they can view or edit their profile and workspace information in the Account Center by clicking their profile avatar in the navigation bar.
 
 CORE RESPONSE PRINCIPLES:
 1. CONFIDENT & DIRECT (ZERO HEDGING):
@@ -622,7 +634,8 @@ Context Information:
         rag_chunks: Optional[List[Dict[str, Any]]],
         user_role: str,
         guardrail_config: Optional[Dict[str, Any]] = None,
-        agent_name: str = "Assistant"
+        agent_name: str = "Assistant",
+        workspace_name: str = "Plug-N-Play AI"
     ) -> AsyncGenerator[str, None]:
         """Streaming token generator for synthesis response with real-time preamble scrubbing."""
         context_parts = []
@@ -649,7 +662,16 @@ Context Information:
             if hints:
                 safety_hint = "\nCOMPLIANCE & PRIVACY RESTRICTIONS:\n" + "\n".join(hints)
 
-        system_prompt = f"""You are the official AI assistant representing {agent_name}.
+        system_prompt = f"""You are {agent_name}, the official AI assistant representing the organization / company / workspace: **{workspace_name}**.
+
+ORGANIZATION & WORKSPACE CONTEXT:
+- Organization / Company / Workspace Name: **{workspace_name}**
+- Assistant / Agent Name: **{agent_name}**
+- If the user asks for the company name, workspace name, organization name, or who you represent:
+  * State directly that your organization / workspace / company name is **{workspace_name}**.
+  * State that you are {agent_name}, representing {workspace_name}.
+  * If {workspace_name} is "Plug-N-Play AI" (or contains "Plug-N-Play"), explain that you represent the Plug-N-Play AI enterprise data and agent orchestration platform.
+  * Inform the user that they can view or edit their profile and workspace information in the Account Center by clicking their profile avatar in the navigation bar.
 
 CORE RESPONSE PRINCIPLES:
 1. CONFIDENT & DIRECT (ZERO HEDGING):
@@ -970,6 +992,7 @@ Context Information:
         t0 = time.time()
         try:
             agent_name = agent.name if agent else "Plug-N-Play AI"
+            workspace_name = tenant.name if (tenant and tenant.name) else "Plug-N-Play AI"
             async for token in cls._stream_synthesize_response(
                 user_query=effective_query,
                 intent=intent,
@@ -977,7 +1000,8 @@ Context Information:
                 rag_chunks=rag_chunks,
                 user_role=user_role,
                 guardrail_config=guardrail_config,
-                agent_name=agent_name
+                agent_name=agent_name,
+                workspace_name=workspace_name
             ):
                 full_answer_parts.append(token)
                 yield f"data: {json.dumps({'event': 'token', 'token': token})}\n\n"

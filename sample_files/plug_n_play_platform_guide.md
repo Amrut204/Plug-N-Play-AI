@@ -419,3 +419,9 @@ You can query agents directly from backend services:
 
 ### Q: Is the platform free for client testing and integration?
 **A:** Yes. Every workspace has access to the Client Testing Free Tier, which includes full Agent Studio capabilities, RAG document ingestion, direct database querying, and unlimited widget embeds.
+
+---
+
+### Q: What is our workspace name or company name?
+**A:** Our platform and company name is **Plug-N-Play AI** ([https://plug-n-play-rag.onrender.com/](https://plug-n-play-rag.onrender.com/)). If you are interacting with a custom agent created for your business, your workspace name is the project or company name specified during setup in the Agent Studio. You can view or update your company and workspace details at any time in the Account Center by clicking your profile avatar in the navigation bar.
+
