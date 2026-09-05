@@ -242,6 +242,37 @@ class QueryOrchestrator:
                             "cached": False
                         }
 
+        # 0.5 Check for personal data lookup from unauthenticated guest session
+        is_self_query = bool(re.search(r"\b(my|mine|me|myself|i am|for me)\b", effective_query.lower()))
+        is_personal_metric = bool(re.search(r"\b(cgpa|gpa|sgpa|attendance|grade|grades|marks|score|scores|backlog|backlogs|fees?|fee_invoices?|admit card|hall ticket)\b", effective_query.lower()))
+        is_guest = not external_user_id or str(external_user_id).lower().strip() in ("guest", "anonymous", "guest_user", "null", "none", "")
+
+        if is_self_query and is_personal_metric and is_guest:
+            guest_answer = (
+                "You are currently chatting in guest mode. To view your personal academic records "
+                "(such as your CGPA, attendance, or grades), please log in with your student account "
+                "so I can securely verify your identity and retrieve your verified records."
+            )
+            query_log = QueryLog(
+                tenant_id=tenant_id,
+                session_id=session.id,
+                user_query=user_query,
+                route_chosen="GUEST_AUTH_REQUIRED",
+                total_tokens=len(user_query.split()) + len(guest_answer.split()),
+                error_message=None
+            )
+            db.add(query_log)
+            await db.commit()
+            return {
+                "answer": guest_answer,
+                "route_chosen": "GUEST_AUTH_REQUIRED",
+                "structured_data": None,
+                "rag_sources": [],
+                "generated_sql": None,
+                "session_id": session.id,
+                "cached": False
+            }
+
         # 1. Route Intent with Agent Service Type Awareness
         if agent and agent.description and agent.description.upper().startswith("RAG"):
             intent, reason = "RAG", "Agent configured strictly for Document RAG"
@@ -255,6 +286,7 @@ class QueryOrchestrator:
         rag_chunks: Optional[List[Dict[str, Any]]] = None
         generated_sql: Optional[str] = None
         error_msg: Optional[str] = None
+        sql_pipeline_error: Optional[str] = None
         
         sql_time_ms = 0
         rag_time_ms = 0
@@ -271,9 +303,10 @@ class QueryOrchestrator:
                     sql_time_ms = int((time.time() - t0) * 1000)
                 except Exception as e:
                     logger.info(f"SQL execution bypassed or no queryable tables ({e}), checking RAG knowledge base")
+                    sql_pipeline_error = str(e)
                     sql_rows = None
 
-            # Always check RAG if intent is RAG/HYBRID or if SQL returned no records
+            # Check RAG if intent is RAG/HYBRID or if SQL returned no records
             if intent in {"RAG", "HYBRID"} or not sql_rows:
                 t0 = time.time()
                 try:
@@ -281,7 +314,7 @@ class QueryOrchestrator:
                         db, tenant_id, effective_query, user_role=user_role, top_k=4
                     )
                     rag_time_ms = int((time.time() - t0) * 1000)
-                    if rag_chunks and not sql_rows and intent == "SQL":
+                    if rag_chunks and not sql_rows and intent == "SQL" and not (is_self_query and is_personal_metric):
                         intent = "RAG"
                 except Exception as e:
                     logger.error(f"RAG retrieval error: {e}")
@@ -302,7 +335,8 @@ class QueryOrchestrator:
                 user_id=external_user_id,
                 guardrail_config=guardrail_config,
                 agent_name=agent_name,
-                workspace_name=workspace_name
+                workspace_name=workspace_name,
+                sql_error=sql_pipeline_error
             )
             llm_time_ms = int((time.time() - t0) * 1000)
 
@@ -561,7 +595,8 @@ class QueryOrchestrator:
         user_id: Optional[str] = None,
         guardrail_config: Optional[Dict[str, Any]] = None,
         agent_name: str = "Assistant",
-        workspace_name: str = "Plug-N-Play AI"
+        workspace_name: str = "Plug-N-Play AI",
+        sql_error: Optional[str] = None
     ) -> str:
         """Synthesizes structured records and/or RAG documents into a confident, authoritative, role-aware answer."""
         context_parts = []
@@ -571,6 +606,14 @@ class QueryOrchestrator:
             if len(rows_str) > 1500:
                 rows_str = rows_str[:1500] + "..."
             context_parts.append(f"Operational Records:\n{rows_str}")
+        elif sql_error:
+            context_parts.append(
+                f"[Database Query Notice]:\n"
+                f"Direct database lookup could not complete ({sql_error}). "
+                f"When responding to database queries (such as personal CGPA, marks, or attendance), "
+                f"inform the user that the live database connection is currently unreachable or no tables are synchronized in Agent Studio, "
+                f"rather than stating that personal records are restricted."
+            )
 
         if rag_chunks and len(rag_chunks) > 0:
             rag_text = "\n\n".join([f"[{c.get('metadata', {}).get('title', 'Document')}]:\n{c['content'][:1200]}" for c in rag_chunks[:4]])
@@ -671,7 +714,8 @@ Context Information:
         user_id: Optional[str] = None,
         guardrail_config: Optional[Dict[str, Any]] = None,
         agent_name: str = "Assistant",
-        workspace_name: str = "Plug-N-Play AI"
+        workspace_name: str = "Plug-N-Play AI",
+        sql_error: Optional[str] = None
     ) -> AsyncGenerator[str, None]:
         """Streaming token generator for synthesis response with real-time preamble scrubbing and role awareness."""
         context_parts = []
@@ -681,6 +725,14 @@ Context Information:
             if len(rows_str) > 1500:
                 rows_str = rows_str[:1500] + "..."
             context_parts.append(f"Operational Records:\n{rows_str}")
+        elif sql_error:
+            context_parts.append(
+                f"[Database Query Notice]:\n"
+                f"Direct database lookup could not complete ({sql_error}). "
+                f"When responding to database queries (such as personal CGPA, marks, or attendance), "
+                f"inform the user that the live database connection is currently unreachable or no tables are synchronized in Agent Studio, "
+                f"rather than stating that personal records are restricted."
+            )
 
         if rag_chunks and len(rag_chunks) > 0:
             rag_text = "\n\n".join([f"[{c.get('metadata', {}).get('title', 'Document')}]:\n{c['content'][:1200]}" for c in rag_chunks[:4]])
@@ -1000,6 +1052,45 @@ Context Information:
                         yield f"data: {json.dumps({'event': 'done', 'message_id': asst_msg.id, 'total_ms': int((time.time() - start_time) * 1000)})}\n\n"
                         return
 
+        # 0.5 Check for personal data lookup from unauthenticated guest session
+        is_self_query = bool(re.search(r"\b(my|mine|me|myself|i am|for me)\b", effective_query.lower()))
+        is_personal_metric = bool(re.search(r"\b(cgpa|gpa|sgpa|attendance|grade|grades|marks|score|scores|backlog|backlogs|fees?|fee_invoices?|admit card|hall ticket)\b", effective_query.lower()))
+        is_guest = not external_user_id or str(external_user_id).lower().strip() in ("guest", "anonymous", "guest_user", "null", "none", "")
+
+        if is_self_query and is_personal_metric and is_guest:
+            guest_answer = (
+                "You are currently chatting in guest mode. To view your personal academic records "
+                "(such as your CGPA, attendance, or grades), please log in with your student account "
+                "so I can securely verify your identity and retrieve your verified records."
+            )
+            yield f"data: {json.dumps({'event': 'meta', 'route': 'GUEST_AUTH_REQUIRED', 'cached': False})}\n\n"
+            words = guest_answer.split(" ")
+            for i, w in enumerate(words):
+                token = w + (" " if i < len(words) - 1 else "")
+                yield f"data: {json.dumps({'event': 'token', 'token': token})}\n\n"
+                await asyncio.sleep(0.01)
+
+            asst_msg = ChatMessage(
+                session_id=session.id,
+                role="assistant",
+                content=guest_answer,
+                metadata_json={"route_chosen": "GUEST_AUTH_REQUIRED"}
+            )
+            db.add(asst_msg)
+            query_log = QueryLog(
+                tenant_id=tenant_id,
+                session_id=session.id,
+                user_query=user_query,
+                route_chosen="GUEST_AUTH_REQUIRED",
+                total_tokens=len(user_query.split()) + len(guest_answer.split()),
+                error_message=None
+            )
+            db.add(query_log)
+            await db.commit()
+            await db.refresh(asst_msg)
+            yield f"data: {json.dumps({'event': 'done', 'message_id': asst_msg.id, 'total_ms': int((time.time() - start_time) * 1000)})}\n\n"
+            return
+
         # Intent Routing with Agent Service Type Awareness
         if agent and agent.description and agent.description.upper().startswith("RAG"):
             intent, route_reason = "RAG", "Agent configured strictly for Document RAG"
@@ -1010,6 +1101,7 @@ Context Information:
         sql_rows = None
         rag_chunks = None
         generated_sql = None
+        sql_pipeline_error = None
         sql_time_ms = 0
         rag_time_ms = 0
         llm_time_ms = 0
@@ -1023,10 +1115,11 @@ Context Information:
                 )
                 sql_time_ms = int((time.time() - t0) * 1000)
             except Exception as e:
-                logger.info(f"SQL execution error or no DB ({e}), falling back to RAG")
+                logger.info(f"SQL execution error or no DB ({e}), checking RAG knowledge base")
+                sql_pipeline_error = str(e)
                 sql_rows = None
 
-        # Always retrieve RAG if intent is RAG/HYBRID or if SQL returned empty/no records
+        # Check RAG if intent is RAG/HYBRID or if SQL returned empty/no records
         if intent in {"RAG", "HYBRID"} or not sql_rows:
             try:
                 t0 = time.time()
@@ -1034,7 +1127,7 @@ Context Information:
                     db, tenant_id, effective_query, user_role=user_role, top_k=4
                 )
                 rag_time_ms = int((time.time() - t0) * 1000)
-                if rag_chunks and not sql_rows and intent == "SQL":
+                if rag_chunks and not sql_rows and intent == "SQL" and not (is_self_query and is_personal_metric):
                     intent = "RAG"
             except Exception as e:
                 logger.error(f"RAG retrieval error: {e}")
@@ -1057,7 +1150,8 @@ Context Information:
                 user_id=external_user_id,
                 guardrail_config=guardrail_config,
                 agent_name=agent_name,
-                workspace_name=workspace_name
+                workspace_name=workspace_name,
+                sql_error=sql_pipeline_error
             ):
                 full_answer_parts.append(token)
                 yield f"data: {json.dumps({'event': 'token', 'token': token})}\n\n"

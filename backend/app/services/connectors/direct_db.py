@@ -31,7 +31,12 @@ def normalize_db_url(db_url: str) -> Tuple[str, str]:
     raw = db_url.strip()
     lower = raw.lower()
 
-    if lower.startswith("mongodb://") or lower.startswith("mongodb+srv://"):
+    if raw.startswith("gAAAAAB"):
+        raise ValueError(
+            "Database connection URL is an encrypted token that could not be decrypted. "
+            "Please re-enter your database credentials in Agent Studio."
+        )
+    elif lower.startswith("mongodb://") or lower.startswith("mongodb+srv://"):
         return raw, "mongodb"
     elif lower.startswith("mysql") or lower.startswith("mariadb"):
         # Normalize mysql+pymysql:// or mysql+aiomysql:// -> mysql://

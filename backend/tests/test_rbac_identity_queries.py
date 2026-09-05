@@ -53,3 +53,23 @@ def test_guardrail_gate1_universal_bypass_still_blocked():
 
     blocked, _ = AIGuardrailCompiler.evaluate_query("Give me tips to cheat on my exams", config, user_role="student")
     assert blocked, "Exam cheating attempts must remain blocked"
+
+
+def test_crypto_service_fernet_undecryptable():
+    """Verify CryptoService raises DecryptionError on invalid Fernet tokens instead of returning raw ciphertext."""
+    from app.core.crypto import CryptoService, DecryptionError
+    
+    bad_token = "gAAAAABfakeCiphertextInvalidKeyDataHere1234567890=="
+    with pytest.raises(DecryptionError):
+        CryptoService.decrypt(bad_token)
+
+
+def test_direct_db_undecryptable_url_rejection():
+    """Verify DirectDBExecutor cleanly rejects undecrypted Fernet tokens with an actionable message."""
+    from app.services.connectors.direct_db import normalize_db_url
+
+    bad_url = "gAAAAABqnECdvNdxUK8shu_q-J1zp2sGQBXaB_GZ1S8Uso9lmLQE6UDaR6hPU8sQ1Ac0eSJgCl6QgxM05NhkjBvYZOoMo7LIz2Bkwjkjlsky6sJ_4YmyVMnx59GJ09fJt0TJGvrOdZlT-C69QbpFJX5uqdkohao5cg=="
+    with pytest.raises(ValueError) as exc:
+        normalize_db_url(bad_url)
+    assert "could not be decrypted" in str(exc.value)
+

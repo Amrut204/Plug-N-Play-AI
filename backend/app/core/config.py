@@ -90,9 +90,25 @@ settings = Settings()
 
 # Production Security Safeguard
 if settings.ENVIRONMENT == "production" and settings.SECRET_KEY == "enterprise_super_secret_pnp_jwt_key_32_bytes_long_change_in_prod":
-    settings.SECRET_KEY = secrets.token_hex(32)
-    logger.warning(
-        "⚠️ [SECURITY WARNING] Default insecure SECRET_KEY detected in production! "
-        "Generated an ephemeral 256-bit cryptographically secure key for this session. "
-        "Please configure SECRET_KEY in your Render environment variables."
-    )
+    secret_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".session_secret")
+    if os.path.exists(secret_file):
+        try:
+            with open(secret_file, "r", encoding="utf-8") as f:
+                saved_key = f.read().strip()
+                if len(saved_key) >= 32:
+                    settings.SECRET_KEY = saved_key
+        except Exception:
+            pass
+    if settings.SECRET_KEY == "enterprise_super_secret_pnp_jwt_key_32_bytes_long_change_in_prod":
+        new_key = secrets.token_hex(32)
+        settings.SECRET_KEY = new_key
+        try:
+            with open(secret_file, "w", encoding="utf-8") as f:
+                f.write(new_key)
+        except Exception:
+            pass
+        logger.warning(
+            "⚠️ [SECURITY WARNING] Default insecure SECRET_KEY detected in production! "
+            "Generated a persistent 256-bit cryptographically secure key for this deployment. "
+            "Please configure SECRET_KEY in your Render environment variables to manage encryption keys explicitly."
+        )

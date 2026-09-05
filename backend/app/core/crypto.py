@@ -5,12 +5,24 @@ from cryptography.fernet import Fernet
 from app.core.config import settings
 
 
+class DecryptionError(ValueError):
+    """Raised when an encrypted secret fails authentication or decryption."""
+    pass
+
+
+DEFAULT_KEY = "enterprise_super_secret_pnp_jwt_key_32_bytes_long_change_in_prod"
+
+
+def _derive_fernet_key(secret: str) -> bytes:
+    digest = hashlib.sha256(secret.encode()).digest()
+    return base64.urlsafe_b64encode(digest)
+
+
 def _get_fernet_key() -> bytes:
     """
     Derives a 32-byte urlsafe base64-encoded key from settings.SECRET_KEY.
     """
-    digest = hashlib.sha256(settings.SECRET_KEY.encode()).digest()
-    return base64.urlsafe_b64encode(digest)
+    return _derive_fernet_key(settings.SECRET_KEY)
 
 
 class CryptoService:
@@ -40,13 +52,34 @@ class CryptoService:
     def decrypt(cls, ciphertext: str) -> str:
         """
         Decrypts ciphertext string back into plaintext.
-        Falls back to ciphertext if not encrypted (legacy migration support).
+        Attempts primary key first, then known fallback keys.
+        Raises DecryptionError if Fernet ciphertext fails all keys.
         """
         if not ciphertext:
             return ""
+        
+        # Fast path: plaintext that is not Fernet-encrypted
+        if not ciphertext.startswith("gAAAAAB"):
+            return ciphertext
+
+        # 1. Try primary key
         cipher = cls._get_instance()
         try:
             return cipher.decrypt(ciphertext.encode("utf-8")).decode("utf-8")
         except Exception:
-            # Return raw string if already unencrypted
-            return ciphertext
+            pass
+
+        # 2. Try default fallback key if different
+        if settings.SECRET_KEY != DEFAULT_KEY:
+            try:
+                fallback_cipher = Fernet(_derive_fernet_key(DEFAULT_KEY))
+                return fallback_cipher.decrypt(ciphertext.encode("utf-8")).decode("utf-8")
+            except Exception:
+                pass
+
+        # If it clearly is a Fernet ciphertext that failed all available keys, raise DecryptionError
+        raise DecryptionError(
+            "Encrypted credentials cannot be decrypted with the current or fallback SECRET_KEY. "
+            "The database connection must be re-entered in the Agent Studio."
+        )
+
