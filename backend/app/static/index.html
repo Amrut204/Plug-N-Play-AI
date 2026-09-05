@@ -6034,7 +6034,7 @@ import React, { useEffect } from 'react';
 
 interface AIWidgetProps {
   userId?: string;
-  userRole?: 'user' | 'student' | 'staff' | 'admin' | string;
+  userRole?: 'student' | 'tpo' | 'faculty' | 'staff' | 'admin' | 'user' | string;
 }
 
 export const AIWidget: React.FC<AIWidgetProps> = ({
@@ -6042,8 +6042,15 @@ export const AIWidget: React.FC<AIWidgetProps> = ({
   userRole = 'user'
 }) => {
   useEffect(() => {
-    // Guard against duplicate script injection in React 18 / StrictMode
-    if (document.getElementById('pnp-widget-script')) return;
+    // If widget script already exists, dynamically update active user & role (e.g. after login)
+    if (document.getElementById('pnp-widget-script')) {
+      if ((window as any).PlugNPlayAI?.setUser) {
+        (window as any).PlugNPlayAI.setUser({ userId, userRole });
+      } else {
+        (window as any).PNP_USER_CONTEXT = { userId, userRole };
+      }
+      return;
+    }
 
     const script = document.createElement('script');
     script.id = 'pnp-widget-script';
@@ -6074,12 +6081,17 @@ ${setAttrsScript}
 //
 // 2. Render <AIWidget /> anywhere in your JSX tree:
 //    export function App() {
+//      const { user } = useAuth(); // your logged-in user state
+//
 //      return (
 //        <div className="app-container">
 //          <YourAppContent />
 //
-//          {/* Plug-N-Play AI Floating Widget */}
-//          <AIWidget userId="user_123" userRole="user" />
+//          {/* Plug-N-Play AI Widget with Dynamic Student / TPO / Management RBAC */}
+//          <AIWidget 
+//            userId={user ? (user.studentId || user.id) : 'guest'} 
+//            userRole={user ? (user.role || 'student') : 'user'} // 'student' | 'tpo' | 'admin' | 'faculty'
+//          />
 //        </div>
 //      );
 //    }`,
@@ -6092,8 +6104,15 @@ import { useEffect } from 'react';
 
 export default function AIWidget({ userId = 'guest', userRole = 'user' }) {
   useEffect(() => {
-    // Guard against duplicate script injection in React 18 / StrictMode
-    if (document.getElementById('pnp-widget-script')) return;
+    // If widget script already exists, dynamically update active user & role (e.g. after login)
+    if (document.getElementById('pnp-widget-script')) {
+      if (window.PlugNPlayAI?.setUser) {
+        window.PlugNPlayAI.setUser({ userId, userRole });
+      } else {
+        window.PNP_USER_CONTEXT = { userId, userRole };
+      }
+      return;
+    }
 
     const script = document.createElement('script');
     script.id = 'pnp-widget-script';
@@ -6124,12 +6143,17 @@ ${setAttrsScript}
 //
 // 2. Render <AIWidget /> anywhere in your JSX tree:
 //    export default function App() {
+//      const { user } = useAuth(); // your logged-in user state
+//
 //      return (
 //        <div className="app-container">
 //          <YourAppContent />
 //
-//          {/* Plug-N-Play AI Floating Widget */}
-//          <AIWidget userId="user_123" userRole="user" />
+//          {/* Plug-N-Play AI Widget with Dynamic Student / TPO / Management RBAC */}
+//          <AIWidget 
+//            userId={user ? (user.studentId || user.id) : 'guest'} 
+//            userRole={user ? (user.role || 'student') : 'user'} // 'student' | 'tpo' | 'admin' | 'faculty'
+//          />
 //        </div>
 //      );
 //    }`,
