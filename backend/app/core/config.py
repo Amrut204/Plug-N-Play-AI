@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     
     # Smart default: If any Groq key is present and OpenAI is not, default to Groq
     DEFAULT_MODEL_PROVIDER: str = "groq" if (os.getenv("GROQ_API_KEY") or os.getenv("GROQ_API_KEY_1") or os.getenv("GROQ_API_KEY_2")) and not os.getenv("OPENAI_API_KEY") else "openai"
-    DEFAULT_MODEL_NAME: str = "qwen/qwen3.8-27b" if (os.getenv("GROQ_API_KEY") or os.getenv("GROQ_API_KEY_1") or os.getenv("GROQ_API_KEY_2")) and not os.getenv("OPENAI_API_KEY") else "gpt-4o-mini"
+    DEFAULT_MODEL_NAME: str = "openai/gpt-oss-20b" if (os.getenv("GROQ_API_KEY") or os.getenv("GROQ_API_KEY_1") or os.getenv("GROQ_API_KEY_2")) and not os.getenv("OPENAI_API_KEY") else "gpt-4o-mini"
     
     # Email / SMTP Configuration
     SMTP_HOST: Optional[str] = os.getenv("SMTP_HOST", "smtp.gmail.com")

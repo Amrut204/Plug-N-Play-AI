@@ -162,65 +162,67 @@ class LLMGateway:
     ) -> str:
         import asyncio
         url = "https://api.groq.com/openai/v1/chat/completions"
-        groq_model = model if ("qwen" in model.lower() or "llama" in model.lower() or "gpt-oss" in model.lower()) else settings.DEFAULT_MODEL_NAME
+        primary_model = model if ("qwen" in model.lower() or "llama" in model.lower() or "gpt-oss" in model.lower()) else settings.DEFAULT_MODEL_NAME
+        candidate_models = [primary_model] + [m for m in ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"] if m != primary_model]
         keys = cls.get_active_groq_keys()
         if not keys:
             raise RuntimeError("No Groq API keys configured in .env (GROQ_API_KEY, GROQ_API_KEY_1, GROQ_API_KEY_2).")
 
-        current_max_tokens = max_tokens
-        max_key_attempts = len(keys)
+        current_max_tokens = min(max_tokens, 350)
         last_error = None
 
         async with httpx.AsyncClient(timeout=35.0) as client:
-            for key_attempt in range(max_key_attempts):
-                active_key = cls.get_current_groq_key()
-                headers = {
-                    "Authorization": f"Bearer {active_key}",
-                    "Content-Type": "application/json"
-                }
-
-                for attempt in range(2):
-                    trimmed_messages = cls._trim_messages_for_budget(messages, current_max_tokens, budget=7500)
-                    payload = {
-                        "model": groq_model,
-                        "messages": trimmed_messages,
-                        "temperature": temperature,
-                        "max_tokens": current_max_tokens
+            for cand_model in candidate_models:
+                max_key_attempts = len(keys)
+                for key_attempt in range(max_key_attempts):
+                    active_key = cls.get_current_groq_key()
+                    headers = {
+                        "Authorization": f"Bearer {active_key}",
+                        "Content-Type": "application/json"
                     }
-                    try:
-                        resp = await client.post(url, headers=headers, json=payload)
-                    except Exception as e:
-                        last_error = e
-                        logger.warning(f"Groq connection exception on key #{cls._current_groq_key_idx + 1}: {e}")
-                        cls.rotate_groq_key(reason="connection_exception")
-                        break
 
-                    if resp.status_code == 413 and attempt < 1:
-                        current_max_tokens = max(30, current_max_tokens // 2)
-                        logger.warning(f"Groq 413: reducing max_tokens to {current_max_tokens}")
-                        await asyncio.sleep(0.5)
-                        continue
+                    for attempt in range(2):
+                        trimmed_messages = cls._trim_messages_for_budget(messages, current_max_tokens, budget=7500)
+                        payload = {
+                            "model": cand_model,
+                            "messages": trimmed_messages,
+                            "temperature": temperature,
+                            "max_tokens": current_max_tokens
+                        }
+                        try:
+                            resp = await client.post(url, headers=headers, json=payload)
+                        except Exception as e:
+                            last_error = e
+                            logger.warning(f"Groq connection exception on key #{cls._current_groq_key_idx + 1}: {e}")
+                            cls.rotate_groq_key(reason="connection_exception")
+                            break
 
-                    # If rate limited (429) or quota reached / auth failure (401/403), rotate to next key
-                    if resp.status_code in (429, 401, 403):
-                        logger.warning(
-                            f"Groq HTTP {resp.status_code} limit reached on key #{cls._current_groq_key_idx + 1}. "
-                            f"Switching to failover Groq key..."
-                        )
-                        last_error = RuntimeError(f"Groq error ({resp.status_code}): {resp.text}")
-                        cls.rotate_groq_key(reason=f"HTTP_{resp.status_code}")
-                        break
+                        if resp.status_code == 413 and attempt < 1:
+                            current_max_tokens = max(30, current_max_tokens // 2)
+                            logger.warning(f"Groq 413: reducing max_tokens to {current_max_tokens}")
+                            await asyncio.sleep(0.5)
+                            continue
 
-                    if resp.status_code != 200:
-                        last_error = RuntimeError(f"Groq error ({resp.status_code}): {resp.text}")
-                        break
+                        # If rate limited (429) or quota reached / auth failure (401/403), rotate to next key
+                        if resp.status_code in (429, 401, 403):
+                            logger.warning(
+                                f"Groq HTTP {resp.status_code} limit on model {cand_model} key #{cls._current_groq_key_idx + 1}. "
+                                f"Switching to failover Groq key/model..."
+                            )
+                            last_error = RuntimeError(f"Groq error ({resp.status_code}): {resp.text}")
+                            cls.rotate_groq_key(reason=f"HTTP_{resp.status_code}")
+                            break
 
-                    data = resp.json()
-                    return data["choices"][0]["message"]["content"]
+                        if resp.status_code != 200:
+                            last_error = RuntimeError(f"Groq error ({resp.status_code}): {resp.text}")
+                            break
+
+                        data = resp.json()
+                        return data["choices"][0]["message"]["content"]
 
         if last_error:
             raise last_error
-        raise RuntimeError("Groq completion failed across all configured API keys.")
+        raise RuntimeError("Groq completion failed across all configured API keys and candidate models.")
 
     @classmethod
     def _trim_messages_for_budget(cls, messages: List[Dict[str, str]], max_tokens: int, budget: int = 7500) -> List[Dict[str, str]]:
@@ -254,59 +256,67 @@ class LLMGateway:
         cls, messages: List[Dict[str, str]], model: str, temperature: float, max_tokens: int
     ) -> AsyncGenerator[str, None]:
         url = "https://api.groq.com/openai/v1/chat/completions"
-        groq_model = model if ("qwen" in model.lower() or "llama" in model.lower() or "gpt-oss" in model.lower()) else settings.DEFAULT_MODEL_NAME
+        primary_model = model if ("qwen" in model.lower() or "llama" in model.lower() or "gpt-oss" in model.lower()) else settings.DEFAULT_MODEL_NAME
+        candidate_models = [primary_model] + [m for m in ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"] if m != primary_model]
         keys = cls.get_active_groq_keys()
         if not keys:
             raise RuntimeError("No Groq API keys configured in .env (GROQ_API_KEY, GROQ_API_KEY_1, GROQ_API_KEY_2).")
 
-        for key_attempt in range(len(keys)):
-            active_key = cls.get_current_groq_key()
-            headers = {
-                "Authorization": f"Bearer {active_key}",
-                "Content-Type": "application/json"
-            }
-            payload = {
-                "model": groq_model,
-                "messages": messages,
-                "temperature": temperature,
-                "max_tokens": max_tokens,
-                "stream": True
-            }
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                try:
-                    async with client.stream("POST", url, headers=headers, json=payload) as response:
-                        if response.status_code in (429, 401, 403) and key_attempt < len(keys) - 1:
-                            logger.warning(
-                                f"Groq streaming HTTP {response.status_code} limit on key #{cls._current_groq_key_idx + 1}. "
-                                f"Switching to failover key..."
-                            )
-                            cls.rotate_groq_key(reason=f"stream_HTTP_{response.status_code}")
-                            continue
+        current_max_tokens = min(max_tokens, 350)
+        last_error = None
 
-                        if response.status_code != 200:
-                            err_body = await response.aread()
-                            raise RuntimeError(f"Groq streaming error ({response.status_code}): {err_body.decode('utf-8')}")
-
-                        async for line in response.aiter_lines():
-                            if not line.startswith("data: "):
+        for cand_model in candidate_models:
+            for key_attempt in range(len(keys)):
+                active_key = cls.get_current_groq_key()
+                headers = {
+                    "Authorization": f"Bearer {active_key}",
+                    "Content-Type": "application/json"
+                }
+                payload = {
+                    "model": cand_model,
+                    "messages": messages,
+                    "temperature": temperature,
+                    "max_tokens": current_max_tokens,
+                    "stream": True
+                }
+                async with httpx.AsyncClient(timeout=60.0) as client:
+                    try:
+                        async with client.stream("POST", url, headers=headers, json=payload) as response:
+                            if response.status_code in (429, 401, 403):
+                                logger.warning(
+                                    f"Groq streaming HTTP {response.status_code} on model {cand_model} key #{cls._current_groq_key_idx + 1}. "
+                                    f"Switching to failover key/model..."
+                                )
+                                cls.rotate_groq_key(reason=f"stream_HTTP_{response.status_code}")
                                 continue
-                            data_str = line[6:].strip()
-                            if data_str == "[DONE]":
+
+                            if response.status_code != 200:
+                                err_body = await response.aread()
+                                last_error = RuntimeError(f"Groq streaming error ({response.status_code}): {err_body.decode('utf-8')}")
                                 break
-                            try:
-                                chunk = json.loads(data_str)
-                                delta = chunk["choices"][0]["delta"]
-                                if "content" in delta and delta["content"]:
-                                    yield delta["content"]
-                            except Exception:
-                                continue
-                        return
-                except Exception as e:
-                    if key_attempt < len(keys) - 1:
+
+                            async for line in response.aiter_lines():
+                                if not line.startswith("data: "):
+                                    continue
+                                data_str = line[6:].strip()
+                                if data_str == "[DONE]":
+                                    break
+                                try:
+                                    chunk = json.loads(data_str)
+                                    delta = chunk["choices"][0]["delta"]
+                                    if "content" in delta and delta["content"]:
+                                        yield delta["content"]
+                                except Exception:
+                                    continue
+                            return
+                    except Exception as e:
+                        last_error = e
                         logger.warning(f"Groq streaming exception on key #{cls._current_groq_key_idx + 1} ({e}). Switching to failover key...")
                         cls.rotate_groq_key(reason="stream_exception")
                         continue
-                    raise e
+
+        if last_error:
+            raise last_error
 
     @classmethod
     def _generate_mock_completion(cls, messages: List[Dict[str, str]]) -> str:

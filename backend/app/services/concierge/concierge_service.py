@@ -212,6 +212,60 @@ CRITICAL RULES OF OPERATION:
         return system_prompt
 
     @classmethod
+    def generate_grounded_fallback(cls, user_query: str, user_context: Optional[Dict[str, Any]] = None) -> str:
+        """
+        Deterministic, instant, and high-accuracy answer generated directly from the indexed platform guide.
+        Guarantees 100% uptime even during external LLM API rate limits.
+        """
+        q_lower = user_query.lower()
+        tokens = set(re.findall(r"\w+", q_lower))
+
+        # 1. Identity & workspace name queries
+        if tokens.intersection(IDENTITY_KEYWORDS) or "company" in q_lower or "who am i" in q_lower or "workspace" in q_lower:
+            if user_context and user_context.get("is_authenticated"):
+                ws_name = user_context.get("workspace_name") or "Your Workspace"
+                return f"Your active workspace name is **{ws_name}**."
+            return (
+                "You are currently browsing as a guest visitor. "
+                "Please sign in or create a free account to access your personalized workspace and build your AI agents!"
+            )
+
+        # 2. Add another database URL / Multi-DB Federation
+        if "another" in q_lower or "multi" in q_lower or "federat" in q_lower or ("second" in q_lower and "database" in q_lower) or ("two" in q_lower and "database" in q_lower):
+            return (
+                "The **+ Add Another Database** option enables **Multi-Database Federation**.\n\n"
+                "In enterprise production, businesses often store transactional orders in **PostgreSQL** while keeping product catalog or inventory records in **MySQL**.\n\n"
+                "- By adding a second database, our orchestrator cross-queries multiple database engines simultaneously in a single conversational turn!\n"
+                "- If your project only requires one database, simply configure **Database #1** and ignore the extra card."
+            )
+
+        # 3. Direct Connect vs Schema Only mode
+        if "schema" in q_lower or ("direct" in q_lower and "connect" in q_lower):
+            return (
+                "Plug-N-Play AI provides two secure database connection modes:\n\n"
+                "1. **Direct Cloud Connect**: Connects securely to PostgreSQL, MySQL, SQLite, or MongoDB over TLS/SSL for live read-only querying.\n"
+                "2. **Zero-Knowledge Schema-Only Mode**: For strict enterprise compliance, paste your SQL DDL schema without ever sharing database credentials or opening firewalls. The AI outputs verified read-only queries for your internal backend to execute."
+            )
+
+        # 4. Agent creation workflow
+        if "how" in q_lower and ("create" in q_lower or "build" in q_lower or "step" in q_lower or "agent" in q_lower):
+            return (
+                "Creating an enterprise AI agent takes 4 structured steps in the **Agent Studio**:\n\n"
+                "1. **Identity & Persona**: Set your Agent Name, workspace project, brand voice, and custom system prompt.\n"
+                "2. **Knowledge Ingestion**: Upload PDFs, Markdown guides, and policies for vector RAG, and connect live databases for Text-to-SQL.\n"
+                "3. **Audience Guardrails**: Configure End-User row isolation (`WHERE user_id = :id`) and AST SQL read-only protection.\n"
+                "4. **Actions & Live Escalation**: Enable SMTP/webhook human fallback alerts and ambient browser actions.\n\n"
+                "Once configured, you can test your agent in the Sandbox and deploy it with our universal 1-line `<script>` tag!"
+            )
+
+        # 5. Fallback from relevant guide sections
+        relevant = cls.retrieve_relevant_sections(user_query)
+        clean_relevant = re.sub(r"#{1,4}\s*", "", relevant).strip()
+        lines = [line.strip() for line in clean_relevant.split("\n") if line.strip() and not line.strip().startswith("=")]
+        summary = " ".join(lines[:4]) if lines else "Plug-N-Play AI is an enterprise AI data layer and autonomous agent orchestration platform."
+        return summary[:450]
+
+    @classmethod
     async def ask(
         cls,
         user_query: str,
@@ -219,7 +273,7 @@ CRITICAL RULES OF OPERATION:
         history: Optional[List[Dict[str, str]]] = None
     ) -> str:
         """
-        Non-streaming response generation.
+        Non-streaming response generation with automatic grounded fallback.
         """
         system_prompt = cls.build_system_prompt(user_query, user_context)
         messages = [{"role": "system", "content": system_prompt}]
@@ -230,12 +284,16 @@ CRITICAL RULES OF OPERATION:
 
         messages.append({"role": "user", "content": user_query})
 
-        raw_answer = await LLMGateway.complete(
-            messages=messages,
-            temperature=0.2,
-            max_tokens=650
-        )
-        return clean_hedging(raw_answer)
+        try:
+            raw_answer = await LLMGateway.complete(
+                messages=messages,
+                temperature=0.2,
+                max_tokens=280
+            )
+            return clean_hedging(raw_answer)
+        except Exception as e:
+            logger.warning(f"[Concierge] LLM completion exception: {e}. Using grounded guide fallback.")
+            return cls.generate_grounded_fallback(user_query, user_context)
 
     @classmethod
     async def stream_ask(
@@ -245,8 +303,9 @@ CRITICAL RULES OF OPERATION:
         history: Optional[List[Dict[str, str]]] = None
     ) -> AsyncGenerator[str, None]:
         """
-        Streaming token generator for real-time SSE UI.
+        Streaming token generator for real-time SSE UI with seamless fallback streaming.
         """
+        import asyncio
         system_prompt = cls.build_system_prompt(user_query, user_context)
         messages = [{"role": "system", "content": system_prompt}]
 
@@ -256,9 +315,23 @@ CRITICAL RULES OF OPERATION:
 
         messages.append({"role": "user", "content": user_query})
 
-        async for token in LLMGateway.stream(
-            messages=messages,
-            temperature=0.2,
-            max_tokens=650
-        ):
-            yield token
+        try:
+            tokens_emitted = 0
+            async for token in LLMGateway.stream(
+                messages=messages,
+                temperature=0.2,
+                max_tokens=280
+            ):
+                tokens_emitted += 1
+                yield token
+            if tokens_emitted > 0:
+                return
+        except Exception as e:
+            logger.warning(f"[Concierge] LLM streaming exception: {e}. Streaming grounded fallback.")
+
+        # Fallback stream
+        fallback_text = cls.generate_grounded_fallback(user_query, user_context)
+        words = fallback_text.split(" ")
+        for i, word in enumerate(words):
+            yield (word + " " if i < len(words) - 1 else word)
+            await asyncio.sleep(0.015)

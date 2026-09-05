@@ -142,11 +142,16 @@ async def concierge_chat(
         )
 
     # Non-streaming fallback
-    answer = await PlatformConciergeService.ask(
-        user_query=payload.query,
-        user_context=user_context,
-        history=payload.history
-    )
+    try:
+        answer = await PlatformConciergeService.ask(
+            user_query=payload.query,
+            user_context=user_context,
+            history=payload.history
+        )
+    except Exception as e:
+        logger.error(f"[Concierge] Non-streaming error: {e}")
+        answer = PlatformConciergeService.generate_grounded_fallback(payload.query, user_context)
+
     return ConciergeChatResponse(
         answer=answer,
         route_chosen="PLATFORM_GUIDE",
