@@ -1285,15 +1285,36 @@
     .dropzone-box {
       border: 2px dashed var(--border-hover);
       border-radius: var(--radius-md);
-      padding: 18px 16px;
+      padding: 20px 16px;
       text-align: center;
       background: var(--surface-2);
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
     }
     .dropzone-box:hover {
-      border-color: var(--border-focus);
+      border-color: var(--primary);
+      background: var(--surface-3);
+    }
+    .dropzone-box.dragover {
+      border-color: #38bdf8 !important;
+      background: rgba(56, 189, 248, 0.12) !important;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+      transform: scale(1.01);
+    }
+    .dropzone-box * {
+      pointer-events: none;
+    }
+    .uploaded-file-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 10px 14px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .uploaded-file-card:hover {
+      border-color: var(--border-hover);
       background: var(--surface-3);
     }
 
@@ -3370,17 +3391,33 @@
             </div>
 
             <!-- Drag & Drop Multi-File Upload Zone -->
-            <div class="dropzone-box" id="drop-zone" onclick="document.getElementById('rag-file-input').click()">
-              <input type="file" id="rag-file-input" style="display: none;" accept=".pdf,.xlsx,.xls,.csv,.docx,.txt,.md,.json" multiple onchange="handleFileUpload(event)" />
+            <div class="dropzone-box" id="drop-zone" onclick="document.getElementById('rag-file-input').click()"
+                 ondragover="handleDropZoneDragOver(event)" 
+                 ondragenter="handleDropZoneDragOver(event)" 
+                 ondragleave="handleDropZoneDragLeave(event)" 
+                 ondrop="handleDropZoneDrop(event)">
+              <input type="file" id="rag-file-input" style="display: none;" accept=".pdf,.xlsx,.xls,.csv,.docx,.txt,.md,.json" multiple onchange="handleFileInputChange(event)" />
               <div style="font-size: 24px; color: var(--text-2); margin-bottom: 4px;">
                 <svg class="svg-icon" viewBox="0 0 24 24" style="width: 26px; height: 26px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
               </div>
-              <div style="font-size: 12.5px; font-weight: 600; color: var(--text-1);">Upload Document Files (PDF, Excel, CSV, DOCX, TXT)</div>
-              <div style="font-size: 11px; color: var(--text-3); margin-top: 2px;">Drag &amp; drop or click to browse (Multi-file enabled)</div>
+              <div style="font-size: 13px; font-weight: 600; color: var(--text-1);" id="dropzone-title">Upload Multiple Documents (PDF, Excel, CSV, DOCX, TXT)</div>
+              <div style="font-size: 11px; color: var(--text-3); margin-top: 2px;" id="dropzone-subtitle">Drag &amp; drop files here or click to browse (Select one or multiple files)</div>
               <div id="upload-file-status" style="font-size: 11px; color: var(--accent-green); margin-top: 6px; display: none;"></div>
             </div>
 
-            <div id="uploaded-files-list" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;"></div>
+            <!-- Uploaded Files List (Below Drag & Drop) -->
+            <div id="uploaded-files-container" style="display: none; margin-bottom: 14px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-2); display: flex; align-items: center; gap: 6px;">
+                  <svg class="svg-icon" viewBox="0 0 24 24" style="width: 14px; height: 14px; color: var(--primary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                  <span id="uploaded-files-count-label">Uploaded Documents (0)</span>
+                </span>
+                <button type="button" class="btn-action-subtle" onclick="clearAllUploadedFiles()" style="font-size: 10.5px; padding: 2px 8px; color: var(--accent-rose);">
+                  Clear All
+                </button>
+              </div>
+              <div id="uploaded-files-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
+            </div>
 
             <div class="form-group">
               <label>Document / Policy Title</label>
@@ -4745,10 +4782,10 @@ CREATE TABLE courses (
       const rInput = document.getElementById('wiz-refusal-message');
       if (rInput && pb.refusal) rInput.value = pb.refusal;
 
-      // Set default doc title and content if empty
+      // Set default doc title and content if empty and no files uploaded
       const docTitle = document.getElementById('wiz-doc-title');
       const docContent = document.getElementById('wiz-doc-content');
-      if (docTitle && (!docTitle.value || docTitle.value.includes('Policy') || docTitle.value.includes('Agreement'))) {
+      if (wizardUploadedDocuments.length === 0 && docTitle && (!docTitle.value || docTitle.value.includes('Policy') || docTitle.value.includes('Agreement'))) {
         docTitle.value = pb.defaultTitle;
         docContent.value = pb.defaultContent;
       }
@@ -4764,6 +4801,7 @@ CREATE TABLE courses (
     let sandboxSessionToken = null;
     let currentGuardrailConfig = null;
     let activeMsgId = null;
+    let wizardUploadedDocuments = [];
 
     // --- Templates & Presets ---
     const ragTemplates = {
@@ -6467,6 +6505,11 @@ class AIChatController extends Controller {
       document.getElementById('wiz-db-url').value = '';
       document.getElementById('studio-active-bot-badge').innerText = 'New Agent Builder';
       
+      wizardUploadedDocuments = [];
+      renderUploadedFilesList();
+      const statusEl = document.getElementById('upload-file-status');
+      if (statusEl) statusEl.style.display = 'none';
+
       selectService('hybrid');
       selectAudience('end_user');
       selectIndustryPlaybook('ecommerce');
@@ -6560,12 +6603,48 @@ class AIChatController extends Controller {
       }
     }
 
-    async function handleFileUpload(event) {
-      const files = Array.from(event.target.files);
+    // --- Multi-File Upload & Document Management ---
+    function handleDropZoneDragOver(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const dz = document.getElementById('drop-zone');
+      if (dz) dz.classList.add('dragover');
+    }
+
+    function handleDropZoneDragLeave(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const dz = document.getElementById('drop-zone');
+      if (dz) dz.classList.remove('dragover');
+    }
+
+    function handleDropZoneDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const dz = document.getElementById('drop-zone');
+      if (dz) dz.classList.remove('dragover');
+      const files = e.dataTransfer ? Array.from(e.dataTransfer.files) : [];
+      if (files.length > 0) {
+        processUploadedFiles(files);
+      }
+    }
+
+    function handleFileInputChange(e) {
+      const files = e.target.files ? Array.from(e.target.files) : [];
+      if (files.length > 0) {
+        processUploadedFiles(files);
+      }
+      e.target.value = '';
+    }
+
+    function handleFileUpload(e) {
+      handleFileInputChange(e);
+    }
+
+    async function processUploadedFiles(files) {
       if (!files || files.length === 0) return;
 
       const statusEl = document.getElementById('upload-file-status');
-      const listEl = document.getElementById('uploaded-files-list');
       statusEl.style.display = 'block';
       statusEl.style.color = '#38bdf8';
       statusEl.innerText = `Parsing ${files.length} document(s)...`;
@@ -6582,31 +6661,34 @@ class AIChatController extends Controller {
         let data = null;
         try {
           data = await res.json();
-        } catch (_) {
-          // Response was not JSON (e.g., HTML error from WAF or gateway)
-        }
+        } catch (_) {}
 
         if (res.ok && data) {
           statusEl.style.color = 'var(--accent-green)';
-          statusEl.innerText = `✓ Successfully extracted ${data.file_count} document(s) (${data.total_char_count} chars)!`;
-          
-          if (!document.getElementById('wiz-doc-title').value.trim()) {
-            document.getElementById('wiz-doc-title').value = files.map(f => f.name).join(', ');
-          }
-          const currentContent = document.getElementById('wiz-doc-content').value.trim();
-          document.getElementById('wiz-doc-content').value = currentContent 
-            ? `${currentContent}\n\n${data.combined_content}` 
-            : data.combined_content;
+          statusEl.innerText = `✓ Successfully parsed ${data.file_count} document(s) (${data.total_char_count.toLocaleString()} chars)!`;
 
-          // Render file badges
-          listEl.innerHTML = '';
-          data.files.forEach(f => {
-            const badge = document.createElement('span');
-            badge.className = 's-badge';
-            badge.style.cssText = 'font-size: 11px; padding: 3px 8px; text-transform: uppercase; background: var(--surface-2); border: 1px solid var(--border-subtle);';
-            badge.innerHTML = `<strong>${escapeHtml(f.filename)}</strong> <span style="opacity: 0.6;">(${f.file_type})</span>`;
-            listEl.appendChild(badge);
-          });
+          if (Array.isArray(data.files)) {
+            data.files.forEach(f => {
+              const existingIdx = wizardUploadedDocuments.findIndex(x => x.filename.toLowerCase() === f.filename.toLowerCase());
+              const docObj = {
+                id: 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                filename: f.filename,
+                title: f.filename.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " "),
+                file_type: (f.file_type || 'text').toLowerCase(),
+                char_count: f.char_count || (f.text ? f.text.length : 0),
+                content: f.text || f.content || '',
+                page_count: f.page_count || null
+              };
+              if (existingIdx >= 0) {
+                wizardUploadedDocuments[existingIdx] = docObj;
+              } else {
+                wizardUploadedDocuments.push(docObj);
+              }
+            });
+          }
+
+          renderUploadedFilesList();
+          updateCombinedDocContent();
         } else {
           statusEl.style.color = 'var(--accent-rose)';
           if (data && data.detail) {
@@ -6622,6 +6704,134 @@ class AIChatController extends Controller {
       } catch (err) {
         statusEl.style.color = 'var(--accent-rose)';
         statusEl.innerText = `Error: ${err.message}`;
+      }
+    }
+
+    function renderUploadedFilesList() {
+      const container = document.getElementById('uploaded-files-container');
+      const listEl = document.getElementById('uploaded-files-list');
+      const countLabel = document.getElementById('uploaded-files-count-label');
+      if (!container || !listEl) return;
+
+      if (wizardUploadedDocuments.length === 0) {
+        container.style.display = 'none';
+        listEl.innerHTML = '';
+        return;
+      }
+
+      container.style.display = 'block';
+      const totalChars = wizardUploadedDocuments.reduce((sum, d) => sum + (d.char_count || 0), 0);
+      if (countLabel) {
+        countLabel.innerText = `Uploaded Documents (${wizardUploadedDocuments.length}) • ${totalChars.toLocaleString()} chars total`;
+      }
+
+      listEl.innerHTML = '';
+      wizardUploadedDocuments.forEach(doc => {
+        const card = document.createElement('div');
+        card.className = 'uploaded-file-card';
+        card.id = `file-card-${doc.id}`;
+
+        let iconBg = 'rgba(56, 189, 248, 0.12)';
+        let iconColor = '#38bdf8';
+        let iconSvg = `<svg class="svg-icon" viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>`;
+
+        if (doc.file_type === 'pdf') {
+          iconBg = 'rgba(239, 68, 68, 0.12)';
+          iconColor = '#ef4444';
+        } else if (doc.file_type === 'excel' || doc.file_type === 'csv' || doc.file_type === 'xlsx' || doc.file_type === 'xls') {
+          iconBg = 'rgba(34, 197, 94, 0.12)';
+          iconColor = '#22c55e';
+          iconSvg = `<svg class="svg-icon" viewBox="0 0 24 24" style="width: 16px; height: 16px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>`;
+        } else if (doc.file_type === 'docx' || doc.file_type === 'doc') {
+          iconBg = 'rgba(59, 130, 246, 0.12)';
+          iconColor = '#3b82f6';
+        } else if (doc.file_type === 'json') {
+          iconBg = 'rgba(245, 158, 11, 0.12)';
+          iconColor = '#f59e0b';
+          iconSvg = `<svg class="svg-icon" viewBox="0 0 24 24" style="width: 16px; height: 16px;"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>`;
+        }
+
+        card.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+              <div style="width: 34px; height: 34px; border-radius: 6px; background: ${iconBg}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${iconColor};">
+                ${iconSvg}
+              </div>
+              <div style="min-width: 0; flex: 1;">
+                <div style="font-size: 12.5px; font-weight: 600; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(doc.filename)}">
+                  ${escapeHtml(doc.filename)}
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 10.5px; color: var(--text-3); margin-top: 2px;">
+                  <span class="s-badge" style="font-size: 9px; padding: 1px 5px; text-transform: uppercase;">${escapeHtml(doc.file_type)}</span>
+                  <span>${doc.char_count.toLocaleString()} chars</span>
+                  ${doc.page_count ? `<span>• ${doc.page_count} pgs</span>` : ''}
+                  <span style="color: var(--accent-green); display: inline-flex; align-items: center; gap: 3px; font-weight: 500;">
+                    <svg class="svg-icon" viewBox="0 0 24 24" style="width: 11px; height: 11px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Ready for embedding
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+              <button type="button" class="btn-action-subtle" onclick="toggleFilePreview('${doc.id}')" title="Preview extracted text" style="font-size: 10.5px; padding: 3px 8px;">
+                Preview
+              </button>
+              <button type="button" class="btn-action-danger" onclick="removeUploadedFile('${doc.id}')" title="Remove file" style="padding: 3px 7px; font-size: 11px; line-height: 1;">
+                ✕
+              </button>
+            </div>
+          </div>
+          <div id="file-preview-${doc.id}" style="display: none; margin-top: 8px; padding: 8px 10px; background: var(--surface-1); border: 1px solid var(--border-subtle); border-radius: 6px; font-family: var(--font-mono); font-size: 11px; color: var(--text-2); max-height: 130px; overflow-y: auto; white-space: pre-wrap; line-height: 1.4;">${escapeHtml(doc.content.slice(0, 800))}${doc.content.length > 800 ? '\n... [preview truncated]' : ''}</div>
+        `;
+        listEl.appendChild(card);
+      });
+    }
+
+    function removeUploadedFile(docId) {
+      wizardUploadedDocuments = wizardUploadedDocuments.filter(d => d.id !== docId);
+      renderUploadedFilesList();
+      updateCombinedDocContent();
+      const statusEl = document.getElementById('upload-file-status');
+      if (statusEl) {
+        if (wizardUploadedDocuments.length === 0) {
+          statusEl.style.display = 'none';
+        } else {
+          statusEl.style.color = 'var(--text-3)';
+          statusEl.innerText = `Document removed. ${wizardUploadedDocuments.length} document(s) remaining.`;
+        }
+      }
+    }
+
+    function clearAllUploadedFiles() {
+      wizardUploadedDocuments = [];
+      renderUploadedFilesList();
+      updateCombinedDocContent();
+      const statusEl = document.getElementById('upload-file-status');
+      if (statusEl) statusEl.style.display = 'none';
+    }
+
+    function toggleFilePreview(docId) {
+      const el = document.getElementById(`file-preview-${docId}`);
+      if (el) {
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+
+    function updateCombinedDocContent() {
+      const docTitleEl = document.getElementById('wiz-doc-title');
+      const docContentEl = document.getElementById('wiz-doc-content');
+      if (!docContentEl) return;
+
+      if (wizardUploadedDocuments.length > 0) {
+        docContentEl.value = wizardUploadedDocuments.map(d => `=== Document: ${d.filename} ===\n${d.content}`).join('\n\n');
+        if (docTitleEl && (!docTitleEl.value.trim() || docTitleEl.value.includes('.pdf') || docTitleEl.value.includes('.csv') || docTitleEl.value.includes('.docx') || docTitleEl.value.includes('.xlsx') || docTitleEl.value.includes('.xls') || docTitleEl.value.includes('.txt'))) {
+          docTitleEl.value = wizardUploadedDocuments.map(d => d.title).join(', ');
+        }
+      } else {
+        if (docTitleEl && (docTitleEl.value.includes('.pdf') || docTitleEl.value.includes('.csv') || docTitleEl.value.includes('.docx') || docTitleEl.value.includes('.xlsx') || docTitleEl.value.includes('.xls') || docTitleEl.value.includes('.txt'))) {
+          docTitleEl.value = '';
+        }
+        docContentEl.value = '';
       }
     }
 
@@ -7693,6 +7903,13 @@ CREATE TABLE scholarships (
         target_audience: selectedAudience,
         document_title: docTitle || null,
         document_content: docContent || null,
+        documents: wizardUploadedDocuments.length > 0 ? wizardUploadedDocuments.map(d => ({
+          filename: d.filename,
+          title: d.title || d.filename,
+          file_type: d.file_type,
+          char_count: d.char_count,
+          content: d.content
+        })) : null,
         document_allowed_roles: selectedDocRoles.includes('all') ? null : selectedDocRoles,
         connection_mode: currentDBMode,
         databases: currentDBMode === 'direct' && validDatabases.length > 0 ? validDatabases : null,
@@ -8355,6 +8572,7 @@ CREATE TABLE scholarships (
           bannedTopics: currentBannedTopics,
           restrictedColumns: currentRestrictedColumns,
           dbConnectionCards: dbConnectionCards,
+          uploadedDocuments: wizardUploadedDocuments,
           timestamp: Date.now()
         };
         localStorage.setItem('pnp_studio_draft', JSON.stringify(draft));

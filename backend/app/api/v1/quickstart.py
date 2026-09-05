@@ -32,6 +32,7 @@ class QuickstartSetupRequest(BaseModel):
     service_type: str = Field(default="hybrid", description="Service mode: 'rag', 'sql', or 'hybrid'")
     document_title: Optional[str] = Field(default=None, description="Title of document/policy")
     document_content: Optional[str] = Field(default=None, description="Text content of policy, FAQ, or documentation")
+    documents: Optional[List[Dict[str, Any]]] = Field(default=None, description="List of multiple uploaded document objects, each with title, content, file_type, char_count")
     document_allowed_roles: Optional[List[str]] = Field(default=None, description="Optional list of user roles allowed to access this document")
     connection_mode: Optional[str] = Field(default="direct", description="Connection mode: 'direct' or 'schema_only'")
     databases: Optional[List[Dict[str, Any]]] = Field(default=None, description="List of multiple database connections, each with name, engine, database_url, selected_tables")
@@ -133,7 +134,48 @@ async def setup_custom_agent(payload: QuickstartSetupRequest, db: AsyncSession =
 
     # 3. Process & Ingest Documents (RAG) - Only if service_type in ('rag', 'hybrid')
     if payload.service_type in {"rag", "hybrid"}:
-        if payload.document_content and payload.document_content.strip():
+        doc_roles = payload.document_allowed_roles if payload.document_allowed_roles else ["student", "faculty", "admin", "user", "customer"]
+        
+        # Check if multiple structured documents were provided
+        if payload.documents and len(payload.documents) > 0:
+            for d in payload.documents:
+                doc_text = (d.get("content") or d.get("text") or "").strip()
+                if not doc_text:
+                    continue
+                d_title = d.get("title") or d.get("filename") or f"{payload.project_name} Document"
+                d_type = d.get("file_type") or "file_upload"
+                source = RAGSource(
+                    tenant_id=tenant.id,
+                    agent_id=agent.id,
+                    name=d_title,
+                    source_type=d_type
+                )
+                db.add(source)
+                await db.commit()
+                await db.refresh(source)
+
+                chunks = TextChunker.chunk_text(doc_text, chunk_size=600, chunk_overlap=80)
+                if chunks:
+                    embeddings = await EmbeddingService.get_embeddings_batch(chunks, batch_size=32)
+                    for c, emb in zip(chunks, embeddings):
+                        rag_chunk = RAGChunk(
+                            tenant_id=tenant.id,
+                            rag_source_id=source.id,
+                            content=c,
+                            doc_metadata={
+                                "title": d_title,
+                                "filename": d.get("filename", d_title),
+                                "file_type": d_type,
+                                "allowed_roles": doc_roles
+                            },
+                            embedding=emb
+                        )
+                        db.add(rag_chunk)
+                        chunks_indexed += 1
+                    await db.commit()
+                test_questions.append(f"What is the official policy regarding {d_title}?")
+        elif payload.document_content and payload.document_content.strip():
+            # Fallback to single concatenated document content
             doc_title = payload.document_title or f"{payload.project_name} Guidelines"
             source = RAGSource(
                 tenant_id=tenant.id,
@@ -148,7 +190,6 @@ async def setup_custom_agent(payload: QuickstartSetupRequest, db: AsyncSession =
             chunks = TextChunker.chunk_text(payload.document_content, chunk_size=600, chunk_overlap=80)
             if chunks:
                 embeddings = await EmbeddingService.get_embeddings_batch(chunks, batch_size=32)
-                doc_roles = payload.document_allowed_roles if payload.document_allowed_roles else ["student", "faculty", "admin", "user", "customer"]
                 for c, emb in zip(chunks, embeddings):
                     rag_chunk = RAGChunk(
                         tenant_id=tenant.id,
@@ -162,7 +203,6 @@ async def setup_custom_agent(payload: QuickstartSetupRequest, db: AsyncSession =
                     )
                     db.add(rag_chunk)
                     chunks_indexed += 1
-
                 await db.commit()
             test_questions.append(f"What is the official policy regarding {doc_title}?")
 
