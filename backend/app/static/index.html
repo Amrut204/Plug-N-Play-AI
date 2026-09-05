@@ -6021,8 +6021,7 @@ ${setAttrsScript}
 
     return () => {
       document.getElementById('pnp-widget-script')?.remove();
-      document.getElementById('pnp-widget-container')?.remove();
-      document.getElementById('pnp-widget-trigger')?.remove();
+      document.querySelectorAll('#pnp-widget-container, #pnp-widget-trigger, #pnp-widget-style').forEach(el => el.remove());
     };
   }, [userId, userRole]);
 
@@ -6071,12 +6070,8 @@ ${setAttrsScript}
     document.body.appendChild(script);
 
     return () => {
-      const s = document.getElementById('pnp-widget-script');
-      if (s) s.remove();
-      const widget = document.getElementById('pnp-widget-container');
-      const btn = document.getElementById('pnp-widget-trigger');
-      if (widget) widget.remove();
-      if (btn) btn.remove();
+      document.getElementById('pnp-widget-script')?.remove();
+      document.querySelectorAll('#pnp-widget-container, #pnp-widget-trigger, #pnp-widget-style').forEach(el => el.remove());
     };
   }, [userId, userRole]);
 

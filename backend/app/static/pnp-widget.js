@@ -1,6 +1,15 @@
 (function() {
     // Plug-N-Play AI Universal Embeddable Widget v2 — Fully Customizable
-    const scriptTag = document.currentScript || document.querySelector('script[src*="pnp-widget.js"]');
+    // 🛡️ Singleton Guard: Remove any pre-existing container or trigger before initializing
+    const prevTrigger = document.getElementById('pnp-widget-trigger');
+    const prevContainer = document.getElementById('pnp-widget-container');
+    const prevStyle = document.getElementById('pnp-widget-style');
+    if (prevTrigger) prevTrigger.remove();
+    if (prevContainer) prevContainer.remove();
+    if (prevStyle) prevStyle.remove();
+
+    const scripts = document.querySelectorAll('script[src*="pnp-widget.js"]');
+    const scriptTag = document.currentScript || (scripts.length > 0 ? scripts[scripts.length - 1] : null);
     const agentId = (scriptTag && scriptTag.getAttribute('data-agent-id')) || 'default';
     let sessionToken = scriptTag ? scriptTag.getAttribute('data-session-token') : null;
     let activeSessionId = null;
@@ -124,7 +133,8 @@
 
     // Inject styles
     const style = document.createElement('style');
-    style.innerHTML = `
+    style.id = 'pnp-widget-style';
+    style.textContent = `
         .pnp-widget-btn {
             position: fixed;
             ${btnPos}
@@ -647,27 +657,33 @@
     document.body.appendChild(triggerBtn);
     document.body.appendChild(chatWindow);
 
-    // Elements & State
-    const msgList = document.getElementById('pnp-msg-list');
-    const inputField = document.getElementById('pnp-input-field');
-    const sendBtn = document.getElementById('pnp-send-btn');
-    const micBtn = document.getElementById('pnp-mic-btn');
-    const escalateBtn = document.getElementById('pnp-btn-escalate');
-    const closeBtn = document.getElementById('pnp-close-btn');
-    const chipsContainer = document.getElementById('pnp-chips-container');
+    // Elements & State (Strictly scoped to this widget instance)
+    const msgList = chatWindow.querySelector('#pnp-msg-list') || chatWindow.querySelector('.pnp-messages');
+    const inputField = chatWindow.querySelector('#pnp-input-field') || chatWindow.querySelector('.pnp-input');
+    const sendBtn = chatWindow.querySelector('#pnp-send-btn') || chatWindow.querySelector('.pnp-send-btn');
+    const micBtn = chatWindow.querySelector('#pnp-mic-btn') || chatWindow.querySelector('.pnp-mic-btn');
+    const escalateBtn = chatWindow.querySelector('#pnp-btn-escalate') || chatWindow.querySelector('.pnp-escalate-btn');
+    const closeBtn = chatWindow.querySelector('#pnp-close-btn') || chatWindow.querySelector('.pnp-close-btn');
+    const chipsContainer = chatWindow.querySelector('#pnp-chips-container') || chatWindow.querySelector('.pnp-starter-chips');
 
     // Populate Starter Prompt Chips
-    starterPrompts.forEach(promptText => {
-        const chip = document.createElement('button');
-        chip.type = 'button';
-        chip.className = 'pnp-chip';
-        chip.innerText = promptText;
-        chip.onclick = () => {
-            inputField.value = promptText;
-            handleSend();
-        };
-        chipsContainer.appendChild(chip);
-    });
+    if (chipsContainer && starterPrompts && starterPrompts.length > 0) {
+        chipsContainer.innerHTML = '';
+        starterPrompts.forEach(promptText => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'pnp-chip';
+            chip.innerText = promptText;
+            chip.onclick = (e) => {
+                if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+                if (inputField) {
+                    inputField.value = promptText;
+                    handleSend();
+                }
+            };
+            chipsContainer.appendChild(chip);
+        });
+    }
 
     // --- Session Persistence ---
     if (persistSession) {
@@ -682,17 +698,18 @@
     }
 
     let isOpen = false;
-    function toggleChat() {
+    function toggleChat(e) {
+        if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
         isOpen = !isOpen;
         chatWindow.style.display = isOpen ? 'flex' : 'none';
         if (isOpen) {
-            inputField.focus();
+            setTimeout(() => { if (inputField) inputField.focus(); }, 50);
             ensureSession();
         }
     }
 
-    triggerBtn.onclick = toggleChat;
-    closeBtn.onclick = toggleChat;
+    if (triggerBtn) triggerBtn.onclick = toggleChat;
+    if (closeBtn) closeBtn.onclick = toggleChat;
 
     // --- Auto-Open ---
     if (autoOpenMs > 0) {
@@ -1233,60 +1250,10 @@
         }
     }
 
-    // --- Live Escalation to Human Support ---
-    if (escalateBtn) {
-        escalateBtn.onclick = async () => {
-            if (!activeSessionId) {
-                await ensureSession();
-            }
-            if (!activeSessionId) return;
-
-            escalateBtn.disabled = true;
-            escalateBtn.innerHTML = '<span>Connecting...</span>';
-
-            // Add user bubble
-            const userDiv = document.createElement('div');
-            userDiv.className = 'pnp-msg pnp-msg-user';
-            userDiv.innerText = 'Requesting Human Support...';
-            msgList.appendChild(userDiv);
-            msgList.scrollTop = msgList.scrollHeight;
-
-            try {
-                const res = await fetch(`${baseUrl}/api/v1/chat/escalate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        session_id: activeSessionId,
-                        reason: 'User clicked Support button in widget',
-                        user_contact: extUserId || 'Website Visitor'
-                    })
-                });
-                const data = await res.json();
-                
-                const asstDiv = document.createElement('div');
-                asstDiv.className = 'pnp-msg pnp-msg-asst';
-                asstDiv.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                        <span class="pnp-badge-route" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4);">SUPPORT ALERT</span>
-                    </div>
-                    <div>${formatBotMessage(data.message || 'A live support representative has been notified and will follow up shortly.')}</div>
-                `;
-                msgList.appendChild(asstDiv);
-                msgList.scrollTop = msgList.scrollHeight;
-
-                escalateBtn.innerHTML = '<span>✓ Notified</span>';
-                escalateBtn.style.background = 'rgba(34, 197, 94, 0.15)';
-                escalateBtn.style.color = '#4ade80';
-                escalateBtn.style.borderColor = 'rgba(34, 197, 94, 0.3)';
-            } catch (err) {
-                escalateBtn.disabled = false;
-                escalateBtn.innerHTML = `<span>${t.support}</span>`;
-            }
+    if (sendBtn) sendBtn.onclick = handleSend;
+    if (inputField) {
+        inputField.onkeydown = (e) => {
+            if (e.key === 'Enter') handleSend();
         };
     }
-
-    sendBtn.onclick = handleSend;
-    inputField.onkeydown = (e) => {
-        if (e.key === 'Enter') handleSend();
-    };
 })();
