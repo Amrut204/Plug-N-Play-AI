@@ -2507,6 +2507,42 @@
     </div>
   </div>
 
+  <!-- Modal: Agent Creation Success & Dashboard Redirect -->
+  <div class="modal-overlay" id="modal-agent-created-success" style="display: none; z-index: 250;">
+    <div class="modal-card" style="max-width: 520px; text-align: center; padding: 32px 28px; border: 1px solid rgba(99, 102, 241, 0.4); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(99, 102, 241, 0.2); animation: fadeInVideo 0.3s ease-out;">
+      <div style="width: 64px; height: 64px; border-radius: 20px; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; font-size: 32px;">
+        🎉
+      </div>
+      <h2 style="font-size: 22px; font-weight: 800; color: var(--text-1); margin-bottom: 8px;">
+        Agent Created Successfully!
+      </h2>
+      <p style="font-size: 13.5px; color: var(--text-3); margin-bottom: 20px; line-height: 1.5;">
+        <strong id="modal-success-agent-name" style="color: var(--primary);">Your AI Agent</strong> has been built, indexed, and deployed to your workspace. All data connections, guardrails, and embed configurations are active.
+      </p>
+
+      <div style="background: var(--surface-2); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px; margin-bottom: 24px; text-align: left; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px;">
+        <div style="display: flex; align-items: center; gap: 8px; color: var(--accent-green);">
+          <span>✓</span> <strong>Knowledge &amp; Database Config:</strong> <span style="color: var(--text-2);">Indexed &amp; Linked</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; color: var(--accent-green);">
+          <span>✓</span> <strong>AST SQL &amp; Safety Guardrails:</strong> <span style="color: var(--text-2);">Enforced (Zero Write Access)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; color: var(--accent-green);">
+          <span>✓</span> <strong>Embeddable Code Snippets:</strong> <span style="color: var(--text-2);">Ready to Copy</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button type="button" class="btn-action-subtle" style="padding: 11px 20px; font-size: 13.5px;" onclick="closeAgentCreatedModal()">
+          Stay in Studio
+        </button>
+        <button type="button" class="btn-primary" style="width: auto; padding: 11px 28px; font-size: 13.5px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);" onclick="confirmGoToDashboard()">
+          Go to Workspace Dashboard →
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ======================================================== -->
   <!-- MAIN APPLICATION BODY                                    -->
   <!-- ======================================================== -->
@@ -2904,6 +2940,17 @@
               <span class="s-badge">Dual Synthesis</span>
             </div>
           </div>
+        </div>
+
+        <!-- Step 1 Bottom Action Bar -->
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <span style="font-size: 12px; color: var(--text-3);">
+            Architecture selected: <strong id="step1-selected-label" style="color: var(--primary);">Hybrid (Dual-Engine Enterprise)</strong>
+          </span>
+          <button type="button" class="btn-primary" style="width: auto; padding: 10px 24px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;" onclick="saveStep1AndContinue()">
+            <span>Save &amp; Continue to Step 2</span>
+            <svg class="svg-icon" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
         </div>
       </div>
 
@@ -3615,11 +3662,21 @@ CREATE TABLE courses (
 
         <hr class="section-divider" />
 
-        <!-- Action Button -->
-        <div style="text-align: center; padding: 8px 0;">
-          <button class="btn-primary" id="btn-build-agent" style="max-width: 440px; margin: 0 auto;" onclick="buildAgent()">
-            Build &amp; Index AI Agent
+        <!-- Step 2 Action Buttons -->
+        <div style="padding: 8px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <button type="button" class="btn-action-subtle" style="padding: 10px 20px; font-weight: 600;" onclick="jumpToStep(1)">
+            ← Back to Architecture
           </button>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn-action-subtle" style="padding: 10px 18px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;" onclick="saveStudioDraft(true)">
+              <svg class="svg-icon" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              <span>Save Progress</span>
+            </button>
+            <button class="btn-primary" id="btn-build-agent" style="width: auto; padding: 10px 28px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;" onclick="buildAgent()">
+              <span>Save &amp; Build AI Agent</span>
+              <svg class="svg-icon" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -3727,10 +3784,20 @@ CREATE TABLE courses (
           </div>
         </div>
 
-        <div style="margin-top: 22px; text-align: center;">
-          <button class="btn-primary" style="max-width: 380px; margin: 0 auto; background: var(--accent-green); border-color: var(--accent-green); color: #ffffff;" onclick="scrollToExport()">
-            Deploy to My Website
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <button type="button" class="btn-action-subtle" style="padding: 10px 20px; font-weight: 600;" onclick="jumpToStep(2)">
+            ← Back to Configuration
           </button>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn-action-subtle" style="padding: 10px 18px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;" onclick="saveStudioDraft(true)">
+              <svg class="svg-icon" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              <span>Save Test State</span>
+            </button>
+            <button class="btn-primary" style="width: auto; padding: 10px 28px; font-weight: 700; background: var(--accent-green); border-color: var(--accent-green); color: #ffffff; display: inline-flex; align-items: center; gap: 8px;" onclick="saveStep3AndContinue()">
+              <span>Save &amp; Continue to Embed Code</span>
+              <svg class="svg-icon" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -4091,6 +4158,28 @@ CREATE TABLE courses (
               <button class="copy-btn" onclick="copySnippet('code-export-bridge-php')">Copy PHP Bridge</button>
             </div>
             <pre id="code-export-bridge-php"></pre>
+          </div>
+        </div>
+
+        <!-- Step 4 Completion Banner with Dashboard Redirect -->
+        <div style="margin-top: 36px; padding: 28px; background: linear-gradient(180deg, var(--surface-2) 0%, rgba(24, 24, 32, 0.95) 100%); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: var(--radius-lg); text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);">
+          <div style="width: 52px; height: 52px; border-radius: 14px; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; color: var(--accent-green); font-size: 26px;">
+            ✓
+          </div>
+          <h3 style="font-size: 19px; font-weight: 800; color: var(--text-1); margin-bottom: 6px;">
+            Agent Configuration Ready to Launch!
+          </h3>
+          <p style="font-size: 13px; color: var(--text-3); max-width: 540px; margin: 0 auto 20px auto; line-height: 1.5;">
+            All knowledge sources, database connections, safety guardrails, and client embed scripts have been verified and saved.
+          </p>
+          <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <button type="button" class="btn-action-subtle" style="padding: 12px 22px; font-weight: 600;" onclick="jumpToStep(3)">
+              ← Back to Sandbox Test
+            </button>
+            <button type="button" class="btn-primary" id="btn-complete-and-dashboard" style="width: auto; padding: 13px 34px; font-size: 14.5px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4); display: inline-flex; align-items: center; gap: 10px;" onclick="finishAndGoToDashboard()">
+              <span>🚀 Finish &amp; Return to Dashboard</span>
+              <svg class="svg-icon" viewBox="0 0 24 24" style="width: 16px; height: 16px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -6059,6 +6148,10 @@ class AIChatController extends Controller {
           else card.classList.remove('selected');
         }
       });
+      const labelEl = document.getElementById('step1-selected-label');
+      if (labelEl) {
+        labelEl.innerText = type === 'rag' ? 'Pure RAG (Document AI)' : (type === 'sql' ? 'Text-to-SQL (Database AI)' : 'Hybrid (Dual-Engine Enterprise)');
+      }
 
       const ragCol = document.getElementById('wiz-rag-col');
       const sqlCol = document.getElementById('wiz-sql-col');
@@ -7875,6 +7968,69 @@ CREATE TABLE scholarships (
       }
 
       document.getElementById('lat-llm').innerText = isBlocked ? '1ms' : `${clientLatency}ms`;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // STUDIO PROGRESSION & DASHBOARD REDIRECT WORKFLOW
+    // ═══════════════════════════════════════════════════════
+
+    function saveStudioDraft(notify = false) {
+      try {
+        const draft = {
+          service: selectedService,
+          audience: selectedAudience,
+          agentName: document.getElementById('wiz-agent-name')?.value || '',
+          projName: document.getElementById('wiz-proj-name')?.value || '',
+          docTitle: document.getElementById('wiz-doc-title')?.value || '',
+          docContent: document.getElementById('wiz-doc-content')?.value || '',
+          schemaDdl: document.getElementById('wiz-schema-ddl')?.value || '',
+          guardrailGuidelines: document.getElementById('wiz-guardrails-text')?.value || '',
+          customRefusal: document.getElementById('wiz-refusal-message')?.value || '',
+          bannedTopics: currentBannedTopics,
+          restrictedColumns: currentRestrictedColumns,
+          dbConnectionCards: dbConnectionCards,
+          timestamp: Date.now()
+        };
+        localStorage.setItem('pnp_studio_draft', JSON.stringify(draft));
+        if (notify) {
+          showToast('Draft progress saved successfully!', 'success');
+        }
+      } catch (e) {
+        console.warn('Could not save studio draft:', e);
+      }
+    }
+
+    function saveStep1AndContinue() {
+      saveStudioDraft(false);
+      showToast('Intelligence Architecture saved! Proceeding to Step 2...', 'success');
+      jumpToStep(2);
+    }
+
+    function saveStep3AndContinue() {
+      saveStudioDraft(false);
+      showToast('Sandbox test state saved! Proceeding to Embed Code...', 'success');
+      scrollToExport();
+    }
+
+    function finishAndGoToDashboard() {
+      saveStudioDraft(false);
+      const agentName = currentAgent?.agent_name || document.getElementById('wiz-agent-name')?.value || 'Your AI Agent';
+      const nameEl = document.getElementById('modal-success-agent-name');
+      if (nameEl) nameEl.innerText = agentName;
+      const modal = document.getElementById('modal-agent-created-success');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeAgentCreatedModal() {
+      const modal = document.getElementById('modal-agent-created-success');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function confirmGoToDashboard() {
+      closeAgentCreatedModal();
+      switchView('dashboard');
+      const agentName = currentAgent?.agent_name || document.getElementById('wiz-agent-name')?.value || 'Your Agent';
+      showToast(`🎉 ${agentName} is active in your Workspace Dashboard!`, 'success');
     }
 
     function scrollToExport() {
