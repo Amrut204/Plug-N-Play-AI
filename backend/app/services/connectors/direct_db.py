@@ -13,6 +13,13 @@ from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
+# Internal platform tables that must NEVER be discovered or exposed to operational agents
+SYSTEM_BLACKLIST_TABLES = {
+    "alembic_version", "tenants", "users", "agents", "connections",
+    "semantic_tables", "semantic_columns", "rag_sources", "rag_chunks",
+    "chat_sessions", "chat_messages", "query_logs", "action_definitions"
+}
+
 
 def normalize_db_url(db_url: str) -> Tuple[str, str]:
     """
@@ -91,7 +98,7 @@ class PostgresExecutor:
                     WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
                     ORDER BY table_name
                 """)
-                tables = [r["table_name"] for r in rows]
+                tables = [r["table_name"] for r in rows if r["table_name"].lower() not in SYSTEM_BLACKLIST_TABLES]
                 return {"status": "success", "message": f"Connected! Found {len(tables)} tables.", "tables": tables, "db_type": "postgresql"}
         except Exception as e:
             return {"status": "error", "message": f"Connection failed: {type(e).__name__}: {e}", "tables": []}
@@ -174,7 +181,7 @@ class MySQLExecutor:
                         (params["db"],)
                     )
                     rows = await cur.fetchall()
-                    tables = [r[0] for r in rows]
+                    tables = [r[0] for r in rows if r[0].lower() not in SYSTEM_BLACKLIST_TABLES]
                     return {"status": "success", "message": f"Connected! Found {len(tables)} tables.", "tables": tables, "db_type": "mysql"}
         except Exception as e:
             return {"status": "error", "message": f"Connection failed: {type(e).__name__}: {e}", "tables": []}
@@ -298,7 +305,7 @@ class MongoDBExecutor:
             if db_name:
                 db = client[db_name]
                 collections = await db.list_collection_names()
-                collections = sorted([c for c in collections if not c.startswith("system.")])
+                collections = sorted([c for c in collections if not c.startswith("system.") and c.lower() not in SYSTEM_BLACKLIST_TABLES])
                 return {
                     "status": "success",
                     "message": f"Connected! Found {len(collections)} collection(s) in database '{db_name}'.",
@@ -314,7 +321,7 @@ class MongoDBExecutor:
 
             for d in user_dbs:
                 colls = await client[d].list_collection_names()
-                user_colls = [c for c in colls if not c.startswith("system.")]
+                user_colls = [c for c in colls if not c.startswith("system.") and c.lower() not in SYSTEM_BLACKLIST_TABLES]
                 all_collections.extend(user_colls)
 
             all_collections = sorted(list(set(all_collections)))

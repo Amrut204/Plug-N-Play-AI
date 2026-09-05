@@ -29,6 +29,12 @@ class SQLASTValidator:
         exp.TruncateTable,
     )
 
+    SYSTEM_BLACKLIST_TABLES = {
+        "alembic_version", "tenants", "users", "agents", "connections",
+        "semantic_tables", "semantic_columns", "rag_sources", "rag_chunks",
+        "chat_sessions", "chat_messages", "query_logs", "action_definitions"
+    }
+
     @classmethod
     def validate_and_sanitize(
         cls,
@@ -81,7 +87,7 @@ class SQLASTValidator:
             if expression.find(forbidden):
                 raise SQLSecurityViolation(f"Forbidden operation detected: {forbidden.__name__}")
 
-        # 3. Rule: Validate whitelisted tables
+        # 3. Rule: Validate whitelisted tables & protect internal platform tables
         referenced_tables = {
             t.name.lower() 
             for t in expression.find_all(exp.Table) 
@@ -90,6 +96,8 @@ class SQLASTValidator:
         allowed_tables_lower = {t.lower() for t in allowed_tables}
 
         for tbl in referenced_tables:
+            if tbl in cls.SYSTEM_BLACKLIST_TABLES:
+                raise SQLSecurityViolation(f"Access to internal system table '{tbl}' is strictly prohibited.")
             if tbl not in allowed_tables_lower:
                 raise SQLSecurityViolation(f"Access to table '{tbl}' is not permitted for this role")
 
