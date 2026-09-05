@@ -2250,6 +2250,19 @@
         <button onclick="closeEmbedModal()" class="btn-logout" style="font-size: 14px;">✕</button>
       </div>
 
+      <!-- 2-Step Integration Guide Alert -->
+      <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.28); border-left: 4px solid var(--primary); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;">2</span>
+          <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">
+            <strong style="color: var(--text-1);">2-Step Framework Integration:</strong>
+            <strong>Step 1:</strong> Create component file &bull;
+            <strong>Step 2:</strong> Import &amp; mount <code>&lt;AIWidget /&gt;</code> in your root <code>App.tsx</code> or layout template so it renders on screen.
+          </div>
+        </div>
+        <span style="font-size: 11px; color: var(--accent-green); background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 600;">React 18 StrictMode Safe</span>
+      </div>
+
       <div class="tab-list" style="overflow-x: auto; white-space: nowrap; padding-bottom: 6px;">
         <button class="tab-btn active" onclick="switchQuickEmbedTab('html')">HTML / WordPress</button>
         <button class="tab-btn" onclick="switchQuickEmbedTab('react-ts')">React (TSX / SWC / Vite)</button>
@@ -2273,7 +2286,7 @@
       <div id="quick-embed-react-ts" class="quick-snip-pane" style="display: none;">
         <div class="code-box">
           <div class="code-header">
-            <span>src/components/AIWidget.tsx (TypeScript + Vite / SWC / CRA)</span>
+            <span>Step 1: Create src/components/AIWidget.tsx &rarr; Step 2: Mount &lt;AIWidget /&gt; in src/App.tsx</span>
             <button class="copy-btn" onclick="copySnippet('quick-code-react-ts')">Copy TSX Hook</button>
           </div>
           <pre id="quick-code-react-ts"></pre>
@@ -2283,7 +2296,7 @@
       <div id="quick-embed-react-js" class="quick-snip-pane" style="display: none;">
         <div class="code-box">
           <div class="code-header">
-            <span>src/components/AIWidget.jsx (JavaScript / JSX)</span>
+            <span>Step 1: Create src/components/AIWidget.jsx &rarr; Step 2: Mount &lt;AIWidget /&gt; in src/App.jsx</span>
             <button class="copy-btn" onclick="copySnippet('quick-code-react-js')">Copy JSX Hook</button>
           </div>
           <pre id="quick-code-react-js"></pre>
@@ -2303,7 +2316,7 @@
       <div id="quick-embed-angular" class="quick-snip-pane" style="display: none;">
         <div class="code-box">
           <div class="code-header">
-            <span>src/app/components/ai-widget.component.ts (Angular 14/15/16/17+)</span>
+            <span>Step 1: Create ai-widget.component.ts &rarr; Step 2: Mount &lt;app-ai-widget&gt; in app.component.ts</span>
             <button class="copy-btn" onclick="copySnippet('quick-code-angular')">Copy Angular Component</button>
           </div>
           <pre id="quick-code-angular"></pre>
@@ -2313,7 +2326,7 @@
       <div id="quick-embed-vue" class="quick-snip-pane" style="display: none;">
         <div class="code-box">
           <div class="code-header">
-            <span>src/components/AIWidget.vue (Vue 3 / Nuxt 3 with TypeScript)</span>
+            <span>Step 1: Create src/components/AIWidget.vue &rarr; Step 2: Mount &lt;AIWidget /&gt; in src/App.vue</span>
             <button class="copy-btn" onclick="copySnippet('quick-code-vue')">Copy Vue Component</button>
           </div>
           <pre id="quick-code-vue"></pre>
@@ -2323,7 +2336,7 @@
       <div id="quick-embed-svelte" class="quick-snip-pane" style="display: none;">
         <div class="code-box">
           <div class="code-header">
-            <span>src/lib/AIWidget.svelte (Svelte / SvelteKit)</span>
+            <span>Step 1: Create src/lib/AIWidget.svelte &rarr; Step 2: Mount &lt;AIWidget /&gt; in +layout.svelte</span>
             <button class="copy-btn" onclick="copySnippet('quick-code-svelte')">Copy Svelte Component</button>
           </div>
           <pre id="quick-code-svelte"></pre>
@@ -4040,12 +4053,25 @@ CREATE TABLE courses (
         <hr class="section-divider" />
 
         <!-- Framework Snippet Tabs -->
-        <div class="subsection-header" style="margin-bottom: 12px;">
+        <div class="subsection-header" style="margin-bottom: 8px;">
           <span class="icon-badge">
             <svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
           </span>
           <span>Copy Embed Code</span>
           <span class="subsection-desc">Includes your custom theme settings</span>
+        </div>
+
+        <!-- 2-Step Integration Guide Alert -->
+        <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.28); border-left: 4px solid var(--primary); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;">2</span>
+            <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">
+              <strong style="color: var(--text-1);">2-Step Framework Integration:</strong>
+              <strong>Step 1:</strong> Create the component file &bull;
+              <strong>Step 2:</strong> Import &amp; mount <code>&lt;AIWidget /&gt;</code> in your root <code>App.tsx</code> or layout template so it renders on screen.
+            </div>
+          </div>
+          <span style="font-size: 11px; color: var(--accent-green); background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 600;">React 18 StrictMode Safe</span>
         </div>
 
         <div class="tab-list" style="overflow-x: auto; white-space: nowrap; padding-bottom: 6px;">
@@ -4074,7 +4100,7 @@ CREATE TABLE courses (
         <div id="snip-react-ts" class="snip-pane" style="display: none;">
           <div class="code-box">
             <div class="code-header">
-              <span>src/components/AIWidget.tsx (TypeScript + Vite / SWC / CRA)</span>
+              <span>Step 1: Create src/components/AIWidget.tsx &rarr; Step 2: Mount &lt;AIWidget /&gt; in src/App.tsx</span>
               <button class="copy-btn" onclick="copySnippet('code-export-react-ts')">Copy TSX Hook</button>
             </div>
             <pre id="code-export-react-ts"></pre>
@@ -4084,7 +4110,7 @@ CREATE TABLE courses (
         <div id="snip-react-js" class="snip-pane" style="display: none;">
           <div class="code-box">
             <div class="code-header">
-              <span>src/components/AIWidget.jsx (JavaScript / JSX)</span>
+              <span>Step 1: Create src/components/AIWidget.jsx &rarr; Step 2: Mount &lt;AIWidget /&gt; in src/App.jsx</span>
               <button class="copy-btn" onclick="copySnippet('code-export-react-js')">Copy JSX Hook</button>
             </div>
             <pre id="code-export-react-js"></pre>
@@ -4104,7 +4130,7 @@ CREATE TABLE courses (
         <div id="snip-angular" class="snip-pane" style="display: none;">
           <div class="code-box">
             <div class="code-header">
-              <span>src/app/components/ai-widget.component.ts (Angular 14/15/16/17+)</span>
+              <span>Step 1: Create ai-widget.component.ts &rarr; Step 2: Mount &lt;app-ai-widget&gt; in app.component.ts</span>
               <button class="copy-btn" onclick="copySnippet('code-export-angular')">Copy Angular Component</button>
             </div>
             <pre id="code-export-angular"></pre>
@@ -4114,7 +4140,7 @@ CREATE TABLE courses (
         <div id="snip-vue" class="snip-pane" style="display: none;">
           <div class="code-box">
             <div class="code-header">
-              <span>src/components/AIWidget.vue (Vue 3 / Nuxt 3 with TypeScript)</span>
+              <span>Step 1: Create src/components/AIWidget.vue &rarr; Step 2: Mount &lt;AIWidget /&gt; in src/App.vue</span>
               <button class="copy-btn" onclick="copySnippet('code-export-vue')">Copy Vue Component</button>
             </div>
             <pre id="code-export-vue"></pre>
@@ -4124,7 +4150,7 @@ CREATE TABLE courses (
         <div id="snip-svelte" class="snip-pane" style="display: none;">
           <div class="code-box">
             <div class="code-header">
-              <span>src/lib/AIWidget.svelte (Svelte / SvelteKit)</span>
+              <span>Step 1: Create src/lib/AIWidget.svelte &rarr; Step 2: Mount &lt;AIWidget /&gt; in +layout.svelte</span>
               <button class="copy-btn" onclick="copySnippet('code-export-svelte')">Copy Svelte Component</button>
             </div>
             <pre id="code-export-svelte"></pre>
@@ -5731,17 +5757,21 @@ Key Features & Architectural Highlights:
 
       return {
         html:
-'<!-- Paste before </body> in your HTML / WordPress / Shopify / Webflow -->\n' +
+'<!-- ========================================================================= -->\n' +
+'<!-- PASTE BEFORE </body> IN YOUR HTML / WORDPRESS / SHOPIFY / WEBFLOW        -->\n' +
+'<!-- ========================================================================= -->\n' +
 '<script \n' + dataAttrs +
 '></' + 'script>',
 
         reactTs:
-`// src/components/AIWidget.tsx (TypeScript + Vite / SWC / CRA)
+`// ============================================================================
+// STEP 1: Create the Component file at: src/components/AIWidget.tsx
+// ============================================================================
 import React, { useEffect } from 'react';
 
 interface AIWidgetProps {
   userId?: string;
-  userRole?: 'user' | 'student' | 'staff' | 'admin';
+  userRole?: 'user' | 'student' | 'staff' | 'admin' | string;
 }
 
 export const AIWidget: React.FC<AIWidgetProps> = ({
@@ -5749,7 +5779,11 @@ export const AIWidget: React.FC<AIWidgetProps> = ({
   userRole = 'user'
 }) => {
   useEffect(() => {
+    // Guard against duplicate script injection in React 18 / StrictMode
+    if (document.getElementById('pnp-widget-script')) return;
+
     const script = document.createElement('script');
+    script.id = 'pnp-widget-script';
     script.src = '${host}/static/pnp-widget.js';
     script.setAttribute('data-api-host', '${host}');
     script.setAttribute('data-agent-id', '${aid}');
@@ -5761,22 +5795,46 @@ ${setAttrsScript}
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      document.getElementById('pnp-widget-script')?.remove();
       document.getElementById('pnp-widget-container')?.remove();
       document.getElementById('pnp-widget-trigger')?.remove();
     };
   }, [userId, userRole]);
 
   return null;
-};`,
+};
+
+// ============================================================================
+// STEP 2: Import & Mount in your Root component (e.g. src/App.tsx or main.tsx)
+// ============================================================================
+// 1. Add this import at the top of src/App.tsx:
+//    import { AIWidget } from './components/AIWidget';
+//
+// 2. Render <AIWidget /> anywhere in your JSX tree:
+//    export function App() {
+//      return (
+//        <div className="app-container">
+//          <YourAppContent />
+//
+//          {/* Plug-N-Play AI Floating Widget */}
+//          <AIWidget userId="user_123" userRole="user" />
+//        </div>
+//      );
+//    }`,
 
         reactJs:
-`// src/components/AIWidget.jsx (JavaScript / JSX)
+`// ============================================================================
+// STEP 1: Create the Component file at: src/components/AIWidget.jsx
+// ============================================================================
 import { useEffect } from 'react';
 
 export default function AIWidget({ userId = 'guest', userRole = 'user' }) {
   useEffect(() => {
+    // Guard against duplicate script injection in React 18 / StrictMode
+    if (document.getElementById('pnp-widget-script')) return;
+
     const script = document.createElement('script');
+    script.id = 'pnp-widget-script';
     script.src = '${host}/static/pnp-widget.js';
     script.setAttribute('data-api-host', '${host}');
     script.setAttribute('data-agent-id', '${aid}');
@@ -5788,7 +5846,8 @@ ${setAttrsScript}
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      const s = document.getElementById('pnp-widget-script');
+      if (s) s.remove();
       const widget = document.getElementById('pnp-widget-container');
       const btn = document.getElementById('pnp-widget-trigger');
       if (widget) widget.remove();
@@ -5797,20 +5856,40 @@ ${setAttrsScript}
   }, [userId, userRole]);
 
   return null;
-}`,
+}
+
+// ============================================================================
+// STEP 2: Import & Mount in your Root component (e.g. src/App.jsx or main.jsx)
+// ============================================================================
+// 1. Add this import at the top of src/App.jsx:
+//    import AIWidget from './components/AIWidget';
+//
+// 2. Render <AIWidget /> anywhere in your JSX tree:
+//    export default function App() {
+//      return (
+//        <div className="app-container">
+//          <YourAppContent />
+//
+//          {/* Plug-N-Play AI Floating Widget */}
+//          <AIWidget userId="user_123" userRole="user" />
+//        </div>
+//      );
+//    }`,
 
         nextjs:
-`// In your existing app/layout.tsx (Next.js 13/14/15 App Router):
-// Step 1: Add import at top:
+`// ============================================================================
+// Next.js 13 / 14 / 15 (App Router - src/app/layout.tsx or app/layout.tsx)
+// ============================================================================
+// STEP 1: Add import at top:
 import Script from 'next/script';
 
-// Step 2: Add this <Script /> tag right inside <body> (before </body>):
+// STEP 2: Add this <Script /> tag inside <body> (before </body>):
 <Script
 ${dataAttrs}  strategy="afterInteractive"
 />
 
 /* -------------------------------------------------------------
- * Full Reference app/layout.tsx Example:
+ * Complete Reference app/layout.tsx Example:
  * ------------------------------------------------------------- */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -5826,7 +5905,9 @@ ${dataAttrs}          strategy="afterInteractive"
 }`,
 
         angular:
-`// src/app/components/ai-widget.component.ts (Angular 14/15/16/17+)
+`// ============================================================================
+// STEP 1: Create component at: src/app/components/ai-widget.component.ts
+// ============================================================================
 import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
@@ -5842,7 +5923,10 @@ export class AIWidgetComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
+      if (document.getElementById('pnp-widget-script')) return;
+
       this.scriptElement = document.createElement('script');
+      this.scriptElement.id = 'pnp-widget-script';
       this.scriptElement.src = '${host}/static/pnp-widget.js';
       this.scriptElement.setAttribute('data-api-host', '${host}');
       this.scriptElement.setAttribute('data-agent-id', '${aid}');
@@ -5860,10 +5944,33 @@ ${setAttrsScriptElement}
       document.getElementById('pnp-widget-trigger')?.remove();
     }
   }
-}`,
+}
+
+// ============================================================================
+// STEP 2: Import & Mount in your Root component (src/app/app.component.ts)
+// ============================================================================
+/*
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { AIWidgetComponent } from './components/ai-widget.component';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet, AIWidgetComponent],
+  template: \`
+    <router-outlet></router-outlet>
+    <!-- Plug-N-Play AI Widget floats in corner -->
+    <app-ai-widget></app-ai-widget>
+  \`
+})
+export class AppComponent {}
+*/`,
 
         vue:
-'<!-- src/components/AIWidget.vue (Vue 3 / Nuxt 3 with TypeScript) -->\n' +
+'<!-- ========================================================================= -->\n' +
+'<!-- STEP 1: Create component at src/components/AIWidget.vue                   -->\n' +
+'<!-- ========================================================================= -->\n' +
 '<script setup lang="ts">\n' +
 'import { onMounted, onUnmounted } from \'vue\';\n\n' +
 'const props = defineProps<{\n' +
@@ -5872,7 +5979,9 @@ ${setAttrsScriptElement}
 '}>();\n\n' +
 'let scriptEl: HTMLScriptElement | null = null;\n\n' +
 'onMounted(() => {\n' +
+'  if (document.getElementById(\'pnp-widget-script\')) return;\n' +
 '  scriptEl = document.createElement(\'script\');\n' +
+'  scriptEl.id = \'pnp-widget-script\';\n' +
 '  scriptEl.src = \'' + host + '/static/pnp-widget.js\';\n' +
 '  scriptEl.setAttribute(\'data-api-host\', \'' + host + '\');\n' +
 '  scriptEl.setAttribute(\'data-agent-id\', \'' + aid + '\');\n' +
@@ -5891,17 +6000,34 @@ setAttrsScriptEl + '\n' +
 '  document.getElementById(\'pnp-widget-trigger\')?.remove();\n' +
 '});\n' +
 '<' + '/script>\n\n' +
-'<template></template>',
+'<template></template>\n\n' +
+'<!-- ========================================================================= -->\n' +
+'<!-- STEP 2: Import & Mount in your Root component (e.g. src/App.vue)          -->\n' +
+'<!-- ========================================================================= -->\n' +
+'<!--\n' +
+'<script setup>\n' +
+'import AIWidget from \'./components/AIWidget.vue\';\n' +
+'<' + '/script>\n\n' +
+'<template>\n' +
+'  <router-view />\n' +
+'  <!-- Plug-N-Play AI Widget floats in corner -->\n' +
+'  <AIWidget user-id="user_123" user-role="user" />\n' +
+'</template>\n' +
+'-->',
 
         svelte:
-'<!-- src/lib/AIWidget.svelte (Svelte / SvelteKit) -->\n' +
+'<!-- ========================================================================= -->\n' +
+'<!-- STEP 1: Create component at src/lib/AIWidget.svelte                       -->\n' +
+'<!-- ========================================================================= -->\n' +
 '<script lang="ts">\n' +
 '  import { onMount, onDestroy } from \'svelte\';\n\n' +
 '  export let userId: string = \'guest\';\n' +
 '  export let userRole: string = \'user\';\n\n' +
 '  let scriptEl: HTMLScriptElement;\n\n' +
 '  onMount(() => {\n' +
+'    if (document.getElementById(\'pnp-widget-script\')) return;\n' +
 '    scriptEl = document.createElement(\'script\');\n' +
+'    scriptEl.id = \'pnp-widget-script\';\n' +
 '    scriptEl.src = \'' + host + '/static/pnp-widget.js\';\n' +
 '    scriptEl.setAttribute(\'data-api-host\', \'' + host + '\');\n' +
 '    scriptEl.setAttribute(\'data-agent-id\', \'' + aid + '\');\n' +
@@ -5919,7 +6045,18 @@ setAttrsScriptEl4 + '\n' +
 '    document.getElementById(\'pnp-widget-container\')?.remove();\n' +
 '    document.getElementById(\'pnp-widget-trigger\')?.remove();\n' +
 '  });\n' +
-'<' + '/script>',
+'<' + '/script>\n\n' +
+'<!-- ========================================================================= -->\n' +
+'<!-- STEP 2: Import & Mount in your Root Layout (src/routes/+layout.svelte)     -->\n' +
+'<!-- ========================================================================= -->\n' +
+'<!--\n' +
+'<script>\n' +
+'  import AIWidget from \'$lib/AIWidget.svelte\';\n' +
+'<' + '/script>\n\n' +
+'<slot />\n' +
+'<!-- Plug-N-Play AI Widget floats in corner -->\n' +
+'<AIWidget userId="user_123" userRole="user" />\n' +
+'-->',
 
         bridgeNode:
 `// =========================================================================
