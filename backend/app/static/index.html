@@ -445,6 +445,90 @@
       width: 0%;
       transition: width 0.25s ease, background 0.25s ease;
     }
+    /* Master Video Walkthrough Card */
+    .landing-video-showcase {
+      margin: 36px auto 36px auto;
+      max-width: 980px;
+      text-align: left;
+    }
+    .landing-video-card {
+      background: linear-gradient(180deg, rgba(24, 24, 32, 0.9) 0%, rgba(12, 12, 16, 0.98) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius-xl);
+      padding: 20px;
+      box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(99, 102, 241, 0.12);
+      backdrop-filter: blur(16px);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    [data-theme="light"] .landing-video-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border-color: rgba(0, 0, 0, 0.1);
+      box-shadow: 0 20px 50px -15px rgba(15, 23, 42, 0.12);
+    }
+    .landing-video-card:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.85), 0 0 50px rgba(99, 102, 241, 0.2);
+    }
+    .landing-video-player-wrap {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000000;
+      box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.9), 0 4px 20px rgba(0, 0, 0, 0.4);
+      aspect-ratio: 16/9;
+    }
+    .landing-video-player-wrap video {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+    .video-chapter-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      color: var(--text-2);
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 6px 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+    [data-theme="light"] .video-chapter-chip {
+      background: rgba(0, 0, 0, 0.04);
+      border-color: rgba(0, 0, 0, 0.1);
+      color: var(--text-2);
+    }
+    .video-chapter-chip:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.5);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+    .btn-watch-video {
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #a5b4fc;
+      border-radius: var(--radius-sm);
+      padding: 12px 22px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .btn-watch-video:hover {
+      background: rgba(99, 102, 241, 0.22);
+      border-color: #818cf8;
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
     .landing-kpi-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -2443,9 +2527,82 @@
           <button class="btn-primary" style="width: auto; padding: 12px 28px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);" onclick="openAuthModal('register')">
             Get Started Free
           </button>
+          <button class="btn-watch-video" onclick="scrollToLandingVideo()" title="Watch complete 6-minute studio demo">
+            <svg class="svg-icon" viewBox="0 0 24 24" style="width: 15px; height: 15px; fill: currentColor;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Watch Video Demo (6 Min)</span>
+          </button>
           <button class="btn-action-subtle" style="padding: 12px 24px; font-size: 14px; font-weight: 600;" onclick="openAuthModal('login')">
             Sign In to Workspace
           </button>
+        </div>
+
+        <!-- Master Pitch Video Showcase Card -->
+        <div class="landing-video-showcase" id="landing-video-section">
+          <div class="landing-video-card">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.45); display: flex; align-items: center; justify-content: center; color: #818cf8; flex-shrink: 0;">
+                  <svg class="svg-icon" viewBox="0 0 24 24" style="width: 17px; height: 17px; fill: currentColor;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </div>
+                <div>
+                  <div style="font-size: 15px; font-weight: 800; color: var(--text-1); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span>Official Platform Pitch &amp; Agent Creation Workflow Walkthrough</span>
+                    <span style="font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">1080p FULL HD</span>
+                    <span style="font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">STUDIO AI NARRATED</span>
+                  </div>
+                  <div style="font-size: 12px; color: var(--text-3); margin-top: 2px;">
+                    Razorpay AI Builder Challenge 2026 Submission • 6 min 25 sec • 1x Presentation Pace
+                  </div>
+                </div>
+              </div>
+              <div style="font-size: 12px; color: var(--text-3);">
+                ⚡ Click any chapter chip below to jump to that section
+              </div>
+            </div>
+
+            <!-- 16:9 Video Player -->
+            <div class="landing-video-player-wrap">
+              <video id="pnp-landing-master-video" controls preload="metadata" playsinline>
+                <source src="/static/Plug_N_Play_AI_Master_Pitch_Demo.mp4" type="video/mp4">
+                Your browser does not support HTML5 video streaming.
+              </video>
+            </div>
+
+            <!-- Interactive Chapters -->
+            <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-subtle); display: flex; gap: 7px; flex-wrap: wrap; align-items: center;">
+              <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-4); letter-spacing: 0.5px; margin-right: 4px;">Jump to Chapter:</span>
+              <button type="button" class="video-chapter-chip" onclick="seekLandingVideo(0)">
+                <span>⚡</span> 0:00 1-Click Login
+              </button>
+              <button type="button" class="video-chapter-chip" onclick="seekLandingVideo(14)">
+                <span>🌐</span> 0:14 Dual-Engine Intro
+              </button>
+              <button type="button" class="video-chapter-chip" onclick="seekLandingVideo(64)">
+                <span>🎭</span> 1:04 Step 1: Persona
+              </button>
+              <button type="button" class="video-chapter-chip" onclick="seekLandingVideo(102)">
+                <span>📄</span> 1:42 Step 2: Vector RAG
+              </button>
+              <button type="button" class="video-chapter-chip" onclick="seekLandingVideo(142)">
+                <span>🗄️</span> 2:22 Multi-DB Federation
+              </button>
+              <button type="button" class="video-chapter-chip" onclick="seekLandingVideo(198)">
+                <span>🛡️</span> 3:18 Guardrails &amp; AST
+              </button>
+              <button type="button" class="video-chapter-chip" onclick="seekLandingVideo(246)">
+                <span>🚨</span> 4:06 Human Escalation
+              </button>
+              <button type="button" class="video-chapter-chip" onclick="seekLandingVideo(279)">
+                <span>🧪</span> 4:39 Live Sandbox
+              </button>
+              <button type="button" class="video-chapter-chip" onclick="seekLandingVideo(314)">
+                <span>💻</span> 5:14 1-Line Embed
+              </button>
+              <button type="button" class="video-chapter-chip" onclick="seekLandingVideo(349)">
+                <span>📊</span> 5:49 Fleet Telemetry
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- 4 Platform Metric Cards -->
@@ -4531,6 +4688,29 @@ Key Features & Architectural Highlights:
         toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 300);
       }, 4000);
+    }
+
+    function scrollToLandingVideo() {
+      const el = document.getElementById('landing-video-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const vid = document.getElementById('pnp-landing-master-video');
+        if (vid && vid.paused) {
+          vid.play().catch(() => {});
+        }
+      }
+    }
+
+    function seekLandingVideo(seconds) {
+      const vid = document.getElementById('pnp-landing-master-video');
+      if (vid) {
+        vid.currentTime = seconds;
+        vid.play().catch(() => {});
+        const el = document.getElementById('landing-video-section');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
     }
 
     function openAuthModal(mode = 'login') {

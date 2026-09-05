@@ -57,6 +57,9 @@ logs/
 *.bak
 .tempmediaStorage/
 .system_generated/
+temp_workflow_video/
+*.mp4
+!backend/app/static/Plug_N_Play_AI_Master_Pitch_Demo.mp4
 
 # OS-generated Files
 .DS_Store
