@@ -273,6 +273,73 @@ class QueryOrchestrator:
                 "cached": False
             }
 
+        # 0.6 Check for session identity and institution meta queries
+        is_identity_query = bool(re.search(
+            r"\b(what\s+is\s+my\s+name|what['’]?s\s+my\s+name|who\s+am\s+i|who\s+i\s+am|tell\s+me\s+my\s+name|whoami|my\s+name\??|what\s+is\s+my\s+role|what['’]?s\s+my\s+role|who\s+am\s+i\s+logged\s+in\s+as)\b",
+            effective_query.lower()
+        ))
+        if is_identity_query:
+            if is_guest:
+                identity_answer = (
+                    "You are currently chatting in guest mode (unauthenticated). "
+                    "Please log in to your account so I can verify your identity and retrieve your records."
+                )
+            else:
+                role_title = {
+                    "tpo": "Training & Placement Officer (TPO)",
+                    "admin": "System Administrator",
+                    "student": "Student",
+                    "user": "Verified User"
+                }.get(str(user_role).lower(), str(user_role).title())
+                identity_answer = f"You are currently logged in as **{external_user_id}** ({role_title})."
+
+            query_log = QueryLog(
+                tenant_id=tenant_id,
+                session_id=session.id,
+                user_query=user_query,
+                route_chosen="SESSION_IDENTITY",
+                total_tokens=len(user_query.split()) + len(identity_answer.split()),
+                error_message=None
+            )
+            db.add(query_log)
+            await db.commit()
+            return {
+                "answer": identity_answer,
+                "route_chosen": "SESSION_IDENTITY",
+                "structured_data": None,
+                "rag_sources": [],
+                "generated_sql": None,
+                "session_id": session.id,
+                "cached": False
+            }
+
+        is_institution_query = bool(re.search(
+            r"\b(what\s+is\s+(?:the\s+name\s+of\s+(?:our|the|this)\s+)?(?:our|the|my|this)?\s*(?:college|university|institution|campus|school)\s*(?:name)?|which\s+(?:college|university|institution|campus)\s*(?:is\s+this)?)\b",
+            effective_query.lower()
+        ))
+        if is_institution_query:
+            inst_name = tenant.name if (tenant and tenant.name and tenant.name.lower() not in ("default", "system")) else "SmartPath Placement Intelligence"
+            inst_answer = f"You are connected to the official campus placement portal for **{inst_name}**."
+            query_log = QueryLog(
+                tenant_id=tenant_id,
+                session_id=session.id,
+                user_query=user_query,
+                route_chosen="SESSION_IDENTITY",
+                total_tokens=len(user_query.split()) + len(inst_answer.split()),
+                error_message=None
+            )
+            db.add(query_log)
+            await db.commit()
+            return {
+                "answer": inst_answer,
+                "route_chosen": "SESSION_IDENTITY",
+                "structured_data": None,
+                "rag_sources": [],
+                "generated_sql": None,
+                "session_id": session.id,
+                "cached": False
+            }
+
         # 1. Route Intent with Agent Service Type Awareness
         if agent and agent.description and agent.description.upper().startswith("RAG"):
             intent, reason = "RAG", "Agent configured strictly for Document RAG"
@@ -1096,7 +1163,7 @@ Context Information:
 
         # 0.5 Check for personal data lookup from unauthenticated guest session
         is_self_query = bool(re.search(r"\b(my|mine|me|myself|i am|for me)\b", effective_query.lower()))
-        is_personal_metric = bool(re.search(r"\b(cgpa|gpa|sgpa|attendance|grade|grades|marks|score|scores|backlog|backlogs|fees?|fee_invoices?|admit card|hall ticket)\b", effective_query.lower()))
+        is_personal_metric = bool(re.search(r"\b(cgpa|gpa|sgpa|prn|roll\s*no|roll\s*number|registration\s*no|registration\s*number|student\s*id|attendance|grade|grades|marks|score|scores|backlog|backlogs|readiness|placement\s*status|fees?|fee_invoices?|admit card|hall ticket)\b", effective_query.lower()))
         is_guest = not external_user_id or str(external_user_id).lower().strip() in ("guest", "anonymous", "guest_user", "null", "none", "")
 
         if is_self_query and is_personal_metric and is_guest:
@@ -1125,6 +1192,89 @@ Context Information:
                 user_query=user_query,
                 route_chosen="GUEST_AUTH_REQUIRED",
                 total_tokens=len(user_query.split()) + len(guest_answer.split()),
+                error_message=None
+            )
+            db.add(query_log)
+            await db.commit()
+            await db.refresh(asst_msg)
+            yield f"data: {json.dumps({'event': 'done', 'message_id': asst_msg.id, 'total_ms': int((time.time() - start_time) * 1000)})}\n\n"
+            return
+
+        # 0.6 Check for session identity and institution meta queries
+        is_identity_query = bool(re.search(
+            r"\b(what\s+is\s+my\s+name|what['’]?s\s+my\s+name|who\s+am\s+i|who\s+i\s+am|tell\s+me\s+my\s+name|whoami|my\s+name\??|what\s+is\s+my\s+role|what['’]?s\s+my\s+role|who\s+am\s+i\s+logged\s+in\s+as)\b",
+            effective_query.lower()
+        ))
+        if is_identity_query:
+            if is_guest:
+                identity_answer = (
+                    "You are currently chatting in guest mode (unauthenticated). "
+                    "Please log in to your account so I can verify your identity and retrieve your records."
+                )
+            else:
+                role_title = {
+                    "tpo": "Training & Placement Officer (TPO)",
+                    "admin": "System Administrator",
+                    "student": "Student",
+                    "user": "Verified User"
+                }.get(str(user_role).lower(), str(user_role).title())
+                identity_answer = f"You are currently logged in as **{external_user_id}** ({role_title})."
+
+            yield f"data: {json.dumps({'event': 'meta', 'route': 'SESSION_IDENTITY', 'cached': False})}\n\n"
+            words = identity_answer.split(" ")
+            for i, w in enumerate(words):
+                token = w + (" " if i < len(words) - 1 else "")
+                yield f"data: {json.dumps({'event': 'token', 'token': token})}\n\n"
+                await asyncio.sleep(0.01)
+
+            asst_msg = ChatMessage(
+                session_id=session.id,
+                role="assistant",
+                content=identity_answer,
+                metadata_json={"route_chosen": "SESSION_IDENTITY"}
+            )
+            db.add(asst_msg)
+            query_log = QueryLog(
+                tenant_id=tenant_id,
+                session_id=session.id,
+                user_query=user_query,
+                route_chosen="SESSION_IDENTITY",
+                total_tokens=len(user_query.split()) + len(identity_answer.split()),
+                error_message=None
+            )
+            db.add(query_log)
+            await db.commit()
+            await db.refresh(asst_msg)
+            yield f"data: {json.dumps({'event': 'done', 'message_id': asst_msg.id, 'total_ms': int((time.time() - start_time) * 1000)})}\n\n"
+            return
+
+        is_institution_query = bool(re.search(
+            r"\b(what\s+is\s+(?:the\s+name\s+of\s+(?:our|the|this)\s+)?(?:our|the|my|this)?\s*(?:college|university|institution|campus|school)\s*(?:name)?|which\s+(?:college|university|institution|campus)\s*(?:is\s+this)?)\b",
+            effective_query.lower()
+        ))
+        if is_institution_query:
+            inst_name = tenant.name if (tenant and tenant.name and tenant.name.lower() not in ("default", "system")) else "SmartPath Placement Intelligence"
+            inst_answer = f"You are connected to the official campus placement portal for **{inst_name}**."
+            yield f"data: {json.dumps({'event': 'meta', 'route': 'SESSION_IDENTITY', 'cached': False})}\n\n"
+            words = inst_answer.split(" ")
+            for i, w in enumerate(words):
+                token = w + (" " if i < len(words) - 1 else "")
+                yield f"data: {json.dumps({'event': 'token', 'token': token})}\n\n"
+                await asyncio.sleep(0.01)
+
+            asst_msg = ChatMessage(
+                session_id=session.id,
+                role="assistant",
+                content=inst_answer,
+                metadata_json={"route_chosen": "SESSION_IDENTITY"}
+            )
+            db.add(asst_msg)
+            query_log = QueryLog(
+                tenant_id=tenant_id,
+                session_id=session.id,
+                user_query=user_query,
+                route_chosen="SESSION_IDENTITY",
+                total_tokens=len(user_query.split()) + len(inst_answer.split()),
                 error_message=None
             )
             db.add(query_log)

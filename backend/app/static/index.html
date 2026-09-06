@@ -4911,6 +4911,12 @@ Key Features & Architectural Highlights:
         document.getElementById('view-studio').style.display = 'block';
         btnStudio.classList.add('active');
         btnDash.classList.remove('active');
+        if (currentAuth?.tenant?.name) {
+          const projInput = document.getElementById('wiz-proj-name');
+          if (projInput && (!projInput.value || projInput.value === 'My Project')) {
+            projInput.value = currentAuth.tenant.name;
+          }
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }

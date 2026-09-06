@@ -666,9 +666,9 @@
     const closeBtn = chatWindow.querySelector('#pnp-close-btn') || chatWindow.querySelector('.pnp-close-btn');
     const chipsContainer = chatWindow.querySelector('#pnp-chips-container') || chatWindow.querySelector('.pnp-starter-chips');
 
-    // Populate Starter Prompt Chips
-    if (chipsContainer && starterPrompts && starterPrompts.length > 0) {
-        chipsContainer.innerHTML = '';
+    function renderStarterChips(container) {
+        if (!container || !starterPrompts || starterPrompts.length === 0) return;
+        container.innerHTML = '';
         starterPrompts.forEach(promptText => {
             const chip = document.createElement('button');
             chip.type = 'button';
@@ -681,8 +681,42 @@
                     handleSend();
                 }
             };
-            chipsContainer.appendChild(chip);
+            container.appendChild(chip);
         });
+    }
+
+    function resetChatUI() {
+        if (!msgList) return;
+        msgList.innerHTML = `
+            <div class="pnp-msg pnp-msg-asst">
+                <div>${welcomeMsg}</div>
+                <div class="pnp-starter-chips" id="pnp-chips-container"></div>
+            </div>
+        `;
+        const newChips = msgList.querySelector('#pnp-chips-container');
+        if (newChips) {
+            renderStarterChips(newChips);
+        }
+    }
+
+    // Populate Initial Starter Prompt Chips
+    renderStarterChips(chipsContainer);
+
+    function tryParseJwt(tokenStr) {
+        if (typeof tokenStr !== 'string' || !tokenStr.includes('.')) return null;
+        const parts = tokenStr.split('.');
+        if (parts.length !== 3) return null;
+        try {
+            const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+            const json = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            return JSON.parse(json);
+        } catch (_) {
+            try {
+                return JSON.parse(atob(parts[1]));
+            } catch (__) {
+                return null;
+            }
+        }
     }
 
     function getCurrentUserContext() {
@@ -691,55 +725,91 @@
         let activeUserId = winCtx.userId || winCtx.id || winCtx.externalUserId || winCtx.prn || winCtx.studentId || winCtx.student_id || winCtx.email || (scriptTag && scriptTag.getAttribute('data-user-id')) || userId;
         let activeUserRole = winCtx.userRole || winCtx.role || (scriptTag && scriptTag.getAttribute('data-user-role')) || userRole;
 
-        // 2. Intelligent LocalStorage Inspection (Auto-detect logged-in student/user on any web framework)
+        // 2. Intelligent Storage & JWT Inspection (Auto-detect logged-in student/user on any web framework)
         if (!activeUserId || activeUserId === 'guest_user' || activeUserId === 'guest') {
             try {
-                const searchKeys = [
+                const storages = [];
+                try { if (window.localStorage) storages.push(window.localStorage); } catch (_) {}
+                try { if (window.sessionStorage) storages.push(window.sessionStorage); } catch (_) {}
+
+                const priorityKeys = [
                     'user', 'currentUser', 'student', 'student_user', 'studentUser', 'profile', 
                     'userData', 'userInfo', 'smartpath_user', 'placementiq_user', 'placementiq', 
-                    'auth', 'auth_user', 'authUser', 'session'
+                    'auth', 'auth_user', 'authUser', 'session', 'account', 'tpo_user', 'admin_user',
+                    'token', 'access_token', 'jwt', 'auth_token', 'id_token'
                 ];
-                for (let k of searchKeys) {
-                    const raw = localStorage.getItem(k);
-                    if (!raw) continue;
-                    try {
-                        const parsed = JSON.parse(raw);
-                        if (parsed && typeof parsed === 'object') {
-                            const u = parsed.user || parsed.student || parsed;
-                            const foundId = u.prn || u.PRN || u.student_id || u.studentId || u.id || u.name || u.fullName || u.full_name || u.student_name || u.email;
-                            if (foundId) {
-                                activeUserId = foundId;
-                                if (u.role || u.user_role || u.userRole) {
-                                    activeUserRole = u.role || u.user_role || u.userRole;
-                                }
-                                break;
-                            }
-                        }
-                    } catch (_) {}
-                }
 
-                // Scan all other localStorage keys for user objects if still not found
-                if (!activeUserId || activeUserId === 'guest_user' || activeUserId === 'guest') {
-                    for (let i = 0; i < localStorage.length; i++) {
-                        const k = localStorage.key(i);
-                        if (!k || k.startsWith('pnp_') || k.startsWith('vite') || k.startsWith('ally-')) continue;
+                for (const store of storages) {
+                    for (let k of priorityKeys) {
+                        const raw = store.getItem(k);
+                        if (!raw) continue;
+                        // Try parsing JSON
                         try {
-                            const parsed = JSON.parse(localStorage.getItem(k));
+                            const parsed = JSON.parse(raw);
                             if (parsed && typeof parsed === 'object') {
-                                const foundId = parsed.prn || parsed.student_id || parsed.name || parsed.fullName || parsed.full_name || parsed.student_name;
-                                if (foundId && typeof foundId === 'string' && foundId.length > 2) {
+                                const u = parsed.user || parsed.student || parsed.profile || parsed.data || parsed;
+                                const foundId = u.prn || u.PRN || u.student_id || u.studentId || u.id || u.name || u.fullName || u.full_name || u.student_name || u.email;
+                                if (foundId && typeof foundId === 'string' && foundId.length > 2 && !foundId.includes('@example.com')) {
                                     activeUserId = foundId;
-                                    if (parsed.role) activeUserRole = parsed.role;
+                                    if (u.role || u.user_role || u.userRole) {
+                                        activeUserRole = u.role || u.user_role || u.userRole;
+                                    }
                                     break;
                                 }
                             }
                         } catch (_) {}
+
+                        // Try parsing JWT token
+                        const jwtPayload = tryParseJwt(raw);
+                        if (jwtPayload) {
+                            const foundId = jwtPayload.name || jwtPayload.full_name || jwtPayload.fullName || jwtPayload.student_name || jwtPayload.prn || jwtPayload.email || jwtPayload.sub;
+                            if (foundId && typeof foundId === 'string' && foundId.length > 2 && !foundId.includes('@example.com')) {
+                                activeUserId = foundId;
+                                if (jwtPayload.role || jwtPayload.user_role || jwtPayload.userRole) {
+                                    activeUserRole = jwtPayload.role || jwtPayload.user_role || jwtPayload.userRole;
+                                }
+                                break;
+                            }
+                        }
                     }
+                    if (activeUserId && activeUserId !== 'guest_user' && activeUserId !== 'guest') break;
+
+                    // Fallback: Scan all keys in this storage
+                    for (let i = 0; i < store.length; i++) {
+                        const k = store.key(i);
+                        if (!k || k.startsWith('pnp_') || k.startsWith('vite') || k.startsWith('ally-')) continue;
+                        const val = store.getItem(k);
+                        if (!val) continue;
+
+                        try {
+                            const parsed = JSON.parse(val);
+                            if (parsed && typeof parsed === 'object') {
+                                const u = parsed.user || parsed.student || parsed.profile || parsed.data || parsed;
+                                const foundId = u.prn || u.PRN || u.student_id || u.studentId || u.id || u.name || u.fullName || u.full_name || u.student_name || u.email;
+                                if (foundId && typeof foundId === 'string' && foundId.length > 2 && !foundId.includes('@example.com')) {
+                                    activeUserId = foundId;
+                                    if (u.role || u.user_role || u.userRole) activeUserRole = u.role || u.user_role || u.userRole;
+                                    break;
+                                }
+                            }
+                        } catch (_) {}
+
+                        const jwtPayload = tryParseJwt(val);
+                        if (jwtPayload) {
+                            const foundId = jwtPayload.name || jwtPayload.full_name || jwtPayload.fullName || jwtPayload.prn || jwtPayload.email || jwtPayload.sub;
+                            if (foundId && typeof foundId === 'string' && foundId.length > 2 && !foundId.includes('@example.com')) {
+                                activeUserId = foundId;
+                                if (jwtPayload.role || jwtPayload.user_role || jwtPayload.userRole) activeUserRole = jwtPayload.role || jwtPayload.user_role || jwtPayload.userRole;
+                                break;
+                            }
+                        }
+                    }
+                    if (activeUserId && activeUserId !== 'guest_user' && activeUserId !== 'guest') break;
                 }
             } catch (_) {}
         }
 
-        // 3. Ambient DOM Heuristics (e.g. "Hi Krutika Gadiwan,", dashboard headings, user profile chips)
+        // 3. Ambient DOM Heuristics (Greetings, profile badges, navbar buttons)
         if (!activeUserId || activeUserId === 'guest_user' || activeUserId === 'guest') {
             try {
                 // Check meta tags or data attributes
@@ -748,15 +818,35 @@
                     activeUserId = elWithUser.getAttribute('data-user-id') || elWithUser.getAttribute('data-user-name') || elWithUser.getAttribute('data-student-name') || elWithUser.getAttribute('data-student-id');
                 }
 
-                // Check welcome heading pattern: "Hi Krutika Gadiwan,", "Welcome John Doe"
+                // Check welcome heading pattern: "Hi Krutika Gadiwan,", "Welcome Chetan Awati", "Good morning, Chetan Awati"
                 if (!activeUserId || activeUserId === 'guest_user' || activeUserId === 'guest') {
-                    const headings = document.querySelectorAll('h1, h2, h3, .user-name, .student-name, .profile-name, .welcome-msg');
+                    const headings = document.querySelectorAll('h1, h2, h3, .user-name, .student-name, .profile-name, .welcome-msg, .header-title');
                     for (let h of headings) {
                         const txt = (h.innerText || h.textContent || '').trim();
-                        const match = txt.match(/(?:hi|hello|welcome|hey),?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/i);
+                        const match = txt.match(/(?:hi|hello|welcome|hey|good\s+(?:morning|afternoon|evening)),?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/i);
                         if (match && match[1]) {
                             activeUserId = match[1].trim();
                             break;
+                        }
+                    }
+                }
+
+                // Check top-right navbar profile buttons / badges
+                if (!activeUserId || activeUserId === 'guest_user' || activeUserId === 'guest') {
+                    const profileSelectors = [
+                        'header button', 'nav button', '.navbar button', 
+                        'header .profile', 'nav .profile', '.user-menu', 
+                        '[aria-label*="profile" i]', '[aria-label*="account" i]'
+                    ];
+                    for (let sel of profileSelectors) {
+                        const el = document.querySelector(sel);
+                        if (el) {
+                            const txt = (el.innerText || el.textContent || '').trim();
+                            const nameMatch = txt.match(/^([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})$/);
+                            if (nameMatch && !['Sign In', 'Log In', 'Sign Out', 'Log Out', 'Dashboard', 'Admin Panel'].includes(nameMatch[1])) {
+                                activeUserId = nameMatch[1].trim();
+                                break;
+                            }
                         }
                     }
                 }
@@ -766,8 +856,8 @@
         // 4. Role Auto-Detection from Path or Workspace Badges
         if (!activeUserRole || activeUserRole === 'user') {
             const path = window.location.pathname.toLowerCase();
-            const bodyText = document.body ? document.body.innerText.slice(0, 1000).toLowerCase() : '';
-            if (path.includes('/tpo') || bodyText.includes('tpo workspace') || bodyText.includes('training & placement officer')) {
+            const bodyText = document.body ? document.body.innerText.slice(0, 1500).toLowerCase() : '';
+            if (path.includes('/tpo') || bodyText.includes('tpo workspace') || bodyText.includes('training & placement officer') || bodyText.includes('tpo dashboard')) {
                 activeUserRole = 'tpo';
             } else if (path.includes('/student') || path.includes('/dashboard') || bodyText.includes('student workspace')) {
                 activeUserRole = 'student';
@@ -807,10 +897,54 @@
         isOpen = !isOpen;
         chatWindow.style.display = isOpen ? 'flex' : 'none';
         if (isOpen) {
+            const ctx = getCurrentUserContext();
+            if (currentSessionUserId !== null && (currentSessionUserId !== ctx.userId || currentSessionUserRole !== ctx.userRole)) {
+                sessionToken = null;
+                activeSessionId = null;
+                resetChatUI();
+            }
             setTimeout(() => { if (inputField) inputField.focus(); }, 50);
             ensureSession();
         }
     }
+
+    if (triggerBtn) triggerBtn.onclick = toggleChat;
+    if (closeBtn) closeBtn.onclick = toggleChat;
+
+    // --- SPA Route & Storage Change Listeners ---
+    function handleSPAContextChange() {
+        const ctx = getCurrentUserContext();
+        if (currentSessionUserId !== null && (currentSessionUserId !== ctx.userId || currentSessionUserRole !== ctx.userRole)) {
+            sessionToken = null;
+            activeSessionId = null;
+            resetChatUI();
+            if (isOpen) {
+                ensureSession();
+            }
+        }
+    }
+
+    window.addEventListener('popstate', handleSPAContextChange);
+    window.addEventListener('storage', handleSPAContextChange);
+
+    try {
+        const _origPushState = window.history.pushState;
+        if (_origPushState) {
+            window.history.pushState = function() {
+                const ret = _origPushState.apply(this, arguments);
+                setTimeout(handleSPAContextChange, 120);
+                return ret;
+            };
+        }
+        const _origReplaceState = window.history.replaceState;
+        if (_origReplaceState) {
+            window.history.replaceState = function() {
+                const ret = _origReplaceState.apply(this, arguments);
+                setTimeout(handleSPAContextChange, 120);
+                return ret;
+            };
+        }
+    } catch (_) {}
 
     if (triggerBtn) triggerBtn.onclick = toggleChat;
     if (closeBtn) closeBtn.onclick = toggleChat;
@@ -990,6 +1124,13 @@
 
     async function ensureSession() {
         const ctx = getCurrentUserContext();
+        const isMismatch = (currentSessionUserId !== null && (currentSessionUserId !== ctx.userId || currentSessionUserRole !== ctx.userRole));
+        if (isMismatch) {
+            sessionToken = null;
+            activeSessionId = null;
+            resetChatUI();
+        }
+
         // If we already have an active session matching current authenticated user and role, reuse it
         if (sessionToken && activeSessionId && currentSessionUserId === ctx.userId && currentSessionUserRole === ctx.userRole) {
             return sessionToken;
@@ -1035,6 +1176,7 @@
         activeSessionId = null;
         currentSessionUserId = null;
         currentSessionUserRole = null;
+        resetChatUI();
         try { localStorage.removeItem('pnp_session_' + agentId); } catch (e) {}
         ensureSession();
     };
@@ -1043,6 +1185,7 @@
         activeSessionId = null;
         currentSessionUserId = null;
         currentSessionUserRole = null;
+        resetChatUI();
         try { localStorage.removeItem('pnp_session_' + agentId); } catch (e) {}
         ensureSession();
     };

@@ -73,3 +73,164 @@ def test_direct_db_undecryptable_url_rejection():
         normalize_db_url(bad_url)
     assert "could not be decrypted" in str(exc.value)
 
+
+def test_session_identity_query_detection():
+    """Verify regex patterns accurately catch self-identity and role questions."""
+    import re
+    identity_regex = r"\b(what\s+is\s+my\s+name|what['’]?s\s+my\s+name|who\s+am\s+i|who\s+i\s+am|tell\s+me\s+my\s+name|whoami|my\s+name\??|what\s+is\s+my\s+role|what['’]?s\s+my\s+role|who\s+am\s+i\s+logged\s+in\s+as)\b"
+    
+    queries = [
+        "what is my name",
+        "what's my name",
+        "who am i",
+        "who i am",
+        "tell me my name",
+        "whoami",
+        "what is my role",
+        "what's my role",
+        "who am i logged in as"
+    ]
+    for q in queries:
+        assert bool(re.search(identity_regex, q.lower())), f"Query '{q}' should match identity regex"
+
+    # Non-identity questions should NOT match
+    assert not bool(re.search(identity_regex, "what is the name of Krutika Gadiwan"))
+    assert not bool(re.search(identity_regex, "what is my cgpa"))
+
+
+def test_institution_query_detection():
+    """Verify regex patterns accurately catch college and university inquiries."""
+    import re
+    inst_regex = r"\b(what\s+is\s+(?:the\s+name\s+of\s+(?:our|the|this)\s+)?(?:our|the|my|this)?\s*(?:college|university|institution|campus|school)\s*(?:name)?|which\s+(?:college|university|institution|campus)\s*(?:is\s+this)?)\b"
+    
+    queries = [
+        "what is our college name",
+        "what is the college name",
+        "what is my college name",
+        "which college is this",
+        "what is the name of our college",
+        "which university is this"
+    ]
+    for q in queries:
+        assert bool(re.search(inst_regex, q.lower())), f"Query '{q}' should match institution regex"
+
+
+@pytest.mark.asyncio
+async def test_process_query_session_identity_tpo():
+    """Verify TPO asking 'what is my name' receives an instantaneous role-aware identity confirmation."""
+    from unittest.mock import AsyncMock, MagicMock
+    from app.models.tenants import Tenant
+    from app.models.agents import Agent
+    from app.models.chat import ChatSession
+
+    mock_db = AsyncMock()
+    mock_tenant = Tenant(id="tenant-123", name="MIT College of Engineering", slug="mit-coe")
+    mock_tenant.monthly_query_limit = 1000
+    mock_tenant.queries_used_this_month = 5
+
+    def mock_get(model, ident):
+        if model == Tenant:
+            return mock_tenant
+        if model == Agent:
+            return Agent(id=ident, name="Placement AI", guardrail_config=None)
+        return None
+    mock_db.get.side_effect = mock_get
+
+    mock_res = MagicMock()
+    mock_res.scalars.return_value.all.return_value = []
+    mock_db.execute.return_value = mock_res
+    mock_db.add = MagicMock()
+
+    session = ChatSession(
+        id="sess-tpo-001",
+        tenant_id="tenant-123",
+        agent_id="agent-001",
+        external_user_id="Chetan Awati",
+        user_role="tpo"
+    )
+
+    res = await QueryOrchestrator.process_query(mock_db, session, "what is my name")
+    assert res["route_chosen"] == "SESSION_IDENTITY"
+    assert "Chetan Awati" in res["answer"]
+    assert "Training & Placement Officer (TPO)" in res["answer"]
+
+
+@pytest.mark.asyncio
+async def test_process_query_session_identity_student():
+    """Verify student asking 'what is my name' receives verified student identity confirmation."""
+    from unittest.mock import AsyncMock, MagicMock
+    from app.models.tenants import Tenant
+    from app.models.agents import Agent
+    from app.models.chat import ChatSession
+
+    mock_db = AsyncMock()
+    mock_tenant = Tenant(id="tenant-123", name="MIT College of Engineering", slug="mit-coe")
+    mock_tenant.monthly_query_limit = 1000
+    mock_tenant.queries_used_this_month = 5
+
+    def mock_get(model, ident):
+        if model == Tenant:
+            return mock_tenant
+        if model == Agent:
+            return Agent(id=ident, name="Placement AI", guardrail_config=None)
+        return None
+    mock_db.get.side_effect = mock_get
+
+    mock_res = MagicMock()
+    mock_res.scalars.return_value.all.return_value = []
+    mock_db.execute.return_value = mock_res
+    mock_db.add = MagicMock()
+
+    session = ChatSession(
+        id="sess-stu-001",
+        tenant_id="tenant-123",
+        agent_id="agent-001",
+        external_user_id="Krutika Gadiwan",
+        user_role="student"
+    )
+
+    res = await QueryOrchestrator.process_query(mock_db, session, "who am i")
+    assert res["route_chosen"] == "SESSION_IDENTITY"
+    assert "Krutika Gadiwan" in res["answer"]
+    assert "Student" in res["answer"]
+
+
+@pytest.mark.asyncio
+async def test_process_query_institution_portal():
+    """Verify user asking 'what is our college name' receives institutional context without error."""
+    from unittest.mock import AsyncMock, MagicMock
+    from app.models.tenants import Tenant
+    from app.models.agents import Agent
+    from app.models.chat import ChatSession
+
+    mock_db = AsyncMock()
+    mock_tenant = Tenant(id="tenant-123", name="MIT College of Engineering", slug="mit-coe")
+    mock_tenant.monthly_query_limit = 1000
+    mock_tenant.queries_used_this_month = 5
+
+    def mock_get(model, ident):
+        if model == Tenant:
+            return mock_tenant
+        if model == Agent:
+            return Agent(id=ident, name="Placement AI", guardrail_config=None)
+        return None
+    mock_db.get.side_effect = mock_get
+
+    mock_res = MagicMock()
+    mock_res.scalars.return_value.all.return_value = []
+    mock_db.execute.return_value = mock_res
+    mock_db.add = MagicMock()
+
+    session = ChatSession(
+        id="sess-inst-001",
+        tenant_id="tenant-123",
+        agent_id="agent-001",
+        external_user_id="Chetan Awati",
+        user_role="tpo"
+    )
+
+    res = await QueryOrchestrator.process_query(mock_db, session, "what is our college name")
+    assert res["route_chosen"] == "SESSION_IDENTITY"
+    assert "MIT College of Engineering" in res["answer"]
+
+
