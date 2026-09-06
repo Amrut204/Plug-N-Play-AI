@@ -1558,6 +1558,86 @@
       border-color: var(--primary);
     }
 
+    /* Embed Multi-Step Framework Guide */
+    .embed-step-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .embed-step-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .embed-step-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-1);
+    }
+    .embed-step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .embed-file-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #a5b4fc;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .embed-quick-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--code-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 7px 12px;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: #e2e8f0;
+      overflow-x: auto;
+    }
+    .embed-tip-box {
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.28);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--text-2);
+      line-height: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
     /* Telemetry Table */
     .logs-table {
       width: 100%;
@@ -2311,7 +2391,7 @@
   <!-- MODAL: QUICK EMBED SNIPPETS (MULTI-FRAMEWORK)             -->
   <!-- ======================================================== -->
   <div class="modal-overlay" id="modal-embed" style="display: none;">
-    <div class="modal-card" style="max-width: 680px;">
+    <div class="modal-card" style="max-width: 860px; width: 92vw; max-height: 88vh; overflow-y: auto;">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
         <div style="font-size: 16px; font-weight: 700; color: var(--text-1);">Deploy Widget to Any Frontend Framework</div>
         <button onclick="closeEmbedModal()" class="btn-logout" style="font-size: 14px;">✕</button>
@@ -2322,9 +2402,9 @@
         <div style="display: flex; align-items: center; gap: 10px;">
           <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;">2</span>
           <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">
-            <strong style="color: var(--text-1);">2-Step Framework Integration:</strong>
-            <strong>Step 1:</strong> Create component file &bull;
-            <strong>Step 2:</strong> Import &amp; mount <code>&lt;AIWidget /&gt;</code> in your root <code>App.tsx</code> or layout template so it renders on screen.
+            <strong style="color: var(--text-1);">Clear 2-Step Framework Integration:</strong>
+            <strong>Step 1:</strong> Create the component file &bull;
+            <strong>Step 2:</strong> Import &amp; mount <code>&lt;AIWidget /&gt;</code> in your root <code>App.tsx</code> / <code>router.tsx</code> so it floats across your app.
           </div>
         </div>
         <span style="font-size: 11px; color: var(--accent-green); background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 600;">React 18 StrictMode Safe</span>
@@ -2340,73 +2420,310 @@
         <button class="tab-btn" onclick="switchQuickEmbedTab('svelte')">Svelte / SvelteKit</button>
       </div>
 
+      <!-- 1. HTML -->
       <div id="quick-embed-html" class="quick-snip-pane">
-        <div class="code-box">
-          <div class="code-header">
-            <span>Paste before &lt;/body&gt; in HTML / WordPress / Shopify / Webflow</span>
-            <button class="copy-btn" onclick="copySnippet('quick-code-html')">Copy Script Tag</button>
+        <div class="embed-step-card">
+          <div class="embed-step-header">
+            <div class="embed-step-title">
+              <span class="embed-step-num">1</span>
+              <span>Paste Widget Script before &lt;/body&gt;</span>
+            </div>
+            <span class="embed-file-badge">📁 File: index.html or theme footer (footer.php)</span>
           </div>
-          <pre id="quick-code-html"></pre>
+          <p style="font-size: 12px; color: var(--text-3); margin: 0;">
+            Embed directly in plain HTML, WordPress, Webflow, Shopify, Wix, Squarespace, or PHP applications.
+          </p>
+          <div class="code-box" style="margin-top: 4px;">
+            <div class="code-header">
+              <span>HTML Script Tag</span>
+              <button class="copy-btn" onclick="copySnippet('quick-code-html')">Copy Script Tag</button>
+            </div>
+            <pre id="quick-code-html"></pre>
+          </div>
+          <div class="embed-tip-box">
+            <span>💡</span>
+            <div>
+              <strong>Dynamic Identity Attributes:</strong> Add <code>data-user-id="123"</code> and <code>data-user-role="admin"</code> to the <code>&lt;script&gt;</code> tag to automatically enforce role-based access controls (RBAC) and row-level security.
+            </div>
+          </div>
         </div>
       </div>
 
+      <!-- 2. React TSX -->
       <div id="quick-embed-react-ts" class="quick-snip-pane" style="display: none;">
-        <div class="code-box">
-          <div class="code-header">
-            <span>Step 1: Create src/components/AIWidget.tsx &rarr; Step 2: Mount &lt;AIWidget /&gt; in src/App.tsx</span>
-            <button class="copy-btn" onclick="copySnippet('quick-code-react-ts')">Copy TSX Hook</button>
+        <!-- Step 1 Card -->
+        <div class="embed-step-card">
+          <div class="embed-step-header">
+            <div class="embed-step-title">
+              <span class="embed-step-num">1</span>
+              <span>Create AI Widget Component File</span>
+            </div>
+            <span class="embed-file-badge">📁 File to Create: src/components/AIWidget.tsx</span>
           </div>
-          <pre id="quick-code-react-ts"></pre>
+          <p style="font-size: 12px; color: var(--text-3); margin: 0;">
+            Creates a React 18 StrictMode-safe floating widget component with cleanup handling.
+          </p>
+          <div class="code-box" style="margin-top: 4px;">
+            <div class="code-header">
+              <span>src/components/AIWidget.tsx</span>
+              <button class="copy-btn" onclick="copySnippet('quick-code-react-ts-comp')">Copy Component Code</button>
+            </div>
+            <pre id="quick-code-react-ts-comp"></pre>
+          </div>
+        </div>
+
+        <!-- Step 2 Card -->
+        <div class="embed-step-card">
+          <div class="embed-step-header">
+            <div class="embed-step-title">
+              <span class="embed-step-num">2</span>
+              <span>Import &amp; Mount in Root (App.tsx or router.tsx)</span>
+            </div>
+            <span class="embed-file-badge">📁 Where to Import: src/App.tsx or src/router.tsx</span>
+          </div>
+          <p style="font-size: 12px; color: var(--text-3); margin: 0;">
+            Import the component and place <code>&lt;AIWidget /&gt;</code> inside your root component or router layout.
+          </p>
+          
+          <div style="display: flex; flex-direction: column; gap: 8px; margin: 4px 0;">
+            <div class="embed-quick-row">
+              <code>import { AIWidget } from './components/AIWidget';</code>
+              <button class="copy-btn" onclick="copySnippetImport('react-ts')">Copy Import</button>
+            </div>
+            <div class="embed-quick-row">
+              <code>&lt;AIWidget userId="guest" userRole="user" /&gt;</code>
+              <button class="copy-btn" onclick="copySnippetTag('react-ts')">Copy Tag</button>
+            </div>
+          </div>
+
+          <div class="code-box" style="margin-top: 4px;">
+            <div class="code-header">
+              <span>Full App.tsx Example</span>
+              <button class="copy-btn" onclick="copySnippet('quick-code-react-ts-example')">Copy App.tsx Example</button>
+            </div>
+            <pre id="quick-code-react-ts-example"></pre>
+          </div>
+
+          <div class="embed-tip-box">
+            <span>🔒</span>
+            <div>
+              <strong>Dynamic Auth &amp; RBAC:</strong> Pass real logged-in credentials (e.g., <code>user.id</code>, <code>user.role</code>). The agent will automatically scope database queries and document answers to the authenticated user's permissions.
+            </div>
+          </div>
         </div>
       </div>
 
+      <!-- 3. React JSX -->
       <div id="quick-embed-react-js" class="quick-snip-pane" style="display: none;">
-        <div class="code-box">
-          <div class="code-header">
-            <span>Step 1: Create src/components/AIWidget.jsx &rarr; Step 2: Mount &lt;AIWidget /&gt; in src/App.jsx</span>
-            <button class="copy-btn" onclick="copySnippet('quick-code-react-js')">Copy JSX Hook</button>
+        <div class="embed-step-card">
+          <div class="embed-step-header">
+            <div class="embed-step-title">
+              <span class="embed-step-num">1</span>
+              <span>Create AI Widget Component File</span>
+            </div>
+            <span class="embed-file-badge">📁 File to Create: src/components/AIWidget.jsx</span>
           </div>
-          <pre id="quick-code-react-js"></pre>
+          <p style="font-size: 12px; color: var(--text-3); margin: 0;">
+            Standard React JSX component with auto-cleanup and mount lifecycle.
+          </p>
+          <div class="code-box" style="margin-top: 4px;">
+            <div class="code-header">
+              <span>src/components/AIWidget.jsx</span>
+              <button class="copy-btn" onclick="copySnippet('quick-code-react-js-comp')">Copy Component Code</button>
+            </div>
+            <pre id="quick-code-react-js-comp"></pre>
+          </div>
+        </div>
+
+        <div class="embed-step-card">
+          <div class="embed-step-header">
+            <div class="embed-step-title">
+              <span class="embed-step-num">2</span>
+              <span>Import &amp; Mount in App.jsx</span>
+            </div>
+            <span class="embed-file-badge">📁 Where to Import: src/App.jsx</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin: 4px 0;">
+            <div class="embed-quick-row">
+              <code>import { AIWidget } from './components/AIWidget';</code>
+              <button class="copy-btn" onclick="copySnippetImport('react-js')">Copy Import</button>
+            </div>
+            <div class="embed-quick-row">
+              <code>&lt;AIWidget userId="guest" userRole="user" /&gt;</code>
+              <button class="copy-btn" onclick="copySnippetTag('react-js')">Copy Tag</button>
+            </div>
+          </div>
+          <div class="code-box" style="margin-top: 4px;">
+            <div class="code-header">
+              <span>Full App.jsx Example</span>
+              <button class="copy-btn" onclick="copySnippet('quick-code-react-js-example')">Copy App.jsx Example</button>
+            </div>
+            <pre id="quick-code-react-js-example"></pre>
+          </div>
         </div>
       </div>
 
+      <!-- 4. Next.js -->
       <div id="quick-embed-nextjs" class="quick-snip-pane" style="display: none;">
-        <div class="code-box">
-          <div class="code-header">
-            <span>app/layout.tsx (Next.js 13/14/15 App Router with next/script)</span>
-            <button class="copy-btn" onclick="copySnippet('quick-code-nextjs')">Copy Next.js Script</button>
+        <div class="embed-step-card">
+          <div class="embed-step-header">
+            <div class="embed-step-title">
+              <span class="embed-step-num">1</span>
+              <span>Add to Root Layout with next/script</span>
+            </div>
+            <span class="embed-file-badge">📁 Where to Add: app/layout.tsx or pages/_app.tsx</span>
           </div>
-          <pre id="quick-code-nextjs"></pre>
+          <p style="font-size: 12px; color: var(--text-3); margin: 0;">
+            Uses Next.js built-in <code>next/script</code> with <code>strategy="afterInteractive"</code> for optimal page speed without blocking SSR hydration.
+          </p>
+          <div class="code-box" style="margin-top: 4px;">
+            <div class="code-header">
+              <span>app/layout.tsx (Next.js 13 / 14 / 15 App Router)</span>
+              <button class="copy-btn" onclick="copySnippet('quick-code-nextjs')">Copy Next.js Script</button>
+            </div>
+            <pre id="quick-code-nextjs"></pre>
+          </div>
+          <div class="embed-tip-box">
+            <span>⚡</span>
+            <div>
+              <strong>App Router &amp; Pages Router:</strong> If using Pages router (<code>pages/_app.tsx</code>), paste the exact same <code>&lt;Script ... /&gt;</code> tag inside your <code>_app.tsx</code>.
+            </div>
+          </div>
         </div>
       </div>
 
+      <!-- 5. Angular -->
       <div id="quick-embed-angular" class="quick-snip-pane" style="display: none;">
-        <div class="code-box">
-          <div class="code-header">
-            <span>Step 1: Create ai-widget.component.ts &rarr; Step 2: Mount &lt;app-ai-widget&gt; in app.component.ts</span>
-            <button class="copy-btn" onclick="copySnippet('quick-code-angular')">Copy Angular Component</button>
+        <div class="embed-step-card">
+          <div class="embed-step-header">
+            <div class="embed-step-title">
+              <span class="embed-step-num">1</span>
+              <span>Create Angular AI Widget Component</span>
+            </div>
+            <span class="embed-file-badge">📁 File to Create: src/app/components/ai-widget.component.ts</span>
           </div>
-          <pre id="quick-code-angular"></pre>
+          <div class="code-box" style="margin-top: 4px;">
+            <div class="code-header">
+              <span>ai-widget.component.ts</span>
+              <button class="copy-btn" onclick="copySnippet('quick-code-angular-comp')">Copy Component Code</button>
+            </div>
+            <pre id="quick-code-angular-comp"></pre>
+          </div>
+        </div>
+
+        <div class="embed-step-card">
+          <div class="embed-step-header">
+            <div class="embed-step-title">
+              <span class="embed-step-num">2</span>
+              <span>Mount in Root Template (app.component.ts)</span>
+            </div>
+            <span class="embed-file-badge">📁 Where to Import: src/app/app.component.ts</span>
+          </div>
+          <div class="embed-quick-row" style="margin: 4px 0;">
+            <code>&lt;app-ai-widget&gt;&lt;/app-ai-widget&gt;</code>
+            <button class="copy-btn" onclick="copySnippetTag('angular')">Copy Tag</button>
+          </div>
+          <div class="code-box" style="margin-top: 4px;">
+            <div class="code-header">
+              <span>app.component.ts Example</span>
+              <button class="copy-btn" onclick="copySnippet('quick-code-angular-example')">Copy Example</button>
+            </div>
+            <pre id="quick-code-angular-example"></pre>
+          </div>
         </div>
       </div>
 
+      <!-- 6. Vue 3 -->
       <div id="quick-embed-vue" class="quick-snip-pane" style="display: none;">
-        <div class="code-box">
-          <div class="code-header">
-            <span>Step 1: Create src/components/AIWidget.vue &rarr; Step 2: Mount &lt;AIWidget /&gt; in src/App.vue</span>
-            <button class="copy-btn" onclick="copySnippet('quick-code-vue')">Copy Vue Component</button>
+        <div class="embed-step-card">
+          <div class="embed-step-header">
+            <div class="embed-step-title">
+              <span class="embed-step-num">1</span>
+              <span>Create Vue Component</span>
+            </div>
+            <span class="embed-file-badge">📁 File to Create: src/components/AIWidget.vue</span>
           </div>
-          <pre id="quick-code-vue"></pre>
+          <div class="code-box" style="margin-top: 4px;">
+            <div class="code-header">
+              <span>src/components/AIWidget.vue</span>
+              <button class="copy-btn" onclick="copySnippet('quick-code-vue-comp')">Copy Component Code</button>
+            </div>
+            <pre id="quick-code-vue-comp"></pre>
+          </div>
+        </div>
+
+        <div class="embed-step-card">
+          <div class="embed-step-header">
+            <div class="embed-step-title">
+              <span class="embed-step-num">2</span>
+              <span>Import &amp; Mount in App.vue</span>
+            </div>
+            <span class="embed-file-badge">📁 Where to Import: src/App.vue or layouts/default.vue</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin: 4px 0;">
+            <div class="embed-quick-row">
+              <code>import AIWidget from './components/AIWidget.vue';</code>
+              <button class="copy-btn" onclick="copySnippetImport('vue')">Copy Import</button>
+            </div>
+            <div class="embed-quick-row">
+              <code>&lt;AIWidget :userId="userId" :userRole="userRole" /&gt;</code>
+              <button class="copy-btn" onclick="copySnippetTag('vue')">Copy Tag</button>
+            </div>
+          </div>
+          <div class="code-box" style="margin-top: 4px;">
+            <div class="code-header">
+              <span>Full App.vue Example</span>
+              <button class="copy-btn" onclick="copySnippet('quick-code-vue-example')">Copy App.vue Example</button>
+            </div>
+            <pre id="quick-code-vue-example"></pre>
+          </div>
         </div>
       </div>
 
+      <!-- 7. Svelte -->
       <div id="quick-embed-svelte" class="quick-snip-pane" style="display: none;">
-        <div class="code-box">
-          <div class="code-header">
-            <span>Step 1: Create src/lib/AIWidget.svelte &rarr; Step 2: Mount &lt;AIWidget /&gt; in +layout.svelte</span>
-            <button class="copy-btn" onclick="copySnippet('quick-code-svelte')">Copy Svelte Component</button>
+        <div class="embed-step-card">
+          <div class="embed-step-header">
+            <div class="embed-step-title">
+              <span class="embed-step-num">1</span>
+              <span>Create Svelte Component</span>
+            </div>
+            <span class="embed-file-badge">📁 File to Create: src/lib/AIWidget.svelte</span>
           </div>
-          <pre id="quick-code-svelte"></pre>
+          <div class="code-box" style="margin-top: 4px;">
+            <div class="code-header">
+              <span>src/lib/AIWidget.svelte</span>
+              <button class="copy-btn" onclick="copySnippet('quick-code-svelte-comp')">Copy Component Code</button>
+            </div>
+            <pre id="quick-code-svelte-comp"></pre>
+          </div>
+        </div>
+
+        <div class="embed-step-card">
+          <div class="embed-step-header">
+            <div class="embed-step-title">
+              <span class="embed-step-num">2</span>
+              <span>Mount in Root Layout (+layout.svelte)</span>
+            </div>
+            <span class="embed-file-badge">📁 Where to Import: src/routes/+layout.svelte</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin: 4px 0;">
+            <div class="embed-quick-row">
+              <code>import AIWidget from '$lib/AIWidget.svelte';</code>
+              <button class="copy-btn" onclick="copySnippetImport('svelte')">Copy Import</button>
+            </div>
+            <div class="embed-quick-row">
+              <code>&lt;AIWidget userId="guest" userRole="user" /&gt;</code>
+              <button class="copy-btn" onclick="copySnippetTag('svelte')">Copy Tag</button>
+            </div>
+          </div>
+          <div class="code-box" style="margin-top: 4px;">
+            <div class="code-header">
+              <span>Full +layout.svelte Example</span>
+              <button class="copy-btn" onclick="copySnippet('quick-code-svelte-example')">Copy Layout Example</button>
+            </div>
+            <pre id="quick-code-svelte-example"></pre>
+          </div>
         </div>
       </div>
 
@@ -4219,103 +4536,379 @@ CREATE TABLE courses (
           <button class="tab-btn" onclick="switchSnippetTab('bridge-php')" style="color: var(--accent-purple); border-color: rgba(192, 132, 252, 0.3);">PHP Bridge (Laravel)</button>
         </div>
 
+        <!-- 1. HTML -->
         <div id="snip-html" class="snip-pane">
-          <div class="code-box">
-            <div class="code-header">
-              <span>index.html (Paste before &lt;/body&gt;)</span>
-              <button class="copy-btn" onclick="copySnippet('code-export-html')">Copy Embed Script</button>
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">1</span>
+                <span>Paste Widget Script before &lt;/body&gt;</span>
+              </div>
+              <span class="embed-file-badge">📁 File: index.html or theme footer (footer.php)</span>
             </div>
-            <pre id="code-export-html"></pre>
+            <p style="font-size: 12px; color: var(--text-3); margin: 0;">
+              Embed directly in plain HTML, WordPress, Webflow, Shopify, Wix, Squarespace, or PHP applications.
+            </p>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>HTML Script Tag</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-html')">Copy Embed Script</button>
+              </div>
+              <pre id="code-export-html"></pre>
+            </div>
+            <div class="embed-tip-box">
+              <span>💡</span>
+              <div>
+                <strong>Dynamic Identity Attributes:</strong> Add <code>data-user-id="123"</code> and <code>data-user-role="admin"</code> to the <code>&lt;script&gt;</code> tag to automatically enforce role-based access controls (RBAC) and row-level security.
+              </div>
+            </div>
           </div>
         </div>
 
+        <!-- 2. React TSX -->
         <div id="snip-react-ts" class="snip-pane" style="display: none;">
-          <div class="code-box">
-            <div class="code-header">
-              <span>Step 1: Create src/components/AIWidget.tsx &rarr; Step 2: Mount &lt;AIWidget /&gt; in src/App.tsx</span>
-              <button class="copy-btn" onclick="copySnippet('code-export-react-ts')">Copy TSX Hook</button>
+          <!-- Step 1 Card -->
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">1</span>
+                <span>Create AI Widget Component File</span>
+              </div>
+              <span class="embed-file-badge">📁 File to Create: src/components/AIWidget.tsx</span>
             </div>
-            <pre id="code-export-react-ts"></pre>
+            <p style="font-size: 12px; color: var(--text-3); margin: 0;">
+              Creates a React 18 StrictMode-safe floating widget component with custom colors and cleanup handling.
+            </p>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>src/components/AIWidget.tsx</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-react-ts-comp')">Copy Component Code</button>
+              </div>
+              <pre id="code-export-react-ts-comp"></pre>
+            </div>
+          </div>
+
+          <!-- Step 2 Card -->
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">2</span>
+                <span>Import &amp; Mount in Root (App.tsx or router.tsx)</span>
+              </div>
+              <span class="embed-file-badge">📁 Where to Import: src/App.tsx or src/router.tsx</span>
+            </div>
+            <p style="font-size: 12px; color: var(--text-3); margin: 0;">
+              Import the component and place <code>&lt;AIWidget /&gt;</code> inside your root component or router layout.
+            </p>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px; margin: 4px 0;">
+              <div class="embed-quick-row">
+                <code>import { AIWidget } from './components/AIWidget';</code>
+                <button class="copy-btn" onclick="copySnippetImport('react-ts')">Copy Import</button>
+              </div>
+              <div class="embed-quick-row">
+                <code>&lt;AIWidget userId="guest" userRole="user" /&gt;</code>
+                <button class="copy-btn" onclick="copySnippetTag('react-ts')">Copy Tag</button>
+              </div>
+            </div>
+
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>Full App.tsx Example</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-react-ts-example')">Copy App.tsx Example</button>
+              </div>
+              <pre id="code-export-react-ts-example"></pre>
+            </div>
+
+            <div class="embed-tip-box">
+              <span>🔒</span>
+              <div>
+                <strong>Dynamic Auth &amp; RBAC:</strong> Pass real logged-in credentials (e.g., <code>user.id</code>, <code>user.role</code>). The agent will automatically scope database queries and document answers to the authenticated user's permissions.
+              </div>
+            </div>
           </div>
         </div>
 
+        <!-- 3. React JSX -->
         <div id="snip-react-js" class="snip-pane" style="display: none;">
-          <div class="code-box">
-            <div class="code-header">
-              <span>Step 1: Create src/components/AIWidget.jsx &rarr; Step 2: Mount &lt;AIWidget /&gt; in src/App.jsx</span>
-              <button class="copy-btn" onclick="copySnippet('code-export-react-js')">Copy JSX Hook</button>
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">1</span>
+                <span>Create AI Widget Component File</span>
+              </div>
+              <span class="embed-file-badge">📁 File to Create: src/components/AIWidget.jsx</span>
             </div>
-            <pre id="code-export-react-js"></pre>
+            <p style="font-size: 12px; color: var(--text-3); margin: 0;">
+              Standard React JSX component with auto-cleanup and mount lifecycle.
+            </p>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>src/components/AIWidget.jsx</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-react-js-comp')">Copy Component Code</button>
+              </div>
+              <pre id="code-export-react-js-comp"></pre>
+            </div>
+          </div>
+
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">2</span>
+                <span>Import &amp; Mount in App.jsx</span>
+              </div>
+              <span class="embed-file-badge">📁 Where to Import: src/App.jsx</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin: 4px 0;">
+              <div class="embed-quick-row">
+                <code>import { AIWidget } from './components/AIWidget';</code>
+                <button class="copy-btn" onclick="copySnippetImport('react-js')">Copy Import</button>
+              </div>
+              <div class="embed-quick-row">
+                <code>&lt;AIWidget userId="guest" userRole="user" /&gt;</code>
+                <button class="copy-btn" onclick="copySnippetTag('react-js')">Copy Tag</button>
+              </div>
+            </div>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>Full App.jsx Example</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-react-js-example')">Copy App.jsx Example</button>
+              </div>
+              <pre id="code-export-react-js-example"></pre>
+            </div>
           </div>
         </div>
 
+        <!-- 4. Next.js -->
         <div id="snip-nextjs" class="snip-pane" style="display: none;">
-          <div class="code-box">
-            <div class="code-header">
-              <span>app/layout.tsx (Next.js 13/14/15 App Router with next/script)</span>
-              <button class="copy-btn" onclick="copySnippet('code-export-nextjs')">Copy Next.js Script</button>
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">1</span>
+                <span>Add to Root Layout with next/script</span>
+              </div>
+              <span class="embed-file-badge">📁 Where to Add: app/layout.tsx or pages/_app.tsx</span>
             </div>
-            <pre id="code-export-nextjs"></pre>
+            <p style="font-size: 12px; color: var(--text-3); margin: 0;">
+              Uses Next.js built-in <code>next/script</code> with <code>strategy="afterInteractive"</code> for optimal page speed without blocking SSR hydration.
+            </p>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>app/layout.tsx (Next.js 13 / 14 / 15 App Router)</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-nextjs')">Copy Next.js Script</button>
+              </div>
+              <pre id="code-export-nextjs"></pre>
+            </div>
+            <div class="embed-tip-box">
+              <span>⚡</span>
+              <div>
+                <strong>App Router &amp; Pages Router:</strong> If using Pages router (<code>pages/_app.tsx</code>), paste the exact same <code>&lt;Script ... /&gt;</code> tag inside your <code>_app.tsx</code>.
+              </div>
+            </div>
           </div>
         </div>
 
+        <!-- 5. Angular -->
         <div id="snip-angular" class="snip-pane" style="display: none;">
-          <div class="code-box">
-            <div class="code-header">
-              <span>Step 1: Create ai-widget.component.ts &rarr; Step 2: Mount &lt;app-ai-widget&gt; in app.component.ts</span>
-              <button class="copy-btn" onclick="copySnippet('code-export-angular')">Copy Angular Component</button>
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">1</span>
+                <span>Create Angular AI Widget Component</span>
+              </div>
+              <span class="embed-file-badge">📁 File to Create: src/app/components/ai-widget.component.ts</span>
             </div>
-            <pre id="code-export-angular"></pre>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>ai-widget.component.ts</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-angular-comp')">Copy Component Code</button>
+              </div>
+              <pre id="code-export-angular-comp"></pre>
+            </div>
+          </div>
+
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">2</span>
+                <span>Mount in Root Template (app.component.ts)</span>
+              </div>
+              <span class="embed-file-badge">📁 Where to Import: src/app/app.component.ts</span>
+            </div>
+            <div class="embed-quick-row" style="margin: 4px 0;">
+              <code>&lt;app-ai-widget&gt;&lt;/app-ai-widget&gt;</code>
+              <button class="copy-btn" onclick="copySnippetTag('angular')">Copy Tag</button>
+            </div>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>app.component.ts Example</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-angular-example')">Copy Example</button>
+              </div>
+              <pre id="code-export-angular-example"></pre>
+            </div>
           </div>
         </div>
 
+        <!-- 6. Vue 3 -->
         <div id="snip-vue" class="snip-pane" style="display: none;">
-          <div class="code-box">
-            <div class="code-header">
-              <span>Step 1: Create src/components/AIWidget.vue &rarr; Step 2: Mount &lt;AIWidget /&gt; in src/App.vue</span>
-              <button class="copy-btn" onclick="copySnippet('code-export-vue')">Copy Vue Component</button>
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">1</span>
+                <span>Create Vue Component</span>
+              </div>
+              <span class="embed-file-badge">📁 File to Create: src/components/AIWidget.vue</span>
             </div>
-            <pre id="code-export-vue"></pre>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>src/components/AIWidget.vue</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-vue-comp')">Copy Component Code</button>
+              </div>
+              <pre id="code-export-vue-comp"></pre>
+            </div>
+          </div>
+
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">2</span>
+                <span>Import &amp; Mount in App.vue</span>
+              </div>
+              <span class="embed-file-badge">📁 Where to Import: src/App.vue or layouts/default.vue</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin: 4px 0;">
+              <div class="embed-quick-row">
+                <code>import AIWidget from './components/AIWidget.vue';</code>
+                <button class="copy-btn" onclick="copySnippetImport('vue')">Copy Import</button>
+              </div>
+              <div class="embed-quick-row">
+                <code>&lt;AIWidget :userId="userId" :userRole="userRole" /&gt;</code>
+                <button class="copy-btn" onclick="copySnippetTag('vue')">Copy Tag</button>
+              </div>
+            </div>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>Full App.vue Example</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-vue-example')">Copy App.vue Example</button>
+              </div>
+              <pre id="code-export-vue-example"></pre>
+            </div>
           </div>
         </div>
 
+        <!-- 7. Svelte -->
         <div id="snip-svelte" class="snip-pane" style="display: none;">
-          <div class="code-box">
-            <div class="code-header">
-              <span>Step 1: Create src/lib/AIWidget.svelte &rarr; Step 2: Mount &lt;AIWidget /&gt; in +layout.svelte</span>
-              <button class="copy-btn" onclick="copySnippet('code-export-svelte')">Copy Svelte Component</button>
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">1</span>
+                <span>Create Svelte Component</span>
+              </div>
+              <span class="embed-file-badge">📁 File to Create: src/lib/AIWidget.svelte</span>
             </div>
-            <pre id="code-export-svelte"></pre>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>src/lib/AIWidget.svelte</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-svelte-comp')">Copy Component Code</button>
+              </div>
+              <pre id="code-export-svelte-comp"></pre>
+            </div>
+          </div>
+
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">2</span>
+                <span>Mount in Root Layout (+layout.svelte)</span>
+              </div>
+              <span class="embed-file-badge">📁 Where to Import: src/routes/+layout.svelte</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin: 4px 0;">
+              <div class="embed-quick-row">
+                <code>import AIWidget from '$lib/AIWidget.svelte';</code>
+                <button class="copy-btn" onclick="copySnippetImport('svelte')">Copy Import</button>
+              </div>
+              <div class="embed-quick-row">
+                <code>&lt;AIWidget userId="guest" userRole="user" /&gt;</code>
+                <button class="copy-btn" onclick="copySnippetTag('svelte')">Copy Tag</button>
+              </div>
+            </div>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>Full +layout.svelte Example</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-svelte-example')">Copy Layout Example</button>
+              </div>
+              <pre id="code-export-svelte-example"></pre>
+            </div>
           </div>
         </div>
 
+        <!-- 8. Node.js Bridge -->
         <div id="snip-bridge-node" class="snip-pane" style="display: none;">
-          <div class="code-box">
-            <div class="code-header">
-              <span>server/routes/ai-chat.js (Node.js Express / Next.js API Route)</span>
-              <button class="copy-btn" onclick="copySnippet('code-export-bridge-node')">Copy Node.js Bridge</button>
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">1</span>
+                <span>Add Secure Local SQL Bridge to Node.js Backend</span>
+              </div>
+              <span class="embed-file-badge">📁 File to Create: server/routes/ai-chat.js or api/chat.ts</span>
             </div>
-            <pre id="code-export-bridge-node"></pre>
+            <p style="font-size: 12px; color: var(--text-3); margin: 0;">
+              Zero-Knowledge Architecture: Generates SQL in the cloud, executes on your private database behind your firewall, and formats the result. No database credentials ever leave your infrastructure.
+            </p>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>server/routes/ai-chat.js</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-bridge-node')">Copy Node.js Bridge</button>
+              </div>
+              <pre id="code-export-bridge-node"></pre>
+            </div>
           </div>
         </div>
 
+        <!-- 9. Python Bridge -->
         <div id="snip-bridge-python" class="snip-pane" style="display: none;">
-          <div class="code-box">
-            <div class="code-header">
-              <span>app/routes/ai_chat.py (Python FastAPI / Django / Flask)</span>
-              <button class="copy-btn" onclick="copySnippet('code-export-bridge-python')">Copy Python Bridge</button>
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">1</span>
+                <span>Add Secure Local SQL Bridge to Python Backend</span>
+              </div>
+              <span class="embed-file-badge">📁 File to Create: app/routes/ai_chat.py or routers/chat.py</span>
             </div>
-            <pre id="code-export-bridge-python"></pre>
+            <p style="font-size: 12px; color: var(--text-3); margin: 0;">
+              FastAPI / Django / Flask endpoint that queries your internal database locally while using Plug-N-Play AI for zero-knowledge schema-to-SQL generation.
+            </p>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>app/routes/ai_chat.py</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-bridge-python')">Copy Python Bridge</button>
+              </div>
+              <pre id="code-export-bridge-python"></pre>
+            </div>
           </div>
         </div>
 
+        <!-- 10. PHP Laravel Bridge -->
         <div id="snip-bridge-php" class="snip-pane" style="display: none;">
-          <div class="code-box">
-            <div class="code-header">
-              <span>app/Http/Controllers/AIChatController.php (PHP Laravel)</span>
-              <button class="copy-btn" onclick="copySnippet('code-export-bridge-php')">Copy PHP Bridge</button>
+          <div class="embed-step-card">
+            <div class="embed-step-header">
+              <div class="embed-step-title">
+                <span class="embed-step-num">1</span>
+                <span>Add Secure Controller to Laravel Backend</span>
+              </div>
+              <span class="embed-file-badge">📁 File to Create: app/Http/Controllers/AIChatController.php</span>
             </div>
-            <pre id="code-export-bridge-php"></pre>
+            <p style="font-size: 12px; color: var(--text-3); margin: 0;">
+              Laravel Controller using <code>Http::post</code> and <code>DB::select</code> with parameterized safety guardrails.
+            </p>
+            <div class="code-box" style="margin-top: 4px;">
+              <div class="code-header">
+                <span>app/Http/Controllers/AIChatController.php</span>
+                <button class="copy-btn" onclick="copySnippet('code-export-bridge-php')">Copy PHP Bridge</button>
+              </div>
+              <pre id="code-export-bridge-php"></pre>
+            </div>
           </div>
         </div>
 
@@ -6036,21 +6629,10 @@ Key Features & Architectural Highlights:
       const setAttrsScriptEl4 = buildSetAttributesCode('    ', 'scriptEl');
       const setAttrsScriptElement = buildSetAttributesCode('      ', 'this.scriptElement');
 
-      return {
-        html:
-'<!-- ========================================================================= -->\n' +
-'<!-- PASTE BEFORE </body> IN YOUR HTML / WORDPRESS / SHOPIFY / WEBFLOW        -->\n' +
-'<!-- ========================================================================= -->\n' +
-'<script \n' + dataAttrs +
-'></' + 'script>',
+      // 1. React TypeScript (TSX)
+      const reactTsComp = `import React, { useEffect } from 'react';
 
-        reactTs:
-`// ============================================================================
-// STEP 1: Create the Component file at: src/components/AIWidget.tsx
-// ============================================================================
-import React, { useEffect } from 'react';
-
-interface AIWidgetProps {
+export interface AIWidgetProps {
   userId?: string;
   userRole?: 'student' | 'tpo' | 'faculty' | 'staff' | 'admin' | 'user' | string;
 }
@@ -6091,34 +6673,46 @@ ${setAttrsScript}
   return null;
 };
 
-// ============================================================================
-// STEP 2: Import & Mount in your Root component (e.g. src/App.tsx or main.tsx)
-// ============================================================================
-// 1. Add this import at the top of src/App.tsx:
-//    import { AIWidget } from './components/AIWidget';
-//
-// 2. Render <AIWidget /> anywhere in your JSX tree:
-//    export function App() {
-//      const { user } = useAuth(); // your logged-in user state
-//
-//      return (
-//        <div className="app-container">
-//          <YourAppContent />
-//
-//          {/* Plug-N-Play AI Widget with Dynamic Student / TPO / Management RBAC */}
-//          <AIWidget 
-//            userId={user ? (user.studentId || user.id) : 'guest'} 
-//            userRole={user ? (user.role || 'student') : 'user'} // 'student' | 'tpo' | 'admin' | 'faculty'
-//          />
-//        </div>
-//      );
-//    }`,
+export default AIWidget;`;
 
-        reactJs:
-`// ============================================================================
-// STEP 1: Create the Component file at: src/components/AIWidget.jsx
+      const reactTsExample = `import React from 'react';
+import { AIWidget } from './components/AIWidget';
+
+export function App() {
+  // If your app has authenticated user state (e.g. from Context, Redux, Supabase, Firebase, NextAuth):
+  // const { user } = useAuth();
+
+  return (
+    <div className="app-container">
+      {/* 1. Your existing Navbar, Routes, and Pages */}
+      <main>
+        <h1>Welcome to Your Application</h1>
+      </main>
+
+      {/* 2. Plug-N-Play Autonomous AI Floating Assistant */}
+      {/* Pass dynamic user ID and role for automatic Row-Level Security & RBAC */}
+      <AIWidget 
+        userId="guest" // Dynamic ID: e.g. user?.id || 'guest'
+        userRole="user" // Dynamic Role: 'student' | 'tpo' | 'faculty' | 'admin' | 'user'
+      />
+    </div>
+  );
+}
+
+export default App;`;
+
+      const reactTsFull = `// ============================================================================
+// STEP 1: Create the Component file at: src/components/AIWidget.tsx
 // ============================================================================
-import { useEffect } from 'react';
+` + reactTsComp + `
+
+// ============================================================================
+// STEP 2: Import & Mount in your Root component (e.g. src/App.tsx or src/router.tsx)
+// ============================================================================
+` + reactTsExample;
+
+      // 2. React JavaScript (JSX)
+      const reactJsComp = `import { useEffect } from 'react';
 
 export default function AIWidget({ userId = 'guest', userRole = 'user' }) {
   useEffect(() => {
@@ -6151,64 +6745,60 @@ ${setAttrsScript}
   }, [userId, userRole]);
 
   return null;
-}
+}`;
+
+      const reactJsExample = `import React from 'react';
+import AIWidget from './components/AIWidget';
+
+export default function App() {
+  return (
+    <div className="app-container">
+      {/* 1. Your existing application layout */}
+      <main>
+        <h1>My Web Application</h1>
+      </main>
+
+      {/* 2. Plug-N-Play Autonomous AI Floating Assistant */}
+      <AIWidget userId="guest" userRole="user" />
+    </div>
+  );
+}`;
+
+      const reactJsFull = `// ============================================================================
+// STEP 1: Create the Component file at: src/components/AIWidget.jsx
+// ============================================================================
+` + reactJsComp + `
 
 // ============================================================================
-// STEP 2: Import & Mount in your Root component (e.g. src/App.jsx or main.jsx)
+// STEP 2: Import & Mount in your Root component (e.g. src/App.jsx or src/router.jsx)
 // ============================================================================
-// 1. Add this import at the top of src/App.jsx:
-//    import AIWidget from './components/AIWidget';
-//
-// 2. Render <AIWidget /> anywhere in your JSX tree:
-//    export default function App() {
-//      const { user } = useAuth(); // your logged-in user state
-//
-//      return (
-//        <div className="app-container">
-//          <YourAppContent />
-//
-//          {/* Plug-N-Play AI Widget with Dynamic Student / TPO / Management RBAC */}
-//          <AIWidget 
-//            userId={user ? (user.studentId || user.id) : 'guest'} 
-//            userRole={user ? (user.role || 'student') : 'user'} // 'student' | 'tpo' | 'admin' | 'faculty'
-//          />
-//        </div>
-//      );
-//    }`,
+` + reactJsExample;
 
-        nextjs:
-`// ============================================================================
-// Next.js 13 / 14 / 15 (App Router - src/app/layout.tsx or app/layout.tsx)
-// ============================================================================
-// STEP 1: Add import at top:
-import Script from 'next/script';
+      // 3. Next.js App Router
+      const nextjsCode = `import Script from 'next/script';
 
-// STEP 2: Add this <Script /> tag inside <body> (before </body>):
-<Script
-${dataAttrs}  strategy="afterInteractive"
-/>
-
-/* -------------------------------------------------------------
- * Complete Reference app/layout.tsx Example:
- * ------------------------------------------------------------- */
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body>
+        {/* Your existing application pages */}
         {children}
+
+        {/* Plug-N-Play AI Widget Embed (App Router with afterInteractive strategy) */}
         <Script
 ${dataAttrs}          strategy="afterInteractive"
         />
       </body>
     </html>
   );
-}`,
+}`;
 
-        angular:
-`// ============================================================================
-// STEP 1: Create component at: src/app/components/ai-widget.component.ts
-// ============================================================================
-import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+      // 4. Angular
+      const angularComp = `import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 @Component({
@@ -6244,13 +6834,9 @@ ${setAttrsScriptElement}
       document.getElementById('pnp-widget-trigger')?.remove();
     }
   }
-}
+}`;
 
-// ============================================================================
-// STEP 2: Import & Mount in your Root component (src/app/app.component.ts)
-// ============================================================================
-/*
-import { Component } from '@angular/core';
+      const angularExample = `import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AIWidgetComponent } from './components/ai-widget.component';
 
@@ -6260,110 +6846,146 @@ import { AIWidgetComponent } from './components/ai-widget.component';
   imports: [RouterOutlet, AIWidgetComponent],
   template: \`
     <router-outlet></router-outlet>
-    <!-- Plug-N-Play AI Widget floats in corner -->
+    <!-- Plug-N-Play Autonomous AI Floating Assistant -->
     <app-ai-widget></app-ai-widget>
   \`
 })
-export class AppComponent {}
-*/`,
+export class AppComponent {}`;
 
-        vue:
-'<!-- ========================================================================= -->\n' +
-'<!-- STEP 1: Create component at src/components/AIWidget.vue                   -->\n' +
-'<!-- ========================================================================= -->\n' +
-'<script setup lang="ts">\n' +
-'import { onMounted, onUnmounted } from \'vue\';\n\n' +
-'const props = defineProps<{\n' +
-'  userId?: string;\n' +
-'  userRole?: string;\n' +
-'}>();\n\n' +
-'let scriptEl: HTMLScriptElement | null = null;\n\n' +
-'onMounted(() => {\n' +
-'  if (document.getElementById(\'pnp-widget-script\')) return;\n' +
-'  scriptEl = document.createElement(\'script\');\n' +
-'  scriptEl.id = \'pnp-widget-script\';\n' +
-'  scriptEl.src = \'' + host + '/static/pnp-widget.js\';\n' +
-'  scriptEl.setAttribute(\'data-api-host\', \'' + host + '\');\n' +
-'  scriptEl.setAttribute(\'data-agent-id\', \'' + aid + '\');\n' +
-'  scriptEl.setAttribute(\'data-title\', \'' + aname + '\');\n' +
-'  if (props.userId) scriptEl.setAttribute(\'data-user-id\', props.userId);\n' +
-'  if (props.userRole) scriptEl.setAttribute(\'data-user-role\', props.userRole);\n' +
-setAttrsScriptEl + '\n' +
-'  scriptEl.async = true;\n' +
-'  document.body.appendChild(scriptEl);\n' +
-'});\n\n' +
-'onUnmounted(() => {\n' +
-'  if (scriptEl && document.body.contains(scriptEl)) {\n' +
-'    document.body.removeChild(scriptEl);\n' +
-'  }\n' +
-'  document.getElementById(\'pnp-widget-container\')?.remove();\n' +
-'  document.getElementById(\'pnp-widget-trigger\')?.remove();\n' +
-'});\n' +
-'<' + '/script>\n\n' +
-'<template></template>\n\n' +
-'<!-- ========================================================================= -->\n' +
-'<!-- STEP 2: Import & Mount in your Root component (e.g. src/App.vue)          -->\n' +
-'<!-- ========================================================================= -->\n' +
-'<!--\n' +
-'<script setup>\n' +
-'import AIWidget from \'./components/AIWidget.vue\';\n' +
-'<' + '/script>\n\n' +
-'<template>\n' +
-'  <router-view />\n' +
-'  <!-- Plug-N-Play AI Widget floats in corner -->\n' +
-'  <AIWidget user-id="user_123" user-role="user" />\n' +
-'</template>\n' +
-'-->',
+      const angularFull = `// ============================================================================
+// STEP 1: Create component at: src/app/components/ai-widget.component.ts
+// ============================================================================
+` + angularComp + `
 
-        svelte:
-'<!-- ========================================================================= -->\n' +
-'<!-- STEP 1: Create component at src/lib/AIWidget.svelte                       -->\n' +
-'<!-- ========================================================================= -->\n' +
-'<script lang="ts">\n' +
-'  import { onMount, onDestroy } from \'svelte\';\n\n' +
-'  export let userId: string = \'guest\';\n' +
-'  export let userRole: string = \'user\';\n\n' +
-'  let scriptEl: HTMLScriptElement;\n\n' +
-'  onMount(() => {\n' +
-'    if (document.getElementById(\'pnp-widget-script\')) return;\n' +
-'    scriptEl = document.createElement(\'script\');\n' +
-'    scriptEl.id = \'pnp-widget-script\';\n' +
-'    scriptEl.src = \'' + host + '/static/pnp-widget.js\';\n' +
-'    scriptEl.setAttribute(\'data-api-host\', \'' + host + '\');\n' +
-'    scriptEl.setAttribute(\'data-agent-id\', \'' + aid + '\');\n' +
-'    scriptEl.setAttribute(\'data-title\', \'' + aname + '\');\n' +
-'    scriptEl.setAttribute(\'data-user-id\', userId);\n' +
-'    scriptEl.setAttribute(\'data-user-role\', userRole);\n' +
-setAttrsScriptEl4 + '\n' +
-'    scriptEl.async = true;\n' +
-'    document.body.appendChild(scriptEl);\n' +
-'  });\n\n' +
-'  onDestroy(() => {\n' +
-'    if (scriptEl && document.body.contains(scriptEl)) {\n' +
-'      document.body.removeChild(scriptEl);\n' +
-'    }\n' +
-'    document.getElementById(\'pnp-widget-container\')?.remove();\n' +
-'    document.getElementById(\'pnp-widget-trigger\')?.remove();\n' +
-'  });\n' +
-'<' + '/script>\n\n' +
-'<!-- ========================================================================= -->\n' +
-'<!-- STEP 2: Import & Mount in your Root Layout (src/routes/+layout.svelte)     -->\n' +
-'<!-- ========================================================================= -->\n' +
-'<!--\n' +
-'<script>\n' +
-'  import AIWidget from \'$lib/AIWidget.svelte\';\n' +
-'<' + '/script>\n\n' +
-'<slot />\n' +
-'<!-- Plug-N-Play AI Widget floats in corner -->\n' +
-'<AIWidget userId="user_123" userRole="user" />\n' +
-'-->',
+// ============================================================================
+// STEP 2: Import & Mount in your Root component (src/app/app.component.ts)
+// ============================================================================
+` + angularExample;
 
-        bridgeNode:
-`// =========================================================================
+      // 5. Vue 3
+      const vueComp = `<script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue';
+
+const props = defineProps<{
+  userId?: string;
+  userRole?: string;
+}>();
+
+let scriptEl: HTMLScriptElement | null = null;
+
+onMounted(() => {
+  if (document.getElementById('pnp-widget-script')) return;
+  scriptEl = document.createElement('script');
+  scriptEl.id = 'pnp-widget-script';
+  scriptEl.src = '${host}/static/pnp-widget.js';
+  scriptEl.setAttribute('data-api-host', '${host}');
+  scriptEl.setAttribute('data-agent-id', '${aid}');
+  scriptEl.setAttribute('data-title', '${aname}');
+  if (props.userId) scriptEl.setAttribute('data-user-id', props.userId);
+  if (props.userRole) scriptEl.setAttribute('data-user-role', props.userRole);
+${setAttrsScriptEl}
+  scriptEl.async = true;
+  document.body.appendChild(scriptEl);
+});
+
+onUnmounted(() => {
+  if (scriptEl && document.body.contains(scriptEl)) {
+    document.body.removeChild(scriptEl);
+  }
+  document.getElementById('pnp-widget-container')?.remove();
+  document.getElementById('pnp-widget-trigger')?.remove();
+});
+<\/script>
+
+<template></template>`;
+
+      const vueExample = `<script setup>
+import AIWidget from './components/AIWidget.vue';
+<\/script>
+
+<template>
+  <!-- 1. Your existing router or page views -->
+  <router-view />
+
+  <!-- 2. Plug-N-Play Autonomous AI Floating Assistant -->
+  <AIWidget user-id="guest" user-role="user" />
+</template>`;
+
+      const vueFull = `<!-- ========================================================================= -->
+<!-- STEP 1: Create component at src/components/AIWidget.vue                   -->
+<!-- ========================================================================= -->
+` + vueComp + `
+
+<!-- ========================================================================= -->
+<!-- STEP 2: Import & Mount in your Root component (e.g. src/App.vue)          -->
+<!-- ========================================================================= -->
+` + vueExample;
+
+      // 6. Svelte
+      const svelteComp = `<script lang="ts">
+  import { onMount, onDestroy } from 'svelte';
+
+  export let userId: string = 'guest';
+  export let userRole: string = 'user';
+
+  let scriptEl: HTMLScriptElement;
+
+  onMount(() => {
+    if (document.getElementById('pnp-widget-script')) return;
+    scriptEl = document.createElement('script');
+    scriptEl.id = 'pnp-widget-script';
+    scriptEl.src = '${host}/static/pnp-widget.js';
+    scriptEl.setAttribute('data-api-host', '${host}');
+    scriptEl.setAttribute('data-agent-id', '${aid}');
+    scriptEl.setAttribute('data-title', '${aname}');
+    scriptEl.setAttribute('data-user-id', userId);
+    scriptEl.setAttribute('data-user-role', userRole);
+${setAttrsScriptEl4}
+    scriptEl.async = true;
+    document.body.appendChild(scriptEl);
+  });
+
+  onDestroy(() => {
+    if (scriptEl && document.body.contains(scriptEl)) {
+      document.body.removeChild(scriptEl);
+    }
+    document.getElementById('pnp-widget-container')?.remove();
+    document.getElementById('pnp-widget-trigger')?.remove();
+  });
+<\/script>`;
+
+      const svelteExample = `<script>
+  import AIWidget from '$lib/AIWidget.svelte';
+<\/script>
+
+<!-- 1. Your existing layout slot -->
+<slot />
+
+<!-- 2. Plug-N-Play Autonomous AI Floating Assistant -->
+<AIWidget userId="guest" userRole="user" />`;
+
+      const svelteFull = `<!-- ========================================================================= -->
+<!-- STEP 1: Create component at src/lib/AIWidget.svelte                       -->
+<!-- ========================================================================= -->
+` + svelteComp + `
+
+<!-- ========================================================================= -->
+<!-- STEP 2: Import & Mount in your Root Layout (src/routes/+layout.svelte)     -->
+<!-- ========================================================================= -->
+` + svelteExample;
+
+      // 7. HTML
+      const htmlCode = `<!-- ========================================================================= -->
+<!-- PASTE BEFORE </body> IN YOUR HTML / WORDPRESS / SHOPIFY / WEBFLOW        -->
+<!-- ========================================================================= -->
+<script 
+${dataAttrs}><\/script>`;
+
+      // 8. Zero-Knowledge Backend Bridges
+      const bridgeNode = `// =========================================================================
 // HOW TO ADD TO YOUR EXISTING NODE.JS / EXPRESS APP
+// Target: server.js or routes/aiChat.js
 // =========================================================================
-// OPTION 1: Paste directly into your existing server.js / app.js
-// -------------------------------------------------------------------------
 app.post('/api/ai-chat', async (req, res) => {
   const { query, userId, userRole } = req.body;
   const PNP_HOST = '${host}';
@@ -6386,7 +7008,6 @@ app.post('/api/ai-chat', async (req, res) => {
     }
 
     // 3. Execute locally on your private database (Inside your firewall)
-    // Replace with your existing database query: e.g. db.query(sql) or prisma.$queryRawUnsafe(sql)
     const dbResult = await dbPool.query(sql);
 
     // 4. Send results back to Plug-N-Play for natural language formatting
@@ -6400,20 +7021,12 @@ app.post('/api/ai-chat', async (req, res) => {
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
-});
+});`;
 
-// -------------------------------------------------------------------------
-// OPTION 2: If you prefer a separate file (e.g. routes/aiChat.js):
-// -------------------------------------------------------------------------
-// In routes/aiChat.js: export the router
-// In your server.js: app.use('/api', require('./routes/aiChat'));`,
-
-        bridgePython:
-`# =========================================================================
+      const bridgePython = `# =========================================================================
 # HOW TO ADD TO YOUR EXISTING PYTHON (FastAPI / Flask / Django) APP
+# Target: main.py or routers/ai_chat.py
 # =========================================================================
-# OPTION 1: Add this endpoint to your existing FastAPI router/app:
-# -------------------------------------------------------------------------
 import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -6447,7 +7060,7 @@ async def handle_ai_chat(payload: ChatPayload):
 
         # 3. Execute locally on private database inside your firewall
         # db_rows = await db_session.execute(text(sql))
-        db_rows = [] # Your local database records
+        db_rows = []
 
         # 4. Format natural language response
         fmt_res = await client.post(f"{PNP_HOST}/api/v1/chat/format-sql-response", json={
@@ -6456,18 +7069,14 @@ async def handle_ai_chat(payload: ChatPayload):
             "sql_query": sql,
             "db_results": db_rows
         })
-        return {"answer": fmt_res.json().get("answer"), "sql_executed": sql}`,
+        return {"answer": fmt_res.json().get("answer"), "sql_executed": sql}`;
 
-        bridgePhp:
-`<?php
+      const bridgePhp = `<?php
 // =========================================================================
 // HOW TO ADD TO YOUR EXISTING LARAVEL / PHP APP
-// =========================================================================
-// Step 1: Add route to routes/api.php:
-// Route::post('/ai-chat', [AIChatController::class, 'handleChat']);
-//
+// Step 1: In routes/api.php: Route::post('/ai-chat', [AIChatController::class, 'handleChat']);
 // Step 2: In app/Http/Controllers/AIChatController.php:
-// -------------------------------------------------------------------------
+// =========================================================================
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -6478,7 +7087,7 @@ class AIChatController extends Controller {
         $pnpHost = "${host}";
         $agentId = "${aid}";
 
-        // 1. Generate SQL from schema (No DB access given to cloud)
+        // 1. Generate SQL from schema (No DB credentials leave firewall)
         $genRes = Http::post("{$pnpHost}/api/v1/chat/generate-sql", [
             'agent_id' => $agentId,
             'query' => $request->input('query'),
@@ -6491,7 +7100,7 @@ class AIChatController extends Controller {
             return response()->json(['error' => 'Security violation: Only SELECT permitted.'], 400);
         }
 
-        // 2. Execute locally on your private database
+        // 2. Execute locally on private database
         $dbResults = DB::select($sql);
 
         // 3. Format natural language response
@@ -6507,22 +7116,80 @@ class AIChatController extends Controller {
             'sql_executed' => $sql
         ]);
     }
-}`
+}`;
+
+      return {
+        html: htmlCode,
+        reactTs: reactTsFull,
+        reactTsComp: reactTsComp,
+        reactTsExample: reactTsExample,
+        reactJs: reactJsFull,
+        reactJsComp: reactJsComp,
+        reactJsExample: reactJsExample,
+        nextjs: nextjsCode,
+        angular: angularFull,
+        angularComp: angularComp,
+        angularExample: angularExample,
+        vue: vueFull,
+        vueComp: vueComp,
+        vueExample: vueExample,
+        svelte: svelteFull,
+        svelteComp: svelteComp,
+        svelteExample: svelteExample,
+        bridgeNode: bridgeNode,
+        bridgePython: bridgePython,
+        bridgePhp: bridgePhp
       };
+    }
+
+    function populateSnippetUI(prefix, snippets) {
+      if (!snippets) return;
+      const setTxt = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && val !== undefined) el.innerText = val;
+      };
+
+      // HTML
+      setTxt(`${prefix}-html`, snippets.html);
+
+      // React TSX
+      setTxt(`${prefix}-react-ts-comp`, snippets.reactTsComp);
+      setTxt(`${prefix}-react-ts-example`, snippets.reactTsExample);
+      setTxt(`${prefix}-react-ts`, snippets.reactTs);
+
+      // React JSX
+      setTxt(`${prefix}-react-js-comp`, snippets.reactJsComp);
+      setTxt(`${prefix}-react-js-example`, snippets.reactJsExample);
+      setTxt(`${prefix}-react-js`, snippets.reactJs);
+
+      // Next.js
+      setTxt(`${prefix}-nextjs`, snippets.nextjs);
+
+      // Angular
+      setTxt(`${prefix}-angular-comp`, snippets.angularComp);
+      setTxt(`${prefix}-angular-example`, snippets.angularExample);
+      setTxt(`${prefix}-angular`, snippets.angular);
+
+      // Vue
+      setTxt(`${prefix}-vue-comp`, snippets.vueComp);
+      setTxt(`${prefix}-vue-example`, snippets.vueExample);
+      setTxt(`${prefix}-vue`, snippets.vue);
+
+      // Svelte
+      setTxt(`${prefix}-svelte-comp`, snippets.svelteComp);
+      setTxt(`${prefix}-svelte-example`, snippets.svelteExample);
+      setTxt(`${prefix}-svelte`, snippets.svelte);
+
+      // Zero-Knowledge Bridges
+      setTxt(`${prefix}-bridge-node`, snippets.bridgeNode);
+      setTxt(`${prefix}-bridge-python`, snippets.bridgePython);
+      setTxt(`${prefix}-bridge-php`, snippets.bridgePhp);
     }
 
     function openQuickEmbedModal(aid, aname) {
       const host = window.location.origin;
       const snippets = generateSnippetCode(host, aid, aname);
-
-      document.getElementById('quick-code-html').innerText = snippets.html;
-      document.getElementById('quick-code-react-ts').innerText = snippets.reactTs;
-      document.getElementById('quick-code-react-js').innerText = snippets.reactJs;
-      document.getElementById('quick-code-nextjs').innerText = snippets.nextjs;
-      document.getElementById('quick-code-angular').innerText = snippets.angular;
-      document.getElementById('quick-code-vue').innerText = snippets.vue;
-      document.getElementById('quick-code-svelte').innerText = snippets.svelte;
-
+      populateSnippetUI('quick-code', snippets);
       document.getElementById('modal-embed').style.display = 'flex';
     }
 
@@ -8670,21 +9337,37 @@ CREATE TABLE scholarships (
     }
 
     function generateExportSnippets(agentData) {
+      if (!agentData) return;
       const host = window.location.origin;
-      const aid = agentData.agent_id;
-      const aname = agentData.agent_name;
+      const aid = agentData.agent_id || (agentData.agent && agentData.agent.id);
+      const aname = agentData.agent_name || (agentData.agent && agentData.agent.name);
       const snippets = generateSnippetCode(host, aid, aname);
+      populateSnippetUI('code-export', snippets);
+    }
 
-      document.getElementById('code-export-html').innerText = snippets.html;
-      document.getElementById('code-export-react-ts').innerText = snippets.reactTs;
-      document.getElementById('code-export-react-js').innerText = snippets.reactJs;
-      document.getElementById('code-export-nextjs').innerText = snippets.nextjs;
-      document.getElementById('code-export-angular').innerText = snippets.angular;
-      document.getElementById('code-export-vue').innerText = snippets.vue;
-      document.getElementById('code-export-svelte').innerText = snippets.svelte;
-      document.getElementById('code-export-bridge-node').innerText = snippets.bridgeNode;
-      document.getElementById('code-export-bridge-python').innerText = snippets.bridgePython;
-      document.getElementById('code-export-bridge-php').innerText = snippets.bridgePhp;
+    function copySnippetImport(framework) {
+      const imports = {
+        'react-ts': `import { AIWidget } from './components/AIWidget';`,
+        'react-js': `import { AIWidget } from './components/AIWidget';`,
+        'vue': `import AIWidget from './components/AIWidget.vue';`,
+        'svelte': `import AIWidget from '$lib/AIWidget.svelte';`
+      };
+      const code = imports[framework] || '';
+      const btn = event?.target?.closest('button') || event?.target;
+      copyTextToClipboard(code, btn);
+    }
+
+    function copySnippetTag(framework) {
+      const tags = {
+        'react-ts': `<AIWidget userId="guest" userRole="user" />`,
+        'react-js': `<AIWidget userId="guest" userRole="user" />`,
+        'angular': `<app-ai-widget></app-ai-widget>`,
+        'vue': `<AIWidget :userId="userId" :userRole="userRole" />`,
+        'svelte': `<AIWidget userId="guest" userRole="user" />`
+      };
+      const code = tags[framework] || '';
+      const btn = event?.target?.closest('button') || event?.target;
+      copyTextToClipboard(code, btn);
     }
 
     function switchSnippetTab(tabId) {
@@ -8719,15 +9402,52 @@ CREATE TABLE scholarships (
       }
     }
 
+    function copyTextToClipboard(text, btn) {
+      if (!text) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          triggerCopyFeedback(btn);
+        }).catch(() => {
+          fallbackCopyText(text, btn);
+        });
+      } else {
+        fallbackCopyText(text, btn);
+      }
+    }
+
+    function fallbackCopyText(text, btn) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        triggerCopyFeedback(btn);
+      } catch (e) {}
+      ta.remove();
+    }
+
+    function triggerCopyFeedback(btn) {
+      if (!btn) return;
+      const orig = btn.innerText;
+      btn.innerText = '✓ Copied!';
+      btn.style.borderColor = 'var(--accent-green)';
+      btn.style.color = 'var(--accent-green)';
+      setTimeout(() => {
+        btn.innerText = orig;
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }, 2000);
+    }
+
     function copySnippet(elementId) {
       const el = document.getElementById(elementId);
+      if (!el) return;
       const code = el.value || el.innerText;
-      navigator.clipboard.writeText(code).then(() => {
-        const btn = event.target;
-        const orig = btn.innerText;
-        btn.innerText = 'Copied!';
-        setTimeout(() => { btn.innerText = orig; }, 2000);
-      });
+      const btn = event?.target?.closest('button') || event?.target;
+      copyTextToClipboard(code, btn);
     }
 
     function escapeHtml(text) {
