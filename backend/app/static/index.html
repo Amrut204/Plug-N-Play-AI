@@ -4981,6 +4981,9 @@ Key Features & Architectural Highlights:
         document.getElementById('nav-logged-in').style.display = 'none';
         document.getElementById('nav-view-tabs').style.display = 'none';
       }
+      if (typeof window.resetPlatformCopilot === 'function') {
+        window.resetPlatformCopilot(currentAuth ? false : true);
+      }
     }
 
     // =========================================================================
@@ -5749,6 +5752,13 @@ Key Features & Architectural Highlights:
       localStorage.removeItem('pnp_auth');
       updateNavAuthUI();
       switchView('landing');
+      if (typeof window.resetPlatformCopilot === 'function') {
+        window.resetPlatformCopilot(true);
+      }
+      const sbMsgs = document.getElementById('sb-chat-messages');
+      if (sbMsgs) {
+        sbMsgs.innerHTML = '';
+      }
     }
 
     // --- Dashboard Fleet & Telemetry Loader ---
@@ -9615,6 +9625,7 @@ CREATE TABLE scholarships (
       let isOpen = false;
       let isStreaming = false;
       let chatHistory = [];
+      const initialWelcomeHTML = msgList ? msgList.innerHTML : '';
 
       function getAuthToken() {
         try {
@@ -9645,6 +9656,29 @@ CREATE TABLE scholarships (
         }
       }
 
+      function resetCopilotState(closeModal = false) {
+        chatHistory = [];
+        if (msgList && initialWelcomeHTML) {
+          msgList.innerHTML = initialWelcomeHTML;
+          const starterContainer = document.getElementById('pnp-copilot-starter-chips');
+          if (starterContainer) starterContainer.style.display = 'grid';
+        }
+        if (inputField) {
+          inputField.value = '';
+          inputField.placeholder = 'Ask anything about the platform or your workspace...';
+        }
+        isStreaming = false;
+        if (sendBtn) sendBtn.disabled = false;
+        updateTenantBadge();
+        if (closeModal && modal) {
+          isOpen = false;
+          modal.style.display = 'none';
+        }
+      }
+
+      // Expose globally for logout & session transitions
+      window.resetPlatformCopilot = resetCopilotState;
+
       function toggleModal() {
         isOpen = !isOpen;
         modal.style.display = isOpen ? 'flex' : 'none';
@@ -9658,12 +9692,7 @@ CREATE TABLE scholarships (
       closeBtn.onclick = toggleModal;
 
       clearBtn.onclick = () => {
-        chatHistory = [];
-        msgList.innerHTML = `
-          <div class="pnp-chat-bubble pnp-chat-asst">
-            <div>Chat cleared. How else can I assist you with the platform?</div>
-          </div>
-        `;
+        resetCopilotState(false);
       };
 
       // Starter chips click handler
@@ -9822,12 +9851,17 @@ CREATE TABLE scholarships (
             }
           }
 
+          if (!fullText.trim()) {
+            asstDiv.innerHTML = 'I am your dedicated Platform Copilot. Please feel free to ask questions about connecting databases, creating AI agents, or setting up security guardrails!';
+            fullText = asstDiv.innerText;
+          }
+
           chatHistory.push({ role: 'user', content: text });
           chatHistory.push({ role: 'assistant', content: fullText });
           if (chatHistory.length > 8) chatHistory = chatHistory.slice(-8);
 
         } catch(err) {
-          asstDiv.innerHTML = `<span style="color: #f87171;">Connection error. Please try again.</span>`;
+          asstDiv.innerHTML = `<span style="color: #f87171;">Platform Copilot is reconnecting. Please try again.</span>`;
         } finally {
           isStreaming = false;
           sendBtn.disabled = false;
@@ -9843,8 +9877,13 @@ CREATE TABLE scholarships (
         }
       };
 
-      // Periodic check of auth state
-      window.addEventListener('storage', updateTenantBadge);
+      // Cross-tab and storage synchronization
+      window.addEventListener('storage', (e) => {
+        updateTenantBadge();
+        if (e && e.key === 'pnp_auth' && !e.newValue) {
+          resetCopilotState(true);
+        }
+      });
       updateTenantBadge();
     })();
   </script>
