@@ -1638,6 +1638,58 @@
       margin-top: 4px;
     }
 
+    /* Deployment Mode Selector */
+    .deploy-mode-hint {
+      font-size: 10.5px;
+      color: var(--text-3);
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+    .deploy-pages-input {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      padding: 8px 12px;
+      background: var(--surface-1);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-1);
+      width: 100%;
+    }
+    .deploy-pages-input::placeholder {
+      color: var(--text-3);
+      font-style: italic;
+    }
+    .deploy-preset-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      font-size: 10.5px;
+      font-weight: 600;
+      border-radius: 14px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-2);
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .deploy-preset-chip:hover {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: var(--primary);
+    }
+    .deploy-mode-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 12px;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #a5b4fc;
+    }
     /* Telemetry Table */
     .logs-table {
       width: 100%;
@@ -2393,7 +2445,10 @@
   <div class="modal-overlay" id="modal-embed" style="display: none;">
     <div class="modal-card" style="max-width: 860px; width: 92vw; max-height: 88vh; overflow-y: auto;">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-        <div style="font-size: 16px; font-weight: 700; color: var(--text-1);">Deploy Widget to Any Frontend Framework</div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="font-size: 16px; font-weight: 700; color: var(--text-1);">Deploy Widget to Any Frontend Framework</div>
+          <span id="quick-embed-deploy-badge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.35); color: #a5b4fc; font-weight: 600;">🌐 All Pages</span>
+        </div>
         <button onclick="closeEmbedModal()" class="btn-logout" style="font-size: 14px;">✕</button>
       </div>
 
@@ -4469,6 +4524,71 @@ CREATE TABLE courses (
               </label>
             </div>
 
+            <hr class="section-divider" style="margin: 16px 0;" />
+
+            <!-- Security & Visibility: Deployment Mode -->
+            <div class="subsection-header" style="margin-bottom: 10px;">
+              <span class="icon-badge">
+                <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </span>
+              <span>Security &amp; Visibility</span>
+              <span class="subsection-desc">Control who sees the widget and where</span>
+            </div>
+
+            <input type="hidden" id="wc-deploy-mode" value="global" />
+
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label>Deployment Mode</label>
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <button type="button" class="db-type-btn active" id="wc-deploy-global" onclick="setDeployMode('global')" style="display: flex; align-items: center; gap: 8px; text-align: left; padding: 8px 12px;">
+                  <span style="font-size: 14px;">🌐</span>
+                  <div>
+                    <div style="font-weight: 600; font-size: 12px;">All Pages (Global)</div>
+                    <div class="deploy-mode-hint">Widget visible to everyone on every page. Best for public FAQ bots, docs, portfolios.</div>
+                  </div>
+                </button>
+                <button type="button" class="db-type-btn" id="wc-deploy-auth" onclick="setDeployMode('auth-only')" style="display: flex; align-items: center; gap: 8px; text-align: left; padding: 8px 12px;">
+                  <span style="font-size: 14px;">🔒</span>
+                  <div>
+                    <div style="font-weight: 600; font-size: 12px;">Logged-in Users Only</div>
+                    <div class="deploy-mode-hint">Widget mounts only after authentication. Unmounts on logout. Prevents public abuse &amp; quota exhaustion.</div>
+                  </div>
+                </button>
+                <button type="button" class="db-type-btn" id="wc-deploy-pages" onclick="setDeployMode('specific-pages')" style="display: flex; align-items: center; gap: 8px; text-align: left; padding: 8px 12px;">
+                  <span style="font-size: 14px;">📍</span>
+                  <div>
+                    <div style="font-weight: 600; font-size: 12px;">Specific Pages Only</div>
+                    <div class="deploy-mode-hint">Widget renders only on whitelisted routes (e.g. /support, /checkout). Great for e-commerce &amp; help centers.</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Conditional: Allowed Pages Input (visible only in specific-pages mode) -->
+            <div id="wc-pages-config" style="display: none; margin-bottom: 10px;">
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label>Allowed Page Routes <span style="font-weight: 400; color: var(--text-3);">(comma-separated)</span></label>
+                <input type="text" id="wc-allowed-pages" class="deploy-pages-input" placeholder="/support, /help, /billing, /checkout" oninput="onDeployConfigChange()" />
+              </div>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; margin-bottom: 6px;">
+                <input type="checkbox" id="wc-require-auth-on-pages" onchange="onDeployConfigChange()" style="accent-color: var(--text-1);" />
+                Also require login on these pages
+              </label>
+            </div>
+
+            <!-- Industry Presets -->
+            <div style="margin-bottom: 10px;">
+              <label style="font-size: 11px; color: var(--text-3); display: block; margin-bottom: 6px;">Industry Presets:</label>
+              <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                <button type="button" class="deploy-preset-chip" onclick="applyDeployPreset('ecommerce')">🛒 E-Commerce</button>
+                <button type="button" class="deploy-preset-chip" onclick="applyDeployPreset('erp')">🏢 ERP / Internal</button>
+                <button type="button" class="deploy-preset-chip" onclick="applyDeployPreset('edtech')">🎓 EdTech</button>
+                <button type="button" class="deploy-preset-chip" onclick="applyDeployPreset('healthcare')">🏥 Healthcare</button>
+                <button type="button" class="deploy-preset-chip" onclick="applyDeployPreset('saas')">💻 SaaS</button>
+                <button type="button" class="deploy-preset-chip" onclick="applyDeployPreset('public-docs')">📚 Public Docs</button>
+              </div>
+            </div>
+
             <!-- Quick Presets -->
             <div style="margin-top: 8px;">
               <label style="font-size: 11px; color: var(--text-3); display: block; margin-bottom: 6px;">Quick Theme Presets:</label>
@@ -4520,7 +4640,10 @@ CREATE TABLE courses (
               <strong>Step 2:</strong> Import &amp; mount <code>&lt;AIWidget /&gt;</code> in your root <code>App.tsx</code> or layout template so it renders on screen.
             </div>
           </div>
-          <span style="font-size: 11px; color: var(--accent-green); background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 600;">React 18 StrictMode Safe</span>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span id="deploy-mode-badge-text" style="font-size: 11px; color: var(--accent-cyan); background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 600;">🌐 All Pages</span>
+            <span style="font-size: 11px; color: var(--accent-green); background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 600;">React 18 StrictMode Safe</span>
+          </div>
         </div>
 
         <div class="tab-list" style="overflow-x: auto; white-space: nowrap; padding-bottom: 6px;">
@@ -6561,6 +6684,9 @@ Key Features & Architectural Highlights:
         showBranding: document.getElementById('wc-branding')?.checked !== false,
         persistSession: document.getElementById('wc-persist')?.checked || false,
         theme: document.getElementById('wtheme-light')?.classList.contains('active') ? 'light' : 'dark',
+        deployMode: document.getElementById('wc-deploy-mode')?.value || 'global',
+        allowedPages: (document.getElementById('wc-allowed-pages')?.value || '').split(',').map(s => s.trim()).filter(Boolean),
+        requireAuthOnPages: document.getElementById('wc-require-auth-on-pages')?.checked || false,
       };
     }
 
@@ -6675,7 +6801,73 @@ ${setAttrsScript}
 
 export default AIWidget;`;
 
-      const reactTsExample = `import React from 'react';
+      // React TSX Example — deploy-mode-aware
+      let reactTsExample;
+      if (c.deployMode === 'auth-only') {
+        reactTsExample = `import React from 'react';
+import { AIWidget } from './components/AIWidget';
+import { useAuth } from './context/AuthContext'; // Your auth hook (Supabase, Firebase, NextAuth, etc.)
+
+export function App() {
+  const { user, isAuthenticated } = useAuth();
+
+  return (
+    <div className="app-container">
+      {/* 1. Your existing Navbar, Routes, and Pages */}
+      <main>
+        <h1>Welcome to Your Application</h1>
+      </main>
+
+      {/* 2. 🔒 AI Widget: Only renders when user is logged in */}
+      {/* Unmounts automatically on logout — zero token usage for anonymous visitors */}
+      {isAuthenticated && (
+        <AIWidget 
+          userId={user?.id || 'guest'}
+          userRole={user?.role || 'user'}
+        />
+      )}
+    </div>
+  );
+}
+
+export default App;`;
+      } else if (c.deployMode === 'specific-pages') {
+        const pagesArr = c.allowedPages.length > 0 ? c.allowedPages : ['/support', '/help'];
+        const pagesStr = pagesArr.map(p => `'${p}'`).join(', ');
+        const authGuard = c.requireAuthOnPages ? `
+  const { user, isAuthenticated } = useAuth();
+  if (!isAuthenticated) return null;` : '';
+        const authImport = c.requireAuthOnPages ? `\nimport { useAuth } from './context/AuthContext';` : '';
+        const userIdProp = c.requireAuthOnPages ? `userId={user?.id || 'guest'}` : `userId="guest"`;
+        const userRoleProp = c.requireAuthOnPages ? `userRole={user?.role || 'user'}` : `userRole="user"`;
+        reactTsExample = `import React from 'react';
+import { useLocation } from 'react-router-dom';
+import { AIWidget } from './components/AIWidget';${authImport}
+
+// 📍 Widget only renders on these specific pages:
+const ALLOWED_PAGES = [${pagesStr}];
+
+export function PageSpecificWidget() {
+  const location = useLocation();${authGuard}
+
+  // Check if current route is in the allowed list
+  if (!ALLOWED_PAGES.includes(location.pathname)) return null;
+
+  return (
+    <AIWidget 
+      ${userIdProp}
+      ${userRoleProp}
+    />
+  );
+}
+
+// In your App.tsx or router.tsx, mount this once:
+// import { PageSpecificWidget } from './components/PageSpecificWidget';
+// <BrowserRouter> ... <PageSpecificWidget /> </BrowserRouter>
+
+export default PageSpecificWidget;`;
+      } else {
+        reactTsExample = `import React from 'react';
 import { AIWidget } from './components/AIWidget';
 
 export function App() {
@@ -6700,6 +6892,7 @@ export function App() {
 }
 
 export default App;`;
+      }
 
       const reactTsFull = `// ============================================================================
 // STEP 1: Create the Component file at: src/components/AIWidget.tsx
@@ -6747,7 +6940,69 @@ ${setAttrsScript}
   return null;
 }`;
 
-      const reactJsExample = `import React from 'react';
+      // 2. React JavaScript (JSX) — deploy-mode-aware
+      let reactJsExample;
+      if (c.deployMode === 'auth-only') {
+        reactJsExample = `import React from 'react';
+import AIWidget from './components/AIWidget';
+import { useAuth } from './context/AuthContext'; // Your auth hook (Supabase, Firebase, NextAuth, etc.)
+
+export default function App() {
+  const { user, isAuthenticated } = useAuth();
+
+  return (
+    <div className="app-container">
+      {/* 1. Your existing application layout */}
+      <main>
+        <h1>My Web Application</h1>
+      </main>
+
+      {/* 2. 🔒 Plug-N-Play AI Widget: Only rendered for logged-in users */}
+      {/* Unmounts automatically on logout — zero tokens consumed by anonymous visitors */}
+      {isAuthenticated && (
+        <AIWidget 
+          userId={user?.id || 'guest'} 
+          userRole={user?.role || 'user'} 
+        />
+      )}
+    </div>
+  );
+}`;
+      } else if (c.deployMode === 'specific-pages') {
+        const pagesArr = c.allowedPages.length > 0 ? c.allowedPages : ['/support', '/help'];
+        const pagesStr = pagesArr.map(p => `'${p}'`).join(', ');
+        const authGuard = c.requireAuthOnPages ? `\n  const { user, isAuthenticated } = useAuth();\n  if (!isAuthenticated) return null;` : '';
+        const authImport = c.requireAuthOnPages ? `\nimport { useAuth } from './context/AuthContext';` : '';
+        const userIdProp = c.requireAuthOnPages ? `userId={user?.id || 'guest'}` : `userId="guest"`;
+        const userRoleProp = c.requireAuthOnPages ? `userRole={user?.role || 'user'}` : `userRole="user"`;
+        reactJsExample = `import React from 'react';
+import { useLocation } from 'react-router-dom';
+import AIWidget from './components/AIWidget';${authImport}
+
+// 📍 Widget only renders on these specific pages:
+const ALLOWED_PAGES = [${pagesStr}];
+
+export function PageSpecificWidget() {
+  const location = useLocation();${authGuard}
+
+  // Check if current route is in the allowed list
+  if (!ALLOWED_PAGES.includes(location.pathname)) return null;
+
+  return (
+    <AIWidget 
+      ${userIdProp} 
+      ${userRoleProp} 
+    />
+  );
+}
+
+// In your App.jsx or router.jsx, mount this once:
+// import PageSpecificWidget from './components/PageSpecificWidget';
+// <BrowserRouter> ... <PageSpecificWidget /> </BrowserRouter>
+
+export default PageSpecificWidget;`;
+      } else {
+        reactJsExample = `import React from 'react';
 import AIWidget from './components/AIWidget';
 
 export default function App() {
@@ -6763,6 +7018,7 @@ export default function App() {
     </div>
   );
 }`;
+      }
 
       const reactJsFull = `// ============================================================================
 // STEP 1: Create the Component file at: src/components/AIWidget.jsx
@@ -6774,8 +7030,61 @@ export default function App() {
 // ============================================================================
 ` + reactJsExample;
 
-      // 3. Next.js App Router
-      const nextjsCode = `import Script from 'next/script';
+      // 3. Next.js App Router — deploy-mode-aware
+      let nextjsCode;
+      if (c.deployMode === 'auth-only') {
+        nextjsCode = `// File: app/(authenticated)/layout.tsx
+// 🔒 GATED: Mounts widget ONLY for authenticated routes & logged-in sessions
+import Script from 'next/script';
+import { auth } from '@/auth'; // NextAuth, Supabase auth, or custom session helper
+import { redirect } from 'next/navigation';
+
+export default async function AuthenticatedLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await auth();
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  return (
+    <>
+      {children}
+
+      {/* Plug-N-Play AI Widget — Protected: Only mounted for logged-in users */}
+      <Script
+${dataAttrs}        data-user-id={session.user.id || 'user'}
+        data-user-role={session.user.role || 'user'}
+        strategy="afterInteractive"
+      />
+    </>
+  );
+}`;
+      } else if (c.deployMode === 'specific-pages') {
+        const targetPage = c.allowedPages.length > 0 ? c.allowedPages[0] : '/support';
+        const cleanName = targetPage.replace(/^\//, '') || 'support';
+        const capitalized = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+        nextjsCode = `// File: app/${cleanName}/page.tsx
+// 📍 PAGE-SPECIFIC: Embed widget directly inside the target route
+import Script from 'next/script';
+
+export default function ${capitalized}Page() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1>${capitalized} Center</h1>
+      <p>Need help? Our autonomous AI assistant is available on this page.</p>
+
+      {/* 📍 Plug-N-Play AI Widget: Renders only on this route */}
+      <Script
+${dataAttrs}        strategy="afterInteractive"
+      />
+    </div>
+  );
+}`;
+      } else {
+        nextjsCode = `import Script from 'next/script';
 
 export default function RootLayout({
   children,
@@ -6796,6 +7105,7 @@ ${dataAttrs}          strategy="afterInteractive"
     </html>
   );
 }`;
+      }
 
       // 4. Angular
       const angularComp = `import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
@@ -6836,7 +7146,50 @@ ${setAttrsScriptElement}
   }
 }`;
 
-      const angularExample = `import { Component } from '@angular/core';
+      let angularExample;
+      if (c.deployMode === 'auth-only') {
+        angularExample = `import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { AIWidgetComponent } from './components/ai-widget.component';
+import { AuthService } from './services/auth.service'; // Your Angular Auth Service
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet, CommonModule, AIWidgetComponent],
+  template: \`
+    <router-outlet></router-outlet>
+    <!-- 🔒 AI Widget: Only renders when user is logged in -->
+    <app-ai-widget *ngIf="authService.isAuthenticated$ | async"></app-ai-widget>
+  \`
+})
+export class AppComponent {
+  constructor(public authService: AuthService) {}
+}`;
+      } else if (c.deployMode === 'specific-pages') {
+        const targetPage = c.allowedPages.length > 0 ? c.allowedPages[0] : '/support';
+        const cleanName = targetPage.replace(/^\//, '') || 'support';
+        const compName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+        angularExample = `import { Component } from '@angular/core';
+import { AIWidgetComponent } from '../components/ai-widget.component';
+
+// 📍 Mount inside your specific routed component (e.g. src/app/pages/${cleanName}/${cleanName}.component.ts)
+@Component({
+  selector: 'app-${cleanName}',
+  standalone: true,
+  imports: [AIWidgetComponent],
+  template: \`
+    <div class="${cleanName}-container">
+      <h2>${compName} Portal</h2>
+      <!-- 📍 AI Widget mounted ONLY on this specific page -->
+      <app-ai-widget></app-ai-widget>
+    </div>
+  \`
+})
+export class ${compName}Component {}`;
+      } else {
+        angularExample = `import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AIWidgetComponent } from './components/ai-widget.component';
 
@@ -6851,6 +7204,7 @@ import { AIWidgetComponent } from './components/ai-widget.component';
   \`
 })
 export class AppComponent {}`;
+      }
 
       const angularFull = `// ============================================================================
 // STEP 1: Create component at: src/app/components/ai-widget.component.ts
@@ -6899,7 +7253,49 @@ onUnmounted(() => {
 
 <template></template>`;
 
-      const vueExample = `<script setup>
+      let vueExample;
+      if (c.deployMode === 'auth-only') {
+        vueExample = `<script setup>
+import AIWidget from './components/AIWidget.vue';
+import { useAuthStore } from '@/stores/auth'; // Pinia, Vuex, or reactive auth state
+
+const auth = useAuthStore();
+<\/script>
+
+<template>
+  <!-- 1. Your existing router views -->
+  <router-view />
+
+  <!-- 2. 🔒 Plug-N-Play AI Widget: Only visible when logged in -->
+  <!-- Automatically unmounts and removes DOM nodes on logout -->
+  <AIWidget 
+    v-if="auth.isAuthenticated" 
+    :user-id="auth.user?.id || 'guest'" 
+    :user-role="auth.user?.role || 'user'" 
+  />
+</template>`;
+      } else if (c.deployMode === 'specific-pages') {
+        const pagesArr = c.allowedPages.length > 0 ? c.allowedPages : ['/support', '/help'];
+        const pagesStr = pagesArr.map(p => `'${p}'`).join(', ');
+        vueExample = `<script setup>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import AIWidget from './components/AIWidget.vue';
+
+const route = useRoute();
+// 📍 Widget only renders on these specific routes:
+const ALLOWED_PAGES = [${pagesStr}];
+const isAllowedPage = computed(() => ALLOWED_PAGES.includes(route.path));
+<\/script>
+
+<template>
+  <router-view />
+
+  <!-- 📍 Plug-N-Play AI Widget: Mounted only on whitelisted pages -->
+  <AIWidget v-if="isAllowedPage" user-id="guest" user-role="user" />
+</template>`;
+      } else {
+        vueExample = `<script setup>
 import AIWidget from './components/AIWidget.vue';
 <\/script>
 
@@ -6910,6 +7306,7 @@ import AIWidget from './components/AIWidget.vue';
   <!-- 2. Plug-N-Play Autonomous AI Floating Assistant -->
   <AIWidget user-id="guest" user-role="user" />
 </template>`;
+      }
 
       const vueFull = `<!-- ========================================================================= -->
 <!-- STEP 1: Create component at src/components/AIWidget.vue                   -->
@@ -6954,7 +7351,40 @@ ${setAttrsScriptEl4}
   });
 <\/script>`;
 
-      const svelteExample = `<script>
+      let svelteExample;
+      if (c.deployMode === 'auth-only') {
+        svelteExample = `<script>
+  import AIWidget from '$lib/AIWidget.svelte';
+  import { isAuthenticated, user } from '$lib/stores/auth'; // Svelte store
+<\/script>
+
+<!-- 1. Your existing layout slot -->
+<slot />
+
+<!-- 2. 🔒 Plug-N-Play AI Widget: Only rendered for authenticated users -->
+{#if $isAuthenticated}
+  <AIWidget userId={$user?.id || 'guest'} userRole={$user?.role || 'user'} />
+{/if}`;
+      } else if (c.deployMode === 'specific-pages') {
+        const pagesArr = c.allowedPages.length > 0 ? c.allowedPages : ['/support', '/help'];
+        const pagesStr = pagesArr.map(p => `'${p}'`).join(', ');
+        svelteExample = `<script>
+  import { page } from '$app/stores';
+  import AIWidget from '$lib/AIWidget.svelte';
+
+  // 📍 Only render on whitelisted pages:
+  const ALLOWED_PAGES = [${pagesStr}];
+  $: isAllowed = ALLOWED_PAGES.includes($page.url.pathname);
+<\/script>
+
+<slot />
+
+<!-- 📍 Plug-N-Play AI Widget: Rendered only on allowed routes -->
+{#if isAllowed}
+  <AIWidget userId="guest" userRole="user" />
+{/if}`;
+      } else {
+        svelteExample = `<script>
   import AIWidget from '$lib/AIWidget.svelte';
 <\/script>
 
@@ -6963,6 +7393,7 @@ ${setAttrsScriptEl4}
 
 <!-- 2. Plug-N-Play Autonomous AI Floating Assistant -->
 <AIWidget userId="guest" userRole="user" />`;
+      }
 
       const svelteFull = `<!-- ========================================================================= -->
 <!-- STEP 1: Create component at src/lib/AIWidget.svelte                       -->
@@ -6974,14 +7405,98 @@ ${setAttrsScriptEl4}
 <!-- ========================================================================= -->
 ` + svelteExample;
 
-      // 7. HTML
-      const htmlCode = `<!-- ========================================================================= -->
+      // 7. HTML — deploy-mode-aware
+      let htmlCode;
+      if (c.deployMode === 'auth-only') {
+        htmlCode = `<!-- ========================================================================= -->
+<!-- OPTION 1: WORDPRESS (Paste in footer.php before </body>)                   -->
+<!-- 🔒 Only renders when a WordPress user is logged in                       -->
+<!-- ========================================================================= -->
+<?php if ( is_user_logged_in() ) : 
+  $current_user = wp_get_current_user();
+?>
+<script 
+${dataAttrs}  data-user-id="<?php echo esc_attr($current_user->ID); ?>"
+  data-user-role="<?php echo esc_attr(!empty($current_user->roles) ? $current_user->roles[0] : 'user'); ?>">
+<\/script>
+<?php endif; ?>
+
+<!-- ========================================================================= -->
+<!-- OPTION 2: LARAVEL BLADE (Paste in resources/views/layouts/app.blade.php)   -->
+<!-- ========================================================================= -->
+@auth
+<script 
+${dataAttrs}  data-user-id="{{ auth()->id() }}"
+  data-user-role="{{ auth()->user()->role ?? 'user' }}">
+<\/script>
+@endauth
+
+<!-- ========================================================================= -->
+<!-- OPTION 3: DJANGO / PYTHON TEMPLATE                                         -->
+<!-- ========================================================================= -->
+{% if request.user.is_authenticated %}
+<script 
+${dataAttrs}  data-user-id="{{ request.user.id }}"
+  data-user-role="{{ request.user.groups.first.name|default:'user' }}">
+<\/script>
+{% endif %}`;
+      } else if (c.deployMode === 'specific-pages') {
+        const pagesArr = c.allowedPages.length > 0 ? c.allowedPages : ['support', 'help'];
+        const wpSlugs = pagesArr.map(p => `'${p.replace(/^\//, '')}'`).join(', ');
+        const pathCheck = pagesArr.map(p => `window.location.pathname.includes('${p}')`).join(' || ');
+        htmlCode = `<!-- ========================================================================= -->
+<!-- OPTION 1: WORDPRESS (Paste in footer.php before </body>)                   -->
+<!-- 📍 Only renders on specific page slugs: ${pagesArr.join(', ')}             -->
+<!-- ========================================================================= -->
+<?php if ( is_page( array( ${wpSlugs} ) ) ) : ?>
+<script 
+${dataAttrs}><\/script>
+<?php endif; ?>
+
+<!-- ========================================================================= -->
+<!-- OPTION 2: VANILLA HTML / STATIC SITES (Conditional JavaScript loader)     -->
+<!-- ========================================================================= -->
+<script>
+  (function() {
+    // 📍 Only load widget if on specified pages
+    if (${pathCheck}) {
+      var s = document.createElement('script');
+      s.src = '${host}/static/pnp-widget.js';
+${setAttrsScript}
+      s.setAttribute('data-api-host', '${host}');
+      s.setAttribute('data-agent-id', '${aid}');
+      s.setAttribute('data-title', '${aname}');
+      s.async = true;
+      document.body.appendChild(s);
+    }
+  })();
+<\/script>`;
+      } else {
+        htmlCode = `<!-- ========================================================================= -->
 <!-- PASTE BEFORE </body> IN YOUR HTML / WORDPRESS / SHOPIFY / WEBFLOW        -->
 <!-- ========================================================================= -->
 <script 
 ${dataAttrs}><\/script>`;
+      }
 
-      // 8. Zero-Knowledge Backend Bridges
+      // 8. Zero-Knowledge Backend Bridges — deploy-mode-aware
+      const authNodeCheck = c.deployMode === 'auth-only' ? `
+    // 🔒 AUTH GUARD: Reject unauthenticated requests
+    if (!req.user && (!userId || userId === 'guest')) {
+      return res.status(401).json({ error: 'Unauthorized: You must be logged in to use this AI assistant.' });
+    }\n` : '';
+
+      const authPyCheck = c.deployMode === 'auth-only' ? `
+    # 🔒 AUTH GUARD: Reject unauthenticated requests
+    if payload.userId == "guest" or not payload.userId:
+        raise HTTPException(status_code=401, detail="Authentication required to access this agent.")\n` : '';
+
+      const authPhpCheck = c.deployMode === 'auth-only' ? `
+        // 🔒 AUTH GUARD: Reject unauthenticated requests
+        if (!auth()->check() && $request->input('user_id', 'guest') === 'guest') {
+            return response()->json(['error' => 'Authentication required.'], 401);
+        }\n` : '';
+
       const bridgeNode = `// =========================================================================
 // HOW TO ADD TO YOUR EXISTING NODE.JS / EXPRESS APP
 // Target: server.js or routes/aiChat.js
@@ -6991,7 +7506,7 @@ app.post('/api/ai-chat', async (req, res) => {
   const PNP_HOST = '${host}';
   const AGENT_ID = '${aid}';
 
-  try {
+  try {${authNodeCheck}
     // 1. Request safe SQL generation (Zero DB credentials leave your firewall)
     const genRes = await fetch(\`\${PNP_HOST}/api/v1/chat/generate-sql\`, {
       method: 'POST',
@@ -7040,7 +7555,7 @@ class ChatPayload(BaseModel):
     userRole: str = "user"
 
 @app.post("/api/ai-chat")
-async def handle_ai_chat(payload: ChatPayload):
+async def handle_ai_chat(payload: ChatPayload):${authPyCheck}
     async with httpx.AsyncClient(timeout=30.0) as client:
         # 1. Ask Plug-N-Play AI to synthesize safe SQL from schema
         gen_res = await client.post(f"{PNP_HOST}/api/v1/chat/generate-sql", json={
@@ -7086,7 +7601,7 @@ class AIChatController extends Controller {
     public function handleChat(Request $request) {
         $pnpHost = "${host}";
         $agentId = "${aid}";
-
+${authPhpCheck}
         // 1. Generate SQL from schema (No DB credentials leave firewall)
         $genRes = Http::post("{$pnpHost}/api/v1/chat/generate-sql", [
             'agent_id' => $agentId,
@@ -7190,6 +7705,8 @@ class AIChatController extends Controller {
       const host = window.location.origin;
       const snippets = generateSnippetCode(host, aid, aname);
       populateSnippetUI('quick-code', snippets);
+      const qBadge = document.getElementById('quick-embed-deploy-badge');
+      if (qBadge) qBadge.innerText = getDeployModeBadgeHtml();
       document.getElementById('modal-embed').style.display = 'flex';
     }
 
@@ -9452,6 +9969,67 @@ CREATE TABLE scholarships (
 
     function escapeHtml(text) {
       return (text || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // DEPLOYMENT MODE SELECTOR FUNCTIONS
+    // ═══════════════════════════════════════════════════════
+
+    function setDeployMode(mode) {
+      document.getElementById('wc-deploy-mode').value = mode;
+      document.getElementById('wc-deploy-global').classList.toggle('active', mode === 'global');
+      document.getElementById('wc-deploy-auth').classList.toggle('active', mode === 'auth-only');
+      document.getElementById('wc-deploy-pages').classList.toggle('active', mode === 'specific-pages');
+
+      const pagesConfig = document.getElementById('wc-pages-config');
+      if (pagesConfig) pagesConfig.style.display = mode === 'specific-pages' ? 'block' : 'none';
+
+      onDeployConfigChange();
+    }
+
+    function applyDeployPreset(industry) {
+      const presets = {
+        'ecommerce':   { mode: 'specific-pages', pages: '/support, /help, /checkout, /account', requireAuth: false },
+        'erp':         { mode: 'auth-only',      pages: '',                                     requireAuth: false },
+        'edtech':      { mode: 'auth-only',      pages: '',                                     requireAuth: false },
+        'healthcare':  { mode: 'auth-only',      pages: '',                                     requireAuth: false },
+        'saas':        { mode: 'auth-only',      pages: '',                                     requireAuth: false },
+        'public-docs': { mode: 'global',         pages: '',                                     requireAuth: false }
+      };
+      const p = presets[industry];
+      if (!p) return;
+
+      setDeployMode(p.mode);
+      const pagesInput = document.getElementById('wc-allowed-pages');
+      if (pagesInput) pagesInput.value = p.pages;
+      const authCheck = document.getElementById('wc-require-auth-on-pages');
+      if (authCheck) authCheck.checked = p.requireAuth;
+      onDeployConfigChange();
+    }
+
+    function onDeployConfigChange() {
+      if (currentAgent?.agent_id) {
+        generateExportSnippets(currentAgent);
+      }
+      updateDeployModeBadge();
+    }
+
+    function updateDeployModeBadge() {
+      const label = getDeployModeBadgeHtml();
+      const badge1 = document.getElementById('deploy-mode-badge-text');
+      if (badge1) badge1.innerText = label;
+      const badge2 = document.getElementById('quick-embed-deploy-badge');
+      if (badge2) badge2.innerText = label;
+    }
+
+    function getDeployModeBadgeHtml() {
+      const mode = document.getElementById('wc-deploy-mode')?.value || 'global';
+      const labels = {
+        'global': '🌐 All Pages',
+        'auth-only': '🔒 Logged-in Only',
+        'specific-pages': '📍 Specific Pages'
+      };
+      return labels[mode] || labels['global'];
     }
 
     // ═══════════════════════════════════════════════════════
