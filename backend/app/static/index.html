@@ -4927,6 +4927,16 @@ Key Features & Architectural Highlights:
       if (stored) {
         try {
           currentAuth = JSON.parse(stored);
+          if (currentAuth) {
+            const uid = currentAuth.tenant?.id || currentAuth.user?.id;
+            const uname = currentAuth.tenant?.name || currentAuth.user?.org_name || currentAuth.user?.full_name || 'SmartPath Workspace';
+            const uslug = currentAuth.tenant?.slug || currentAuth.user?.slug || 'smartpath';
+            const utier = currentAuth.tenant?.subscription_tier || currentAuth.user?.tier || 'free';
+            if (!currentAuth.tenant && uid) {
+              currentAuth.tenant = { id: uid, name: uname, slug: uslug, subscription_tier: utier };
+              try { localStorage.setItem('pnp_auth', JSON.stringify(currentAuth)); } catch (_) {}
+            }
+          }
           updateNavAuthUI();
           switchView('dashboard');
         } catch (e) {
@@ -5743,8 +5753,8 @@ Key Features & Architectural Highlights:
 
     // --- Dashboard Fleet & Telemetry Loader ---
     async function loadDashboardFleet() {
-      if (!currentAuth?.tenant?.id) return;
-      const tid = currentAuth.tenant.id;
+      const tid = currentAuth?.tenant?.id || currentAuth?.user?.id;
+      if (!tid) return;
 
       try {
         const res = await fetch(`/api/v1/agents/tenant/${tid}/detailed`);
@@ -5819,8 +5829,8 @@ Key Features & Architectural Highlights:
     }
 
     async function loadWorkspaceOverview() {
-      if (!currentAuth?.tenant?.id) return;
-      const tid = currentAuth.tenant.id;
+      const tid = currentAuth?.tenant?.id || currentAuth?.user?.id;
+      if (!tid) return;
 
       // API Key
       try {
@@ -7925,9 +7935,12 @@ CREATE TABLE scholarships (
       if (supportPhone) finalGuardrailConfig.support_contact_phone = supportPhone;
       if (supportEmail) finalGuardrailConfig.support_contact_email = supportEmail;
 
+      const tid = currentAuth?.tenant?.id || currentAuth?.user?.id || null;
+      const tname = currentAuth?.tenant?.name || currentAuth?.user?.org_name || projName;
+
       const payload = {
-        tenant_id: currentAuth?.tenant?.id || null,
-        project_name: projName,
+        tenant_id: tid,
+        project_name: tname,
         agent_name: agentName,
         service_type: selectedService,
         target_audience: selectedAudience,
@@ -8224,7 +8237,7 @@ CREATE TABLE scholarships (
       };
 
       const agentId = currentAgent?.agent_id || currentAgent?.agent?.id;
-      const tenantId = currentAuth?.tenant?.id || currentAgent?.tenant?.id;
+      const tenantId = currentAuth?.tenant?.id || currentAuth?.user?.id || currentAgent?.tenant?.id;
 
       if (agentId && tenantId) {
         try {

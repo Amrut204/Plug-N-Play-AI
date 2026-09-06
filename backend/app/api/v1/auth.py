@@ -187,6 +187,12 @@ async def google_auth(payload: GoogleAuthRequest, db: AsyncSession = Depends(get
         "status": "success",
         "message": f"Welcome, {tenant.full_name or tenant.email}! Signed in with Google.",
         "token": jwt_token,
+        "tenant": {
+            "id": tenant.id,
+            "name": tenant.name,
+            "slug": tenant.slug,
+            "subscription_tier": tenant.subscription_tier or "free"
+        },
         "user": {
             "id": tenant.id,
             "full_name": tenant.full_name,
@@ -603,6 +609,12 @@ async def login_client(payload: ClientLoginRequest, db: AsyncSession = Depends(g
     return {
         "status": "success",
         "token": token,
+        "tenant": {
+            "id": tenant.id,
+            "name": tenant.name,
+            "slug": tenant.slug,
+            "subscription_tier": tenant.subscription_tier or "free"
+        },
         "user": {
             "id": tenant.id,
             "full_name": tenant.full_name or tenant.name,
