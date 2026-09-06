@@ -2452,17 +2452,18 @@
         <button onclick="closeEmbedModal()" class="btn-logout" style="font-size: 14px;">✕</button>
       </div>
 
-      <!-- 2-Step Integration Guide Alert -->
+      <!-- Integration Guide Alert -->
       <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.28); border-left: 4px solid var(--primary); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;">2</span>
-          <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">
-            <strong style="color: var(--text-1);">Clear 2-Step Framework Integration:</strong>
-            <strong>Step 1:</strong> Create the component file &bull;
-            <strong>Step 2:</strong> Import &amp; mount <code>&lt;AIWidget /&gt;</code> in your root <code>App.tsx</code> / <code>router.tsx</code> so it floats across your app.
+          <span id="modal-guide-step-num" style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;">1</span>
+          <div id="modal-guide-text" style="font-size: 12px; color: var(--text-2); line-height: 1.4;">
+            <strong style="color: var(--text-1);">Direct HTML / CMS Integration:</strong> Paste the <code>&lt;script&gt;</code> tag right before <code>&lt;/body&gt;</code> in your <code>index.html</code>, WordPress <code>footer.php</code>, Shopify, or Webflow.
           </div>
         </div>
-        <span style="font-size: 11px; color: var(--accent-green); background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 600;">React 18 StrictMode Safe</span>
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span id="quick-embed-deploy-badge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.35); color: #a5b4fc; font-weight: 600;">🌐 All Pages</span>
+          <span id="modal-framework-badge" style="font-size: 11px; color: #f59e0b; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 600;">Vanilla JS • Zero Dependencies</span>
+        </div>
       </div>
 
       <div class="tab-list" style="overflow-x: auto; white-space: nowrap; padding-bottom: 6px;">
@@ -4630,19 +4631,17 @@ CREATE TABLE courses (
           <span class="subsection-desc">Includes your custom theme settings</span>
         </div>
 
-        <!-- 2-Step Integration Guide Alert -->
+        <!-- Integration Guide Alert -->
         <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.28); border-left: 4px solid var(--primary); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;">2</span>
-            <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">
-              <strong style="color: var(--text-1);">2-Step Framework Integration:</strong>
-              <strong>Step 1:</strong> Create the component file &bull;
-              <strong>Step 2:</strong> Import &amp; mount <code>&lt;AIWidget /&gt;</code> in your root <code>App.tsx</code> or layout template so it renders on screen.
+            <span id="studio-guide-step-num" style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;">1</span>
+            <div id="studio-guide-text" style="font-size: 12px; color: var(--text-2); line-height: 1.4;">
+              <strong style="color: var(--text-1);">Direct HTML / CMS Integration:</strong> Paste the <code>&lt;script&gt;</code> tag right before <code>&lt;/body&gt;</code> in your <code>index.html</code>, WordPress <code>footer.php</code>, Shopify, or Webflow.
             </div>
           </div>
           <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <span id="deploy-mode-badge-text" style="font-size: 11px; color: var(--accent-cyan); background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 600;">🌐 All Pages</span>
-            <span style="font-size: 11px; color: var(--accent-green); background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 600;">React 18 StrictMode Safe</span>
+            <span id="studio-framework-badge" style="font-size: 11px; color: #f59e0b; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: 600;">Vanilla JS • Zero Dependencies</span>
           </div>
         </div>
 
@@ -7701,12 +7700,184 @@ ${authPhpCheck}
       setTxt(`${prefix}-bridge-php`, snippets.bridgePhp);
     }
 
+    let currentStudioSnippetTab = 'html';
+    let currentModalSnippetTab = 'html';
+
+    const FRAMEWORK_GUIDE_CONFIG = {
+      'html': {
+        stepNum: '1',
+        title: 'Direct HTML / CMS Integration',
+        badge: 'Vanilla JS • Zero Dependencies',
+        badgeColor: '#f59e0b',
+        badgeBg: 'rgba(245, 158, 11, 0.1)',
+        badgeBorder: 'rgba(245, 158, 11, 0.3)',
+        descriptions: {
+          'global': 'Paste the <code>&lt;script&gt;</code> tag right before <code>&lt;/body&gt;</code> in your <code>index.html</code>, WordPress <code>footer.php</code>, Shopify, or Webflow.',
+          'auth-only': '🔒 <strong>Protected:</strong> Wraps widget in WordPress <code>is_user_logged_in()</code>, Blade <code>@auth</code>, or Django <code>is_authenticated</code> checks so only logged-in users see it.',
+          'specific-pages': '📍 <strong>Targeted:</strong> Embeds via WordPress <code>is_page()</code> or conditional JavaScript path matching only on specified URLs.'
+        }
+      },
+      'react-ts': {
+        stepNum: '2',
+        title: 'React TypeScript (TSX / Vite / Next)',
+        badge: 'React 18 & 19 StrictMode Safe',
+        badgeColor: 'var(--accent-green, #22c55e)',
+        badgeBg: 'rgba(34, 197, 94, 0.1)',
+        badgeBorder: 'rgba(34, 197, 94, 0.3)',
+        descriptions: {
+          'global': '<strong>Step 1:</strong> Create <code>src/components/AIWidget.tsx</code> &bull; <strong>Step 2:</strong> Mount <code>&lt;AIWidget /&gt;</code> in your root <code>App.tsx</code> or <code>router.tsx</code>.',
+          'auth-only': '<strong>Step 1:</strong> Create <code>AIWidget.tsx</code> &bull; <strong>Step 2:</strong> Mount in <code>App.tsx</code> with <code>{isAuthenticated &amp;&amp; &lt;AIWidget /&gt;}</code> — unmounts automatically on logout.',
+          'specific-pages': '<strong>Step 1:</strong> Create <code>AIWidget.tsx</code> &bull; <strong>Step 2:</strong> Mount <code>&lt;PageSpecificWidget /&gt;</code> with React Router <code>useLocation()</code> to filter allowed routes.'
+        }
+      },
+      'react-js': {
+        stepNum: '2',
+        title: 'React JavaScript (JSX / Vite / CRA)',
+        badge: 'React 18 & 19 StrictMode Safe',
+        badgeColor: 'var(--accent-green, #22c55e)',
+        badgeBg: 'rgba(34, 197, 94, 0.1)',
+        badgeBorder: 'rgba(34, 197, 94, 0.3)',
+        descriptions: {
+          'global': '<strong>Step 1:</strong> Create <code>src/components/AIWidget.jsx</code> &bull; <strong>Step 2:</strong> Mount <code>&lt;AIWidget /&gt;</code> in your root <code>App.jsx</code> or <code>router.jsx</code>.',
+          'auth-only': '<strong>Step 1:</strong> Create <code>AIWidget.jsx</code> &bull; <strong>Step 2:</strong> Guard with <code>{isAuthenticated &amp;&amp; &lt;AIWidget /&gt;}</code> in <code>App.jsx</code> — zero tokens for guests.',
+          'specific-pages': '<strong>Step 1:</strong> Create <code>AIWidget.jsx</code> &bull; <strong>Step 2:</strong> Mount <code>&lt;PageSpecificWidget /&gt;</code> with route path matching.'
+        }
+      },
+      'nextjs': {
+        stepNum: '1',
+        title: 'Next.js App Router & Pages Router',
+        badge: 'Next.js 13/14/15 App Router',
+        badgeColor: 'var(--accent-cyan, #38bdf8)',
+        badgeBg: 'rgba(56, 189, 248, 0.1)',
+        badgeBorder: 'rgba(56, 189, 248, 0.3)',
+        descriptions: {
+          'global': 'Import Next.js <code>&lt;Script /&gt;</code> into your root <code>app/layout.tsx</code> with <code>strategy="afterInteractive"</code> for optimal Core Web Vitals.',
+          'auth-only': '🔒 <strong>Session Guard:</strong> Mount inside <code>app/(authenticated)/layout.tsx</code> with server session verification (NextAuth / Supabase).',
+          'specific-pages': '📍 <strong>Route Scoped:</strong> Place <code>&lt;Script /&gt;</code> inside your target page (e.g. <code>app/support/page.tsx</code>) instead of root layout.'
+        }
+      },
+      'angular': {
+        stepNum: '2',
+        title: 'Angular Standalone Component',
+        badge: 'Angular 16+ Standalone & SSR Safe',
+        badgeColor: '#f43f5e',
+        badgeBg: 'rgba(244, 63, 94, 0.1)',
+        badgeBorder: 'rgba(244, 63, 94, 0.3)',
+        descriptions: {
+          'global': '<strong>Step 1:</strong> Create <code>ai-widget.component.ts</code> &bull; <strong>Step 2:</strong> Add to <code>app.component.ts</code> imports and add <code>&lt;app-ai-widget&gt;</code> to template.',
+          'auth-only': '<strong>Step 1:</strong> Create component &bull; <strong>Step 2:</strong> Guard with <code>*ngIf="authService.isAuthenticated$ | async"</code> in template.',
+          'specific-pages': '<strong>Step 1:</strong> Create component &bull; <strong>Step 2:</strong> Import into specific routed component (e.g. <code>support.component.ts</code>).'
+        }
+      },
+      'vue': {
+        stepNum: '2',
+        title: 'Vue 3 & Nuxt 3 (Composition API)',
+        badge: 'Vue 3 Composition API & Nuxt 3',
+        badgeColor: '#10b981',
+        badgeBg: 'rgba(16, 185, 129, 0.1)',
+        badgeBorder: 'rgba(16, 185, 129, 0.3)',
+        descriptions: {
+          'global': '<strong>Step 1:</strong> Create <code>src/components/AIWidget.vue</code> &bull; <strong>Step 2:</strong> Import &amp; mount <code>&lt;AIWidget /&gt;</code> in <code>App.vue</code>.',
+          'auth-only': '<strong>Step 1:</strong> Create component &bull; <strong>Step 2:</strong> Mount with <code>v-if="auth.isAuthenticated"</code> in <code>App.vue</code> — reactive teardown on logout.',
+          'specific-pages': '<strong>Step 1:</strong> Create component &bull; <strong>Step 2:</strong> Conditionally render with <code>useRoute()</code> path check in page template.'
+        }
+      },
+      'svelte': {
+        stepNum: '2',
+        title: 'Svelte 4 & 5 / SvelteKit',
+        badge: 'Svelte 4 / 5 & SvelteKit Safe',
+        badgeColor: '#fb923c',
+        badgeBg: 'rgba(251, 146, 60, 0.1)',
+        badgeBorder: 'rgba(251, 146, 60, 0.3)',
+        descriptions: {
+          'global': '<strong>Step 1:</strong> Create <code>src/lib/AIWidget.svelte</code> &bull; <strong>Step 2:</strong> Import &amp; mount <code>&lt;AIWidget /&gt;</code> in <code>src/routes/+layout.svelte</code>.',
+          'auth-only': '<strong>Step 1:</strong> Create component &bull; <strong>Step 2:</strong> Wrap with <code>{#if $isAuthenticated}</code> store check in layout.',
+          'specific-pages': '<strong>Step 1:</strong> Create component &bull; <strong>Step 2:</strong> Check <code>$page.url.pathname</code> against allowed routes.'
+        }
+      },
+      'bridge-node': {
+        stepNum: 'API',
+        title: 'Zero-Knowledge Node.js Bridge',
+        badge: 'Express / Fastify • Zero VPC Leak',
+        badgeColor: 'var(--accent-green, #22c55e)',
+        badgeBg: 'rgba(34, 197, 94, 0.1)',
+        badgeBorder: 'rgba(34, 197, 94, 0.3)',
+        descriptions: {
+          'global': 'Add <code>POST /api/ai-chat</code> to Express. Plug-N-Play generates read-only SQL; queries execute <strong>inside your firewall</strong> with zero DB credentials leaving your server.',
+          'auth-only': '🔒 <strong>401 Auth Guard Enforced:</strong> Rejects unauthenticated requests with HTTP 401 before calling AI synthesis.',
+          'specific-pages': 'Frontend widget passes session context; backend executes queries only within your private VPC.'
+        }
+      },
+      'bridge-python': {
+        stepNum: 'API',
+        title: 'Zero-Knowledge Python Bridge',
+        badge: 'FastAPI / Flask / Django',
+        badgeColor: 'var(--accent-cyan, #38bdf8)',
+        badgeBg: 'rgba(56, 189, 248, 0.1)',
+        badgeBorder: 'rgba(56, 189, 248, 0.3)',
+        descriptions: {
+          'global': 'Add <code>@app.post("/api/ai-chat")</code>. Uses <code>httpx</code> for async SQL synthesis; local database results are formatted into natural answers.',
+          'auth-only': '🔒 <strong>FastAPI HTTPException(401):</strong> Rejects anonymous callers if <code>userId == "guest"</code>.',
+          'specific-pages': 'Frontend widget passes session context; backend executes queries safely inside your private cluster.'
+        }
+      },
+      'bridge-php': {
+        stepNum: 'API',
+        title: 'Zero-Knowledge Laravel / PHP Bridge',
+        badge: 'Laravel 10+ / PHP 8.1+',
+        badgeColor: 'var(--accent-purple, #c084fc)',
+        badgeBg: 'rgba(192, 132, 252, 0.1)',
+        badgeBorder: 'rgba(192, 132, 252, 0.3)',
+        descriptions: {
+          'global': 'Add <code>Route::post(\'/ai-chat\', [AIChatController::class, \'handleChat\'])</code>. Local <code>DB::select()</code> executes safely on your server.',
+          'auth-only': '🔒 <strong>Laravel auth()->check() Guard:</strong> Returns HTTP 401 JSON response if the visitor is not authenticated.',
+          'specific-pages': 'Controller validates request context and executes read-only queries with zero external DB exposure.'
+        }
+      }
+    };
+
+    function updateIntegrationGuideBanner(context, tabId) {
+      const cfg = FRAMEWORK_GUIDE_CONFIG[tabId] || FRAMEWORK_GUIDE_CONFIG['html'];
+      const mode = document.getElementById('wc-deploy-mode')?.value || 'global';
+      const desc = (cfg.descriptions && cfg.descriptions[mode]) || cfg.descriptions['global'];
+
+      const prefix = context === 'modal' ? 'modal' : 'studio';
+      const numEl = document.getElementById(`${prefix}-guide-step-num`);
+      const textEl = document.getElementById(`${prefix}-guide-text`);
+      const badgeEl = document.getElementById(`${prefix}-framework-badge`);
+
+      if (numEl) {
+        numEl.innerText = cfg.stepNum;
+        if (cfg.stepNum === 'API') {
+          numEl.style.fontSize = '9px';
+          numEl.style.borderRadius = '6px';
+          numEl.style.width = '28px';
+        } else {
+          numEl.style.fontSize = '11px';
+          numEl.style.borderRadius = '50%';
+          numEl.style.width = '22px';
+        }
+      }
+
+      if (textEl) {
+        textEl.innerHTML = `<strong style="color: var(--text-1);">${cfg.title}:</strong> ${desc}`;
+      }
+
+      if (badgeEl) {
+        badgeEl.innerText = cfg.badge;
+        badgeEl.style.color = cfg.badgeColor;
+        badgeEl.style.backgroundColor = cfg.badgeBg;
+        badgeEl.style.borderColor = cfg.badgeBorder;
+      }
+    }
+
     function openQuickEmbedModal(aid, aname) {
       const host = window.location.origin;
       const snippets = generateSnippetCode(host, aid, aname);
       populateSnippetUI('quick-code', snippets);
       const qBadge = document.getElementById('quick-embed-deploy-badge');
       if (qBadge) qBadge.innerText = getDeployModeBadgeHtml();
+      updateIntegrationGuideBanner('modal', currentModalSnippetTab);
       document.getElementById('modal-embed').style.display = 'flex';
     }
 
@@ -7715,11 +7886,14 @@ ${authPhpCheck}
     }
 
     function switchQuickEmbedTab(tabId) {
+      currentModalSnippetTab = tabId;
       document.querySelectorAll('.quick-snip-pane').forEach(el => el.style.display = 'none');
       document.querySelectorAll('#modal-embed .tab-btn').forEach(b => b.classList.remove('active'));
       const active = document.getElementById('quick-embed-' + tabId);
       if (active) active.style.display = 'block';
-      if (event && event.target) event.target.classList.add('active');
+      const clickedBtn = (typeof event !== 'undefined' && event?.target) ? event.target : document.querySelector(`#modal-embed .tab-btn[onclick*="'${tabId}'"]`);
+      if (clickedBtn) clickedBtn.classList.add('active');
+      updateIntegrationGuideBanner('modal', tabId);
     }
 
     // --- Studio Navigation & Creation ---
@@ -9860,6 +10034,7 @@ CREATE TABLE scholarships (
       const aname = agentData.agent_name || (agentData.agent && agentData.agent.name);
       const snippets = generateSnippetCode(host, aid, aname);
       populateSnippetUI('code-export', snippets);
+      updateIntegrationGuideBanner('studio', currentStudioSnippetTab);
     }
 
     function copySnippetImport(framework) {
@@ -9888,11 +10063,14 @@ CREATE TABLE scholarships (
     }
 
     function switchSnippetTab(tabId) {
+      currentStudioSnippetTab = tabId;
       document.querySelectorAll('.snip-pane').forEach(el => el.style.display = 'none');
       document.querySelectorAll('#section-export .tab-btn').forEach(b => b.classList.remove('active'));
       const active = document.getElementById('snip-' + tabId);
       if (active) active.style.display = 'block';
-      if (event && event.target) event.target.classList.add('active');
+      const clickedBtn = (typeof event !== 'undefined' && event?.target) ? event.target : document.querySelector(`#section-export .tab-btn[onclick*="'${tabId}'"]`);
+      if (clickedBtn) clickedBtn.classList.add('active');
+      updateIntegrationGuideBanner('studio', tabId);
     }
 
     function updateStepper(activeStep) {
@@ -10012,6 +10190,8 @@ CREATE TABLE scholarships (
         generateExportSnippets(currentAgent);
       }
       updateDeployModeBadge();
+      updateIntegrationGuideBanner('studio', currentStudioSnippetTab);
+      updateIntegrationGuideBanner('modal', currentModalSnippetTab);
     }
 
     function updateDeployModeBadge() {
