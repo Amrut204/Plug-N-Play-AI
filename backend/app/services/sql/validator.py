@@ -143,10 +143,15 @@ class SQLASTValidator:
             # If target table is queried and doesn't already have an equality check on target_col, enforce WHERE
             if target_table.lower() in referenced_tables:
                 where_clause = f"{target_table}.{target_col} = :{param_key}"
-                # Check if expression already has a where condition on target_col
+                # Check if expression already has a where condition on target_col or user identity
                 existing_where = expression.find(exp.Where)
                 where_str = existing_where.sql() if existing_where else ""
-                if target_col.lower() not in where_str.lower():
+                user_val_str = str(user_value).lower().strip()
+                already_filtered = (
+                    target_col.lower() in where_str.lower() or 
+                    (bool(user_val_str) and user_val_str in where_str.lower())
+                )
+                if not already_filtered:
                     expression = expression.where(where_clause, append=True)
 
         sanitized_sql = expression.sql(dialect=dialect)

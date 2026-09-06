@@ -244,7 +244,7 @@ class QueryOrchestrator:
 
         # 0.5 Check for personal data lookup from unauthenticated guest session
         is_self_query = bool(re.search(r"\b(my|mine|me|myself|i am|for me)\b", effective_query.lower()))
-        is_personal_metric = bool(re.search(r"\b(cgpa|gpa|sgpa|attendance|grade|grades|marks|score|scores|backlog|backlogs|fees?|fee_invoices?|admit card|hall ticket)\b", effective_query.lower()))
+        is_personal_metric = bool(re.search(r"\b(cgpa|gpa|sgpa|prn|roll\s*no|roll\s*number|registration\s*no|registration\s*number|student\s*id|attendance|grade|grades|marks|score|scores|backlog|backlogs|readiness|placement\s*status|fees?|fee_invoices?|admit card|hall ticket)\b", effective_query.lower()))
         is_guest = not external_user_id or str(external_user_id).lower().strip() in ("guest", "anonymous", "guest_user", "null", "none", "")
 
         if is_self_query and is_personal_metric and is_guest:
@@ -449,7 +449,11 @@ class QueryOrchestrator:
         restricted_cols = set()
         if guardrail_config and guardrail_config.get("restricted_columns"):
             raw_restricted = {c.lower().strip() for c in guardrail_config["restricted_columns"]}
-            ACADEMIC_FIELDS = {"cgpa", "gpa", "sgpa", "marks", "attendance", "grade", "grades", "score", "scores", "rank", "percentage"}
+            ACADEMIC_FIELDS = {
+                "cgpa", "gpa", "sgpa", "marks", "attendance", "grade", "grades", "score", "scores", 
+                "rank", "percentage", "prn", "student_id", "roll_no", "roll_number", "readiness_pct", 
+                "placement_status", "active_backlogs"
+            }
             if role_is_elevated or is_self_query:
                 # Do not strip academic / performance columns for TPO or student's own inquiry
                 restricted_cols = {c for c in raw_restricted if c not in ACADEMIC_FIELDS}
@@ -642,10 +646,29 @@ class QueryOrchestrator:
         safety_hint = ""
         if guardrail_config:
             instructions = guardrail_config.get("refusal_instructions") or []
-            restricted_cols = guardrail_config.get("restricted_columns") or []
+            raw_restricted = guardrail_config.get("restricted_columns") or []
+            
+            ELEVATED_ROLES = {"admin", "tpo", "placement_officer", "faculty", "staff", "management", "manager", "superadmin", "recruiter", "director", "dean"}
+            role_is_elevated = bool(user_role and user_role.lower() in ELEVATED_ROLES)
+            is_self = bool(re.search(r"\b(my|mine|me|myself|i am|for me)\b", user_query.lower()))
+            ACADEMIC_FIELDS = {
+                "cgpa", "gpa", "sgpa", "marks", "attendance", "grade", "grades", "score", "scores", 
+                "rank", "percentage", "prn", "student_id", "roll_no", "roll_number", "readiness_pct", 
+                "placement_status", "active_backlogs"
+            }
+            
+            if role_is_elevated or is_self:
+                effective_restricted = [c for c in raw_restricted if str(c).lower().strip() not in ACADEMIC_FIELDS]
+            else:
+                effective_restricted = raw_restricted
+
             hints = [f"- {inst}" for inst in instructions]
-            if restricted_cols:
-                hints.append(f"- Never reveal or discuss restricted personal columns: {', '.join(restricted_cols)}.")
+            if effective_restricted:
+                hints.append(f"- Never reveal or discuss restricted personal columns: {', '.join(effective_restricted)}.")
+            if is_self:
+                hints.append("- The user is inquiring about their OWN personal records. When operational records for the user are present above, state their personal data (such as their PRN, CGPA, attendance, placement readiness) directly, warmly, and accurately. Do not refuse their own verified records.")
+            elif role_is_elevated:
+                hints.append(f"- The requester has an authorized management/staff role ({user_role}). Present student records, performance metrics, and drive eligibility criteria directly without withholding.")
             if hints:
                 safety_hint = "\nCOMPLIANCE & PRIVACY RESTRICTIONS:\n" + "\n".join(hints)
 
@@ -760,10 +783,29 @@ Context Information:
         safety_hint = ""
         if guardrail_config:
             instructions = guardrail_config.get("refusal_instructions") or []
-            restricted_cols = guardrail_config.get("restricted_columns") or []
+            raw_restricted = guardrail_config.get("restricted_columns") or []
+            
+            ELEVATED_ROLES = {"admin", "tpo", "placement_officer", "faculty", "staff", "management", "manager", "superadmin", "recruiter", "director", "dean"}
+            role_is_elevated = bool(user_role and user_role.lower() in ELEVATED_ROLES)
+            is_self = bool(re.search(r"\b(my|mine|me|myself|i am|for me)\b", user_query.lower()))
+            ACADEMIC_FIELDS = {
+                "cgpa", "gpa", "sgpa", "marks", "attendance", "grade", "grades", "score", "scores", 
+                "rank", "percentage", "prn", "student_id", "roll_no", "roll_number", "readiness_pct", 
+                "placement_status", "active_backlogs"
+            }
+            
+            if role_is_elevated or is_self:
+                effective_restricted = [c for c in raw_restricted if str(c).lower().strip() not in ACADEMIC_FIELDS]
+            else:
+                effective_restricted = raw_restricted
+
             hints = [f"- {inst}" for inst in instructions]
-            if restricted_cols:
-                hints.append(f"- Never reveal or discuss restricted personal columns: {', '.join(restricted_cols)}.")
+            if effective_restricted:
+                hints.append(f"- Never reveal or discuss restricted personal columns: {', '.join(effective_restricted)}.")
+            if is_self:
+                hints.append("- The user is inquiring about their OWN personal records. When operational records for the user are present above, state their personal data (such as their PRN, CGPA, attendance, placement readiness) directly, warmly, and accurately. Do not refuse their own verified records.")
+            elif role_is_elevated:
+                hints.append(f"- The requester has an authorized management/staff role ({user_role}). Present student records, performance metrics, and drive eligibility criteria directly without withholding.")
             if hints:
                 safety_hint = "\nCOMPLIANCE & PRIVACY RESTRICTIONS:\n" + "\n".join(hints)
 

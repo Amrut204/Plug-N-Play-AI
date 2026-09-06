@@ -80,7 +80,7 @@ Rules:
 4. For string/name searching or filtering, {match_rule} to ensure case-insensitive and partial typo tolerance.
 5. If the user asks for entities with a specific role, title, category, or status (e.g. 'manager', 'tpo', 'doctor', 'active', 'pending'), query the main entity table filtering on the corresponding role/type/category column.
 6. Limit results to at most 20 rows if no specific count is requested.
-7. If the question refers to the current user (e.g. 'my orders', 'my attendance', 'my grades', 'my profile', 'my account', 'my balance') and User ID is provided (not anonymous), automatically filter by matching the User ID '{user_id}' against the primary user/student/customer/account identification column.
+7. If the question refers to the current user (e.g. 'my orders', 'my attendance', 'my grades', 'my prn', 'my cgpa', 'my profile', 'my account', 'my balance') and User ID is provided (not anonymous): if User ID is a name or contains letters/spaces (e.g. '{user_id}'), filter flexibly by matching against the name, PRN, or student identifier column (e.g. WHERE (name ILIKE '%{user_id}%' OR student_id = '{user_id}' OR prn = '{user_id}')); if User ID is an ID code, match against the ID or PRN column.
 8. If the user has an elevated management role (e.g. 'tpo', 'faculty', 'admin', 'management') and asks for student performance (e.g. a specific student's CGPA, attendance, marks, or students meeting placement eligibility criteria like CGPA >= 7.0), query across the student table filtering on the target student or criteria without restricting to the requester's own User ID.
 
 SCHEMA:

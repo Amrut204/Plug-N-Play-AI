@@ -686,10 +686,99 @@
     }
 
     function getCurrentUserContext() {
-        const winCtx = window.PNP_USER_CONTEXT || window.PNP_USER || {};
-        const activeUserId = winCtx.userId || winCtx.id || winCtx.externalUserId || (scriptTag && scriptTag.getAttribute('data-user-id')) || userId || 'guest_user';
-        const activeUserRole = winCtx.userRole || winCtx.role || (scriptTag && scriptTag.getAttribute('data-user-role')) || userRole || 'user';
-        return { userId: String(activeUserId).trim(), userRole: String(activeUserRole).trim() };
+        // 1. Explicit window context or script data attributes
+        const winCtx = window.PNP_USER_CONTEXT || window.PNP_USER || window.__USER__ || window.user || window.currentUser || {};
+        let activeUserId = winCtx.userId || winCtx.id || winCtx.externalUserId || winCtx.prn || winCtx.studentId || winCtx.student_id || winCtx.email || (scriptTag && scriptTag.getAttribute('data-user-id')) || userId;
+        let activeUserRole = winCtx.userRole || winCtx.role || (scriptTag && scriptTag.getAttribute('data-user-role')) || userRole;
+
+        // 2. Intelligent LocalStorage Inspection (Auto-detect logged-in student/user on any web framework)
+        if (!activeUserId || activeUserId === 'guest_user' || activeUserId === 'guest') {
+            try {
+                const searchKeys = [
+                    'user', 'currentUser', 'student', 'student_user', 'studentUser', 'profile', 
+                    'userData', 'userInfo', 'smartpath_user', 'placementiq_user', 'placementiq', 
+                    'auth', 'auth_user', 'authUser', 'session'
+                ];
+                for (let k of searchKeys) {
+                    const raw = localStorage.getItem(k);
+                    if (!raw) continue;
+                    try {
+                        const parsed = JSON.parse(raw);
+                        if (parsed && typeof parsed === 'object') {
+                            const u = parsed.user || parsed.student || parsed;
+                            const foundId = u.prn || u.PRN || u.student_id || u.studentId || u.id || u.name || u.fullName || u.full_name || u.student_name || u.email;
+                            if (foundId) {
+                                activeUserId = foundId;
+                                if (u.role || u.user_role || u.userRole) {
+                                    activeUserRole = u.role || u.user_role || u.userRole;
+                                }
+                                break;
+                            }
+                        }
+                    } catch (_) {}
+                }
+
+                // Scan all other localStorage keys for user objects if still not found
+                if (!activeUserId || activeUserId === 'guest_user' || activeUserId === 'guest') {
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const k = localStorage.key(i);
+                        if (!k || k.startsWith('pnp_') || k.startsWith('vite') || k.startsWith('ally-')) continue;
+                        try {
+                            const parsed = JSON.parse(localStorage.getItem(k));
+                            if (parsed && typeof parsed === 'object') {
+                                const foundId = parsed.prn || parsed.student_id || parsed.name || parsed.fullName || parsed.full_name || parsed.student_name;
+                                if (foundId && typeof foundId === 'string' && foundId.length > 2) {
+                                    activeUserId = foundId;
+                                    if (parsed.role) activeUserRole = parsed.role;
+                                    break;
+                                }
+                            }
+                        } catch (_) {}
+                    }
+                }
+            } catch (_) {}
+        }
+
+        // 3. Ambient DOM Heuristics (e.g. "Hi Krutika Gadiwan,", dashboard headings, user profile chips)
+        if (!activeUserId || activeUserId === 'guest_user' || activeUserId === 'guest') {
+            try {
+                // Check meta tags or data attributes
+                const elWithUser = document.querySelector('[data-user-id], [data-user-name], [data-student-name], [data-student-id]');
+                if (elWithUser) {
+                    activeUserId = elWithUser.getAttribute('data-user-id') || elWithUser.getAttribute('data-user-name') || elWithUser.getAttribute('data-student-name') || elWithUser.getAttribute('data-student-id');
+                }
+
+                // Check welcome heading pattern: "Hi Krutika Gadiwan,", "Welcome John Doe"
+                if (!activeUserId || activeUserId === 'guest_user' || activeUserId === 'guest') {
+                    const headings = document.querySelectorAll('h1, h2, h3, .user-name, .student-name, .profile-name, .welcome-msg');
+                    for (let h of headings) {
+                        const txt = (h.innerText || h.textContent || '').trim();
+                        const match = txt.match(/(?:hi|hello|welcome|hey),?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/i);
+                        if (match && match[1]) {
+                            activeUserId = match[1].trim();
+                            break;
+                        }
+                    }
+                }
+            } catch (_) {}
+        }
+
+        // 4. Role Auto-Detection from Path or Workspace Badges
+        if (!activeUserRole || activeUserRole === 'user') {
+            const path = window.location.pathname.toLowerCase();
+            const bodyText = document.body ? document.body.innerText.slice(0, 1000).toLowerCase() : '';
+            if (path.includes('/tpo') || bodyText.includes('tpo workspace') || bodyText.includes('training & placement officer')) {
+                activeUserRole = 'tpo';
+            } else if (path.includes('/student') || path.includes('/dashboard') || bodyText.includes('student workspace')) {
+                activeUserRole = 'student';
+            } else if (path.includes('/admin')) {
+                activeUserRole = 'admin';
+            }
+        }
+
+        activeUserId = (activeUserId && String(activeUserId).trim()) || 'guest_user';
+        activeUserRole = (activeUserRole && String(activeUserRole).trim()) || 'user';
+        return { userId: activeUserId, userRole: activeUserRole };
     }
 
     let currentSessionUserId = null;

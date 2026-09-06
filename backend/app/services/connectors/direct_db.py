@@ -131,9 +131,23 @@ class PostgresExecutor:
     async def execute_readonly(db_url: str, sql: str, params: Optional[Dict[str, Any]] = None, max_rows: int = 100) -> List[Dict[str, Any]]:
         _validate_sql_safety(sql)
         pool = await _get_pg_pool(db_url)
+        
+        # Translate named parameters (:name) into asyncpg positional parameters ($1, $2)
+        ordered_values = []
+        if params:
+            import re
+            def _replace_pg_param(match):
+                key = match.group(1)
+                if key in params:
+                    ordered_values.append(params[key])
+                    return "$" + str(len(ordered_values))
+                return match.group(0)
+
+            sql = re.sub(r":([a-zA-Z0-9_]+)", _replace_pg_param, sql)
+
         async with pool.acquire(timeout=10) as conn:
-            if params:
-                rows = await conn.fetch(sql, *list(params.values()))
+            if ordered_values:
+                rows = await conn.fetch(sql, *ordered_values)
             else:
                 rows = await conn.fetch(sql)
             return [dict(row) for row in rows[:max_rows]]
@@ -216,10 +230,24 @@ class MySQLExecutor:
     async def execute_readonly(db_url: str, sql: str, params: Optional[Dict[str, Any]] = None, max_rows: int = 100) -> List[Dict[str, Any]]:
         _validate_sql_safety(sql)
         pool = await _get_mysql_pool(db_url)
+
+        # Translate named parameters (:name) into MySQL positional parameters (%s)
+        ordered_values = []
+        if params:
+            import re
+            def _replace_mysql_param(match):
+                key = match.group(1)
+                if key in params:
+                    ordered_values.append(params[key])
+                    return "%s"
+                return match.group(0)
+
+            sql = re.sub(r":([a-zA-Z0-9_]+)", _replace_mysql_param, sql)
+
         async with pool.acquire() as conn:
             async with conn.cursor() as cur:
-                if params:
-                    await cur.execute(sql, list(params.values()))
+                if ordered_values:
+                    await cur.execute(sql, tuple(ordered_values))
                 else:
                     await cur.execute(sql)
                 rows = await cur.fetchmany(max_rows)
