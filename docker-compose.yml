@@ -7,20 +7,20 @@ services:
     container_name: pnp_postgres
     restart: always
     environment:
-      POSTGRES_USER: pnp_admin
-      POSTGRES_PASSWORD: pnp_secret_password
-      POSTGRES_DB: pnp_ai_platform
+      POSTGRES_USER: ${POSTGRES_USER:-pnp_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pnp_secret_password}
+      POSTGRES_DB: ${POSTGRES_DB:-pnp_ai_platform}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pnp_admin -d pnp_ai_platform"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pnp_admin} -d ${POSTGRES_DB:-pnp_ai_platform}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  # Redis for task queuing & rate limiting
+  # Redis for query caching & rate limiting
   redis:
     image: redis:7-alpine
     container_name: pnp_redis
@@ -29,8 +29,13 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  # Plug-N-Play AI Modular Monolith Backend
+  # Plug-N-Play AI Platform Backend & Embedded Widget Server
   backend:
     build:
       context: ./backend
@@ -38,18 +43,21 @@ services:
     container_name: pnp_backend
     restart: always
     environment:
-      - DATABASE_URL=postgresql+asyncpg://pnp_admin:pnp_secret_password@postgres:5432/pnp_ai_platform
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-pnp_admin}:${POSTGRES_PASSWORD:-pnp_secret_password}@postgres:5432/${POSTGRES_DB:-pnp_ai_platform}
       - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=enterprise_super_secret_pnp_jwt_key_32_bytes_long
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - SECRET_KEY=${SECRET_KEY:-pnp_dev_secret_key_change_in_production_32b}
       - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - GROQ_API_KEY_1=${GROQ_API_KEY_1:-}
+      - GROQ_API_KEY_2=${GROQ_API_KEY_2:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
     ports:
       - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
 
 volumes:
   postgres_data:

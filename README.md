@@ -2,90 +2,91 @@
 
 # ⚡ Plug-N-Play AI
 
-### Enterprise Zero-Trust Hybrid RAG & Federated Text-to-SQL Platform
+### Developer-First AI Assistant for SQL Databases & Documents
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%20+%20pgvector-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://github.com/pgvector/pgvector)
+[![Docker](https://img.shields.io/badge/Docker-Compose%20Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](docker-compose.yml)
 [![Groq LPU](https://img.shields.io/badge/Groq-LPU%20Inference-F55036?style=for-the-badge&logo=groq&logoColor=white)](https://groq.com/)
-[![Redis](https://img.shields.io/badge/Upstash-Redis%20Cache-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://upstash.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
 <p align="center">
-  <strong>Query operational SQL/NoSQL databases with natural language, retrieve dense knowledge from unstructured documents with Vector RAG, and execute cross-database federated joins with sub-250ms latency — with Zero Database Migration and Zero Credential Exposure.</strong>
+  <strong>Drop-in natural language search for Postgres, MySQL, Mongo & documents. Connect existing schemas directly, enforce read-only SQL safety with AST parsing, and embed a floating assistant into React, Next.js, or Vue in 2 minutes.</strong>
 </p>
 
-[Key Features](#-key-features) •
+[Why Plug-N-Play?](#-why-plug-n-play-ai) •
+[Key Capabilities](#-key-capabilities) •
 [Architecture](#-system-architecture) •
-[Security & Guardrails](#-enterprise-zero-trust-security) •
 [Quickstart](#-quickstart--local-setup) •
+[Docker Deployment](#-production-deployment-docker--cloud) •
 [Widget Integration](#-embeddable-widget-integration) •
-[Deployment](#-production-deployment-render--cloud) •
-[Testing](#-testing--verification)
+[Security & Guardrails](#-read-only-safety--security-guardrails)
 
 ---
 
 </div>
 
-## 📌 What is Plug-N-Play AI?
+## 📌 Why Plug-N-Play AI?
 
-Modern enterprise systems maintain operational data dispersed across heterogeneous databases (such as customer records in **PostgreSQL**, billing in **MySQL**, catalog in **MongoDB**) alongside unstructured policy handbooks, contracts, and knowledge bases in **PDFs/Markdown**.
+Every web application has operational data in databases (like **PostgreSQL**, **MySQL**, or **MongoDB**) and policies in **PDFs or Markdown documents**. 
 
-Building AI search across this landscape typically requires:
-- Complex and fragile ETL pipelines.
-- Migrating sensitive operational data into proprietary external vector stores.
-- Exposing high-privilege database credentials to third-party LLM providers.
-- Lengthy multi-second query latencies.
+When building an AI search or conversational assistant over this data, developers typically face three bad options:
+1. **Building Text-to-SQL from scratch**: Fragile prompt templates that hallucinate table names, fail on joins, or create catastrophic security vulnerabilities (`DROP TABLE`, prompt injections, data leaks).
+2. **Heavy ETL into proprietary vector databases**: Moving relational data into external vector stores that duplicate databases, lose relational constraints, drift out of sync, and balloon monthly cloud bills.
+3. **Complex multi-service pipelines**: Cobbling together separate LangChain wrappers, embedding servers, authentication layers, and custom chat UIs.
 
-**Plug-N-Play AI** eliminates these bottlenecks. It is a production-ready, self-contained AI orchestration platform that connects directly to your databases via read-only connections or **Zero-Knowledge DDL Schemas**, synthesizes AST-sanitized SQL/MQL queries, searches vector embeddings via `pgvector`, and streams coherent answers to client applications through a lightweight, universal floating widget.
+**Plug-N-Play AI is a developer-first, self-contained solution:**
+- **Zero ETL / Zero Migration**: Connect directly to your existing database with a read-only user or paste your schema DDL.
+- **Guaranteed Read-Only SQL**: Every synthesized query passes through an Abstract Syntax Tree (AST) validator (`sqlglot`) that strictly blocks any non-`SELECT` query before execution.
+- **Hybrid Search Out of the Box**: Intelligently routes questions between Text-to-SQL (tabular data), dense Vector RAG (documents via local `pgvector`), or composite hybrid answers.
+- **Turnkey Embeddable Widget**: A lightweight Vanilla JS client with pre-generated, copy-paste components for **React**, **Next.js**, **Vue**, **Angular**, and **Svelte** with auth-gating and route whitelisting.
 
 ---
 
-## ✨ Key Features
+## ✨ Key Capabilities
 
-### 🗄️ 1. Polyglot Multi-Database Federation
-- **Heterogeneous Database Support**: Query **PostgreSQL**, **MySQL**, **MongoDB**, and **SQLite** simultaneously from a single natural language question.
-- **In-Memory Federation**: Decomposes complex user queries into sub-queries, executes them in parallel via `asyncio.gather`, and joins structured results in-memory using unified identity keys (e.g. `student_id`, `customer_id`, `order_id`).
+### 🗄️ 1. Multi-Source Agentic Query Routing & Composite Answers
+- **Parallel Multi-Source Execution**: Decomposes user questions across configured data stores (**PostgreSQL**, **MySQL**, **MongoDB**, **SQLite**) and executes targeted sub-queries in parallel using `asyncio.gather`.
+- **Contextual Key Joining**: Merges related records on matching keys (e.g., `user_id`, `customer_id`, `order_id`) in-memory to assemble a coherent answer (e.g., pulling a student's profile from Postgres and unpaid invoices from MySQL).
+- **Graceful Degradation**: If one secondary source times out or is unreachable, the orchestrator answers from the available data sources rather than failing the entire request.
+> *Scope Note: Designed for operational application assistants, internal dashboards, and customer support bots. For multi-terabyte analytical joins across data lakes, use dedicated OLAP engines like Trino or Snowflake.*
 
 ### 🛡️ 2. Zero-Knowledge Schema Bridge
-- **Zero Credential Exposure**: Enterprises with strict compliance or firewall constraints (HIPAA, SOC 2, banking) can supply plain SQL DDL or Prisma schemas without exposing any live database host, port, or password.
-- **Firewall Data Residency**: Plug-N-Play AI synthesizes safe read-only SQL for your private backend (Node.js, Python FastAPI/Django, Laravel PHP) to execute locally inside your VPC. Only query results return for formatting.
+- **Zero Credential Exposure**: Organizations with strict compliance or firewall constraints can provide plain SQL DDL or Prisma schemas without sharing live database connection strings or passwords.
+- **Local VPC Execution**: Plug-N-Play AI generates AST-sanitized read-only SQL for your private backend (Node.js Express, Python FastAPI, Laravel PHP) to execute against your private database cluster. Only query results are passed back for natural language formatting.
 
-### 🧠 3. Dual-Engine Intelligent Router & Hybrid RAG
-- **Autonomous Intent Classification**: Evaluates questions to determine whether to route to:
-  - **Text-to-SQL / MQL Engine** for tabular and numerical queries.
-  - **Vector RAG Engine** (FastEmbed ONNX + `pgvector` HNSW index) for unstructured documents.
-  - **Hybrid Engine** that merges structured tabular facts and policy documents into a unified, source-cited response.
-- **FastEmbed Local Embeddings**: Generates dense 384-dimensional embeddings locally (`BAAI/bge-small-en-v1.5`) via ONNX Runtime in $< 8\text{ms}$ with zero OpenAI API embedding costs.
+### 🧠 3. Hybrid Routing (SQL + Dense Vector RAG)
+- **Automatic Intent Classifier**: Routes user prompts to the best retrieval engine:
+  - **SQL / MQL Engine**: Computes exact counts, averages, filters, and relational lookups.
+  - **Vector RAG Engine**: Performs semantic search across uploaded PDF/DOCX/Markdown documents using dense cosine similarity on PostgreSQL `pgvector` (HNSW index).
+  - **Composite Hybrid Engine**: Combines tabular facts and document guidelines into a unified, source-cited response.
+- **Local FastEmbed Embeddings**: Uses ONNX Runtime (`BAAI/bge-small-en-v1.5`, 384 dimensions) locally. Embedding generation takes $< 8\text{ms}$ with zero OpenAI embedding API costs.
 
-### 🔒 4. Enterprise Zero-Trust Security & AST Guardrails
-- **Deterministic Gate 1 Shield**: Sub-millisecond regex & intent compiler blocks prompt injections, jailbreaks, and offensive queries in $< 2\text{ms}$ using **0 LLM tokens**.
-- **Abstract Syntax Tree (AST) Sanitization**: Strict `sqlglot` parser enforces `SELECT`-only operations. Any `DROP`, `UPDATE`, `INSERT`, `DELETE`, `ALTER`, or query-stacking semicolons (`;`) trigger instant security exceptions.
-- **Row-Level Security (RLS) & RBAC**: Automatically appends authenticated user constraints (e.g. `AND user_id = :auth_user_id`) to mathematically prevent horizontal cross-tenant data leakage.
-- **Automated PII Scrubber**: Masks passwords, social security numbers, salaries, and sensitive columns before feeding database records into the LLM synthesis context.
+### 🔒 4. AST Guardrails & Row-Level Security
+- **Strict AST Validation (`sqlglot`)**: Rejects any statement containing `INSERT`, `UPDATE`, `DELETE`, `DROP`, `ALTER`, `TRUNCATE`, or query-stacking semicolons (`;`).
+- **Deterministic Gate 1 Intent Shield**: Sub-millisecond regex & pattern rules block prompt injections and jailbreaks in $< 2\text{ms}$ with **0 LLM tokens consumed**.
+- **Row-Level Security (RLS) Identity Injection**: Automatically injects tenant and user constraints (e.g. `AND user_id = :auth_user_id`) into generated queries to prevent cross-tenant or horizontal data leaks.
+- **Automated PII Scrubber**: Masks passwords, credit card patterns, social security numbers, and sensitive salary columns before passing data into LLM synthesis.
 
-### ⚡ 5. Hardware-Accelerated Low Latency
-- **Groq LPU Inference Core**: Streams responses at **$300\text{--}500+\text{ tokens/second}$** using `llama-3.3-70b-versatile` with an automated multi-key failover pool.
-- **Upstash Redis Semantic Caching**: Identical and semantically equivalent queries resolve in **$15\text{--}35\text{ms}$**.
-- **Server-Sent Events (SSE)**: Delivers smooth, real-time token streaming with live query telemetry.
+### ⚡ 5. Low-Latency Streaming Pipeline
+- **Groq LPU Acceleration**: High-speed token generation at **$300\text{--}500+\text{ tokens/sec}$** using `llama-3.3-70b-versatile` with automated multi-key failover rotation.
+- **Semantic Query Caching**: Upstash Redis cache resolves repeated or semantically identical questions in **$15\text{--}35\text{ms}$**.
+- **Real-Time Token Streaming**: Server-Sent Events (SSE) deliver real-time token streaming with live query telemetry.
 
-### 🎨 6. Universal Embeddable Widget & Multi-Framework Code Generator
-- **Zero NPM Dependencies**: A single lightweight Vanilla JS script (`pnp-widget.js`) works out of the box.
-- **Multi-Framework Snippets**: Visual studio generates copy-paste ready, production-grade components for:
+### 🎨 6. Multi-Framework Embeddable Widget
+- **Zero NPM Dependencies**: Pure Vanilla JS widget (`pnp-widget.js`) with complete styling isolation.
+- **Framework-Ready Components**: Visual studio generates ready-to-use snippets for:
   - **React** (TypeScript TSX & JavaScript JSX)
-  - **Next.js** (App Router & Pages Router with `strategy="afterInteractive"`)
+  - **Next.js** (App Router with `strategy="afterInteractive"`)
   - **Angular** (v16+ Standalone Components)
-  - **Vue 3** (Composition API & Nuxt 3)
+  - **Vue 3** (Composition API / Nuxt 3)
   - **Svelte / SvelteKit**
   - **Plain HTML / WordPress / Shopify / Webflow**
-  - **Backend Bridges** (Node.js Express, Python FastAPI, Laravel PHP)
-
-### 📍 7. Security & Page-Level Visibility Controls
 - **3 Deployment Modes**:
-  - `🌐 All Pages (Always Visible)`: Public FAQ bots, documentation, and marketing pages.
-  - `🔒 Logged-in Users Only (Gated)`: Shows the widget only when authenticated; unmounts immediately on logout to safeguard API quotas.
-  - `📍 Selected Pages Only`: Whitelists target routes (e.g. `/support, /help, /checkout`) with optional auth-on-page guards.
-- **1-Click Industry Presets**: Pre-configured defaults for **E-Commerce**, **ERP / Internal Portals**, **EdTech**, **Healthcare**, **SaaS**, and **Public Documentation**.
+  - `🌐 All Pages`: Always visible for marketing and public knowledge bases.
+  - `🔒 Logged-in Users Only`: Renders only when authenticated; unmounts immediately on logout to safeguard API quotas.
+  - `📍 Selected Pages Only`: Whitelists specific route paths (e.g. `/support, /help, /checkout`) with optional auth-on-page guards.
 
 ---
 
@@ -103,7 +104,7 @@ Building AI search across this landscape typically requires:
                                       │                  │
                                       ▼                  ▼
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                               PLUG-N-PLAY AI CLOUD PLATFORM                            │
+│                               PLUG-N-PLAY AI DATA PLATFORM                             │
 │                                                                                        │
 │  ┌─────────────────────────┐  ┌──────────────────────────┐  ┌───────────────────────┐  │
 │  │   API Gateway & Auth    │  │  Multi-Tenant Isolation  │  │ Semantic Data Schema  │  │
@@ -119,15 +120,15 @@ Building AI search across this landscape typically requires:
 │                                       ▼                                                │
 │  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
 │  │                       INTELLIGENT DUAL-ENGINE ROUTER                             │  │
-│  │                (Routes: SQL vs Vector RAG vs Federated HYBRID)                   │  │
+│  │             (Routes: SQL/MQL vs Vector RAG vs Composite Hybrid)                  │  │
 │  └────────┬───────────────────────────────────┬─────────────────────────────────────┘  │
 │           │                                   │                                        │
 │           ▼                                   ▼                                        │
 │  ┌─────────────────────────────────┐ ┌─────────────────────────────────┐               │
-│  │     POLYGLOT SQL/MQL ENGINE     │ │        VECTOR RAG ENGINE        │               │
+│  │     MULTI-SOURCE SQL ENGINE     │ │        VECTOR RAG ENGINE        │               │
 │  │  • Text-to-SQL / Text-to-MQL    │ │  • FastEmbed ONNX (bge-small)   │               │
 │  │  • AST sqlglot Sanitization     │ │  • PostgreSQL pgvector (HNSW)   │               │
-│  │  • Multi-DB Query Federation    │ │  • Role-Aware Document Slicing  │               │
+│  │  • Multi-Source Parallel Query  │ │  • Role-Aware Document Slicing  │               │
 │  │  • Parallel Execution (gather)  │ │  • Dense Cosine Similarity Match│               │
 │  └────────────────┬────────────────┘ └────────────────┬────────────────┘               │
 │                   │                                   │                                │
@@ -151,15 +152,15 @@ Building AI search across this landscape typically requires:
 
 ---
 
-## ⚡ Latency & Performance Budget
+## ⚡ Performance Budget
 
-| Operation Type | Time-to-First-Token (TTFT) | Total Generation | Processing Pipeline |
+| Query Scenario | Time-to-First-Token (TTFT) | Total Generation | Processing Pipeline |
 | :--- | :--- | :--- | :--- |
-| **🚀 Semantic Cache Hit** | **$15\text{ms} - 35\text{ms}$** | **$35\text{ms}$** | Upstash Redis exact/semantic embedding match. |
-| **🛡️ Blocked / Malicious** | **$< 2\text{ms}$** | **$< 5\text{ms}$** | Deterministic Gate 1 intent compiler (0 LLM tokens). |
-| **📄 Unstructured RAG** | **$180\text{ms} - 280\text{ms}$** | **$450\text{ms} - 650\text{ms}$** | FastEmbed ONNX dense search + pgvector + Groq LPU stream. |
+| **🚀 Semantic Cache Hit** | **$15\text{ms} - 35\text{ms}$** | **$35\text{ms}$** | Upstash Redis exact/semantic match. |
+| **🛡️ Blocked / Malicious** | **$< 2\text{ms}$** | **$< 5\text{ms}$** | Deterministic Gate 1 intent shield (0 LLM tokens). |
+| **📄 Unstructured RAG** | **$180\text{ms} - 280\text{ms}$** | **$450\text{ms} - 650\text{ms}$** | FastEmbed ONNX search + pgvector HNSW + Groq LPU. |
 | **🗄️ Database Text-to-SQL** | **$250\text{ms} - 420\text{ms}$** | **$600\text{ms} - 800\text{ms}$** | AST generation + Read-only DB fetch + Groq stream. |
-| **🌐 Multi-DB Federation** | **$300\text{ms} - 480\text{ms}$** | **$700\text{ms} - 900\text{ms}$** | Parallel `asyncio.gather` across databases + in-memory join. |
+| **🌐 Multi-Source Query** | **$300\text{ms} - 480\text{ms}$** | **$700\text{ms} - 900\text{ms}$** | Parallel `asyncio.gather` across databases + contextual key merge. |
 | **🔒 Zero-Knowledge Bridge** | **$350\text{ms} - 550\text{ms}$** | **$750\text{ms} - 950\text{ms}$** | Schema query generation $\rightarrow$ client local execution $\rightarrow$ answer synthesis. |
 
 ---
@@ -183,7 +184,7 @@ Building AI search across this landscape typically requires:
 
 ### 1. Prerequisites
 - Python 3.11 or higher
-- PostgreSQL with `pgvector` extension (or a free [Neon Serverless PostgreSQL](https://neon.tech) database)
+- PostgreSQL with `pgvector` extension (or local Docker container)
 - Groq API Key (from [console.groq.com](https://console.groq.com))
 
 ### 2. Clone the Repository
@@ -214,17 +215,18 @@ Create a `.env` file in the project root:
 # Database (PostgreSQL with pgvector)
 DATABASE_URL=postgresql+asyncpg://postgres:your_password@localhost:5432/plugnplay
 
-# Groq LPU Inference (Free tier available at console.groq.com)
+# Groq LPU Inference (Get a free key at console.groq.com)
 GROQ_API_KEY=gsk_your_groq_api_key
-GROQ_API_KEY_1=gsk_optional_failover_key_1
-GROQ_API_KEY_2=gsk_optional_failover_key_2
 
-# Redis Cache (Optional - Upstash Redis)
-UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
-UPSTASH_REDIS_REST_TOKEN=your_upstash_token
+# Optional: Failover Groq keys for automatic rate-limit rotation
+GROQ_API_KEY_1=gsk_optional_key_1
+GROQ_API_KEY_2=gsk_optional_key_2
+
+# Redis Cache (Optional - Upstash Redis or local Redis)
+REDIS_URL=redis://localhost:6379/0
 
 # Platform Security & Authentication
-SECRET_KEY=your-super-secret-hex-encryption-key
+SECRET_KEY=generate_a_random_32_byte_secret_key_here
 ENVIRONMENT=development
 ```
 
@@ -235,13 +237,55 @@ python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --
 
 - **Agent Studio & Dashboard**: Open [http://127.0.0.1:8000](http://127.0.0.1:8000)
 - **Interactive Swagger API Docs**: Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- **Health Check Endpoint**: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+- **Health Check**: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+
+---
+
+## 🐳 Production Deployment (Docker & Cloud)
+
+### Option 1: Self-Hosted Docker Compose (Recommended)
+
+The repository includes a ready-to-run [`docker-compose.yml`](docker-compose.yml) that starts PostgreSQL 16 with `pgvector`, Redis, and the optimized backend container:
+
+```bash
+# 1. Provide your Groq API key in .env:
+echo "GROQ_API_KEY=gsk_your_key_here" >> .env
+
+# 2. Launch the full stack in detached mode:
+docker compose up -d
+
+# 3. View live server logs:
+docker compose logs -f backend
+```
+
+Services started:
+- `pnp_postgres`: PostgreSQL 16 with `pgvector` pre-installed on port `5432`
+- `pnp_redis`: Redis 7 Alpine on port `6379`
+- `pnp_backend`: FastAPI container with non-root security and pre-warmed ONNX embeddings on port `8000`
+
+### Option 2: Cloud Container Hosting (Railway, Render, AWS, GCP)
+
+Deploy the pre-built container or use the included [`render.yaml`](render.yaml) blueprint:
+
+1. Connect your repository in your cloud dashboard (Render, Railway, or Cloud Run).
+2. Set the environment variables:
+   - `DATABASE_URL`: Cloud PostgreSQL connection string (e.g. [Neon Serverless PostgreSQL](https://neon.tech))
+   - `GROQ_API_KEY`: Groq LPU API key
+   - `SECRET_KEY`: Cryptographically secure JWT secret key
+3. Start command:
+   ```bash
+   python -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT
+   ```
+
+> [!NOTE]
+> **🧪 Evaluation & Sandbox Setup**:
+> For testing and proof-of-concept evaluation, you can run this stack at zero infrastructure cost by combining free developer tiers (Neon PostgreSQL 0.5 GB, Groq Cloud free tier, and Upstash Redis).
 
 ---
 
 ## 🔌 Embeddable Widget Integration
 
-Plug-N-Play AI provides ready-to-use code snippets directly in Step 4 of the Studio or via the Dashboard **Quick Embed Modal**.
+Plug-N-Play AI provides ready-to-use, framework-specific components directly in Step 4 of the Agent Studio and via the Dashboard Quick Embed Modal.
 
 ### 1. Plain HTML / WordPress / Webflow (1-Step Embed)
 Paste this script tag right before `</body>`:
@@ -287,7 +331,7 @@ export function AIWidget({ userId = 'guest', userRole = 'user' }) {
 }
 ```
 
-#### Mounting with Authentication (Auth-Gated Mode)
+#### Auth-Gated Deployment (Logged-in Users Only)
 ```tsx
 import { AIWidget } from './components/AIWidget';
 import { useAuth } from './context/AuthContext';
@@ -299,7 +343,7 @@ export function App() {
     <div>
       <main>{/* Your application */}</main>
 
-      {/* 🔒 Only rendered when user is logged in; unmounts on logout */}
+      {/* 🔒 Only rendered when user is logged in; unmounts immediately on logout */}
       {isAuthenticated && (
         <AIWidget userId={user?.id} userRole={user?.role} />
       )}
@@ -332,84 +376,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ---
 
-## 🔒 Zero-Knowledge Backend Bridges
+## 🔒 Read-Only Safety & Security Guardrails
 
-For organizations that cannot open inbound firewall ports or share database credentials, Plug-N-Play AI provides **Zero-Knowledge Backend Bridges**.
-
-The platform generates read-only SQL queries from your schema; your private server executes the SQL locally and returns only the rows for natural language formatting:
-
-### Node.js / Express Bridge
-```javascript
-app.post('/api/ai-chat', async (req, res) => {
-  const { query, userId, userRole } = req.body;
-  const PNP_HOST = 'https://your-pnp-instance.com';
-  const AGENT_ID = 'YOUR_AGENT_ID';
-
-  // 1. Request safe SQL generation (Zero credentials leave your firewall)
-  const genRes = await fetch(`${PNP_HOST}/api/v1/chat/generate-sql`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ agent_id: AGENT_ID, query, user_id: userId, user_role: userRole })
-  });
-  const data = await genRes.json();
-  if (data.guardrail_blocked) return res.json({ answer: data.refusal_message });
-
-  // 2. Strict read-only check
-  const sql = data.sql_query;
-  if (!sql || !sql.trim().toUpperCase().startsWith('SELECT') || sql.includes(';')) {
-    return res.status(400).json({ error: 'Security violation: Non-SELECT query rejected.' });
-  }
-
-  // 3. Execute locally on private database inside your firewall
-  const dbResult = await dbPool.query(sql);
-
-  // 4. Format natural language response
-  const formatRes = await fetch(`${PNP_HOST}/api/v1/chat/format-sql-response`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ agent_id: AGENT_ID, query, sql_query: sql, db_results: dbResult.rows })
-  });
-  const finalData = await formatRes.json();
-  return res.json({ answer: finalData.answer });
-});
+```
+User Query ──> [Gate 1: Intent & Anti-Jailbreak Shield]
+                 │ (< 2ms deterministic refusal for prompt injections)
+                 ▼
+               [AST Parser & sqlglot Sanitizer]
+                 │ (STRICT: Rejects anything that is not a SELECT statement)
+                 ▼
+               [Row-Level Security (RLS) Identity Injection]
+                 │ (Appends WHERE user_id = :auth_user_id automatically)
+                 ▼
+               [Post-Execution PII Scrubber]
+                 │ (Masks passwords, credit card numbers, and restricted fields)
+                 ▼
+               [Sanitized Response Stream (SSE)]
 ```
 
-*(Python FastAPI and PHP Laravel bridge implementations are also available in the Studio export tab).*
-
----
-
-## ☁️ Production Deployment (Render + Cloud)
-
-This repository includes a [`render.yaml`](render.yaml) blueprint specification for automated, zero-downtime deployment:
-
-### 1-Click Render Blueprint
-1. Fork or push this repository to GitHub.
-2. Open the [Render Dashboard](https://dashboard.render.com/) $\rightarrow$ **New +** $\rightarrow$ **Blueprint**.
-3. Select your repository. Render will automatically read `render.yaml` and configure:
-   - **Environment**: Python 3
-   - **Build Command**: `pip install -r backend/requirements.txt`
-   - **Start Command**: `python -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT`
-   - **Health Check Path**: `/health`
-4. Supply your environment secrets:
-   - `DATABASE_URL`: Cloud PostgreSQL connection string (e.g. from [Neon](https://neon.tech)).
-   - `GROQ_API_KEY`: Your Groq LPU API key.
-   - `SECRET_KEY`: Secret string for JWT/HMAC token signing.
-5. Click **Apply**. Your instance will be live in minutes.
-
-### 💰 Zero-Cost Production Stack ($0.00 / month)
-You can deploy and run this entire architecture for free using cloud free tiers:
-
-| Component | Provider | Free Tier Allowance | Monthly Cost |
-| :--- | :--- | :--- | :--- |
-| **API Web Service** | [Render](https://render.com) | 512 MB RAM, 750 free instance hours/month | **$0.00** |
-| **PostgreSQL + pgvector** | [Neon Serverless](https://neon.tech) | 0.5 GB storage, auto-suspend compute | **$0.00** |
-| **Semantic Cache** | [Upstash Redis](https://upstash.com) | 10,000 commands/day | **$0.00** |
-| **LLM Inference** | [Groq Cloud](https://console.groq.com) | Free tier rate limits (300+ tok/s) | **$0.00** |
-| **Total** | | | **$0.00 / mo** |
-
-> [!TIP]
-> **Prevent Render Spin-Down on Free Tier**:
-> Set up a free ping monitor at [UptimeRobot](https://uptimerobot.com) or [Cron-job.org](https://cron-job.org) targeting `https://<your-render-url>/health` every 12 minutes to keep the instance warm.
+1. **AST Query Sanitization**: The SQL generation engine validates queries against an Abstract Syntax Tree using `sqlglot`. Statements containing modification verbs (`UPDATE`, `DELETE`, `INSERT`, `DROP`, `ALTER`, `TRUNCATE`) or multiple semicolon-delimited commands are rejected before touching any database driver.
+2. **Deterministic Gate 1 Shield**: Pre-compiled regex and rule matrices evaluate user intent in $< 2\text{ms}$ without consuming LLM inference tokens.
+3. **Automated Row-Level Identity Binding**: Automatically injects tenant and authenticated user constraints (e.g. `AND user_id = :auth_user_id`) into generated SQL to prevent horizontal cross-user data leakage.
+4. **Post-Execution Data Scrubber**: Automatically strips sensitive fields (e.g., hashed credentials, payment tokens) before feeding database results into the LLM synthesis context.
 
 ---
 
@@ -421,10 +409,10 @@ Run the automated test suites using `pytest`:
 # Run RBAC identity and security query tests
 pytest backend/tests/test_rbac_identity_queries.py -v
 
-# Run multi-database setup tests
+# Run multi-database connection tests
 python backend/test_multi_db_setup.py
 
-# Run zero-knowledge multi-database bridge tests
+# Run zero-knowledge schema bridge tests
 python backend/test_zk_multi_db.py
 
 # Run end-to-end streaming multi-agent test
@@ -444,20 +432,22 @@ Plug-N-Play-AI/
 │   │   ├── models/                # Multi-tenant SQLAlchemy ORM models
 │   │   ├── schemas/               # Pydantic v2 request/response schemas
 │   │   ├── services/
-│   │   │   ├── connectors/        # Live DB connectors (Postgres, MySQL, Mongo, SQLite)
+│   │   │   ├── connectors/        # Database drivers (Postgres, MySQL, Mongo, SQLite)
 │   │   │   ├── sql/               # Text-to-SQL / Text-to-MQL engine & sqlglot AST validator
 │   │   │   ├── rag/               # Chunking, FastEmbed ONNX embedder, pgvector search
 │   │   │   ├── router/            # Intent classification & context re-writer
-│   │   │   ├── hybrid/            # Central multi-engine orchestrator & streaming engine
+│   │   │   ├── hybrid/            # Multi-source agentic orchestrator & streaming engine
 │   │   │   ├── guardrails/        # Gate 1 & 2 safety shields and intent compiler
 │   │   │   ├── cache/             # Upstash Redis semantic cache
 │   │   │   └── llm/               # Groq LPU & multi-key failover gateway
 │   │   ├── static/                # Agent Studio dashboard, UI styles, & pnp-widget.js
 │   │   └── main.py                # FastAPI app initialization, middleware, & routes
 │   ├── tests/                     # Automated test suites
+│   ├── Dockerfile                 # Production multi-stage Docker build
 │   └── requirements.txt           # Python dependencies
 ├── examples/                      # Integration examples & sample schemas
-├── render.yaml                    # 1-Click Render infrastructure blueprint
+├── docker-compose.yml             # 1-Command self-hosted stack (Postgres + Redis + API)
+├── render.yaml                    # Cloud infrastructure blueprint
 └── README.md                      # Platform documentation
 ```
 
