@@ -733,9 +733,8 @@
                 try { if (window.sessionStorage) storages.push(window.sessionStorage); } catch (_) {}
 
                 const priorityKeys = [
-                    'user', 'currentUser', 'student', 'student_user', 'studentUser', 'profile', 
-                    'userData', 'userInfo', 'smartpath_user', 'placementiq_user', 'placementiq', 
-                    'auth', 'auth_user', 'authUser', 'session', 'account', 'tpo_user', 'admin_user',
+                    'user', 'currentUser', 'profile', 'userData', 'userInfo',
+                    'auth', 'auth_user', 'authUser', 'session', 'account', 'admin_user',
                     'token', 'access_token', 'jwt', 'auth_token', 'id_token'
                 ];
 
