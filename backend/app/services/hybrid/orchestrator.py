@@ -324,8 +324,8 @@ class QueryOrchestrator:
             effective_query.lower()
         ))
         if is_institution_query:
-            inst_name = tenant.name if (tenant and tenant.name and tenant.name.lower() not in ("default", "system")) else "SmartPath Placement Intelligence"
-            inst_answer = f"You are connected to the official campus placement portal for **{inst_name}**."
+            inst_name = tenant.name if (tenant and tenant.name and tenant.name.lower() not in ("default", "system")) else "Plug-N-Play AI Workspace"
+            inst_answer = f"You are connected to the official workspace portal for **{inst_name}**."
             query_log = QueryLog(
                 tenant_id=tenant_id,
                 session_id=session.id,
@@ -1265,8 +1265,8 @@ Context Information:
             effective_query.lower()
         ))
         if is_institution_query:
-            inst_name = tenant.name if (tenant and tenant.name and tenant.name.lower() not in ("default", "system")) else "SmartPath Placement Intelligence"
-            inst_answer = f"You are connected to the official campus placement portal for **{inst_name}**."
+            inst_name = tenant.name if (tenant and tenant.name and tenant.name.lower() not in ("default", "system")) else "Plug-N-Play AI Workspace"
+            inst_answer = f"You are connected to the official workspace portal for **{inst_name}**."
             yield f"data: {json.dumps({'event': 'meta', 'route': 'SESSION_IDENTITY', 'cached': False})}\n\n"
             words = inst_answer.split(" ")
             for i, w in enumerate(words):

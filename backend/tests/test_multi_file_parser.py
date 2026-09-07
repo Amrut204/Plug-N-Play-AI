@@ -1,7 +1,9 @@
 import io
 import csv
-import openpyxl
-import docx
+import pytest
+
+openpyxl = pytest.importorskip("openpyxl")
+docx = pytest.importorskip("docx")
 from app.services.rag.document_parser import DocumentParser
 
 def test_pdf_parsing():

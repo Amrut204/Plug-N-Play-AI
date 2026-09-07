@@ -5671,8 +5671,8 @@ Key Features & Architectural Highlights:
           currentAuth = JSON.parse(stored);
           if (currentAuth) {
             const uid = currentAuth.tenant?.id || currentAuth.user?.id;
-            const uname = currentAuth.tenant?.name || currentAuth.user?.org_name || currentAuth.user?.full_name || 'SmartPath Workspace';
-            const uslug = currentAuth.tenant?.slug || currentAuth.user?.slug || 'smartpath';
+            const uname = currentAuth.tenant?.name || currentAuth.user?.org_name || currentAuth.user?.full_name || 'My Workspace';
+            const uslug = currentAuth.tenant?.slug || currentAuth.user?.slug || 'my-workspace';
             const utier = currentAuth.tenant?.subscription_tier || currentAuth.user?.tier || 'free';
             if (!currentAuth.tenant && uid) {
               currentAuth.tenant = { id: uid, name: uname, slug: uslug, subscription_tier: utier };
