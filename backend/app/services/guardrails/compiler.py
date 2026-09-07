@@ -533,8 +533,8 @@ class AIGuardrailCompiler:
             if trig in q_low:
                 return True, refusal_msg
 
-        # Check if role is elevated management / staff (e.g. TPO, Admin, Faculty)
-        ELEVATED_ROLES = {"admin", "tpo", "placement_officer", "faculty", "staff", "management", "manager", "superadmin", "recruiter", "director", "dean"}
+        # Check if role is elevated management / staff (e.g. Admin, Owner, Manager, Lead, Support, Faculty)
+        ELEVATED_ROLES = {"admin", "owner", "manager", "lead", "support", "staff", "management", "superadmin", "director", "tpo", "placement_officer", "faculty", "recruiter", "dean"}
         role_is_elevated = bool(user_role and user_role.lower() in ELEVATED_ROLES)
 
         # Check if the query is a self-inquiry for personal metrics

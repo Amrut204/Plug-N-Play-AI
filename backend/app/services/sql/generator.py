@@ -78,10 +78,10 @@ Rules:
 2. Use EXACT table and column names from the SCHEMA below.
 3. For multi-table queries, perform standard JOINs on matching foreign keys (e.g. table_a.user_id = users.id).
 4. For string/name searching or filtering, {match_rule} to ensure case-insensitive and partial typo tolerance.
-5. If the user asks for entities with a specific role, title, category, or status (e.g. 'manager', 'tpo', 'doctor', 'active', 'pending'), query the main entity table filtering on the corresponding role/type/category column.
+5. If the user asks for entities with a specific role, title, category, or status (e.g. 'manager', 'lead', 'active', 'pending', 'cancelled', 'paid'), query the main entity table filtering on the corresponding role/type/category column.
 6. Limit results to at most 20 rows if no specific count is requested.
-7. If the question refers to the current user (e.g. 'my orders', 'my attendance', 'my grades', 'my prn', 'my cgpa', 'my profile', 'my account', 'my balance') and User ID is provided (not anonymous): if User ID is a name or contains letters/spaces (e.g. '{user_id}'), filter flexibly by matching against the name, PRN, or student identifier column (e.g. WHERE (name ILIKE '%{user_id}%' OR student_id = '{user_id}' OR prn = '{user_id}')); if User ID is an ID code, match against the ID or PRN column.
-8. If the user has an elevated management role (e.g. 'tpo', 'faculty', 'admin', 'management') and asks for student performance (e.g. a specific student's CGPA, attendance, marks, or students meeting placement eligibility criteria like CGPA >= 7.0), query across the student table filtering on the target student or criteria without restricting to the requester's own User ID.
+7. If the question refers to the current user (e.g. 'my orders', 'my invoices', 'my tickets', 'my account', 'my profile', 'my usage', 'my balance', 'my grades') and User ID is provided (not anonymous): if User ID is a name or contains letters/spaces (e.g. '{user_id}'), filter flexibly by matching against user_id, customer_id, account_id, email, name, or identifier column (e.g. WHERE (user_id = '{user_id}' OR customer_id = '{user_id}' OR email ILIKE '%{user_id}%' OR name ILIKE '%{user_id}%' OR prn = '{user_id}' OR student_id = '{user_id}')); if User ID is an ID code, match against the ID column.
+8. If the user has an elevated operational role (e.g. 'admin', 'manager', 'support', 'staff', 'lead', 'tpo', 'faculty', 'management') and asks for organizational metrics, aggregate reporting, or details about a specific entity/customer/user/student, query across the target table filtering on the target entity or criteria without restricting to the requester's own User ID.
 
 SCHEMA:
 {schema_context}

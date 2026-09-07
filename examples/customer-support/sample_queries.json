@@ -1,0 +1,48 @@
+[
+  {
+    "id": "q_cs_001",
+    "question": "How many open tickets do we have across all accounts?",
+    "type": "sql",
+    "expected_tables": ["tickets"],
+    "expected_pattern": "SELECT COUNT(*) FROM tickets WHERE status = 'open'"
+  },
+  {
+    "id": "q_cs_002",
+    "question": "Show all high priority tickets currently in progress.",
+    "type": "sql",
+    "expected_tables": ["tickets"],
+    "expected_pattern": "priority = 'high' AND status = 'in_progress'"
+  },
+  {
+    "id": "q_cs_003",
+    "question": "Which account manager is responsible for Starlight Media?",
+    "type": "sql",
+    "expected_tables": ["accounts"],
+    "expected_pattern": "account_manager"
+  },
+  {
+    "id": "q_cs_004",
+    "question": "What is our SLA response time for urgent P1 tickets?",
+    "type": "rag",
+    "expected_keywords": ["15 minutes", "Urgent", "P1"]
+  },
+  {
+    "id": "q_cs_005",
+    "question": "How do webhook retries work if our server returns a 500 error?",
+    "type": "rag",
+    "expected_keywords": ["exponential backoff", "Dead Letter Queue", "DLQ"]
+  },
+  {
+    "id": "q_cs_006",
+    "question": "How do I rotate our SAML SSO certificate without downtime?",
+    "type": "rag",
+    "expected_keywords": ["Settings > Security", "test SAML assertion", "clock skew"]
+  },
+  {
+    "id": "q_cs_007",
+    "question": "Show my open support tickets and status updates.",
+    "type": "sql_rls",
+    "expected_tables": ["tickets"],
+    "expected_pattern": "WHERE"
+  }
+]

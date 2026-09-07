@@ -1,0 +1,49 @@
+[
+  {
+    "id": "q_inv_001",
+    "question": "Which products currently have inventory on hand below their reorder threshold?",
+    "type": "sql",
+    "expected_tables": ["inventory", "products"],
+    "expected_pattern": "WHERE quantity_on_hand < reorder_threshold"
+  },
+  {
+    "id": "q_inv_002",
+    "question": "What is the total quantity of 4K monitors available across all warehouses?",
+    "type": "sql",
+    "expected_tables": ["inventory", "products"],
+    "expected_pattern": "SUM(quantity_on_hand)"
+  },
+  {
+    "id": "q_inv_003",
+    "question": "Show all orders that are currently in processing status.",
+    "type": "sql",
+    "expected_tables": ["orders"],
+    "expected_pattern": "status = 'processing'"
+  },
+  {
+    "id": "q_inv_004",
+    "question": "What is our return policy on opened electronics?",
+    "type": "rag",
+    "expected_keywords": ["10% restocking fee", "30 calendar days"]
+  },
+  {
+    "id": "q_inv_005",
+    "question": "What carrier and tracking number was used for order ORD-2026-9021?",
+    "type": "sql",
+    "expected_tables": ["orders"],
+    "expected_pattern": "tracking_number"
+  },
+  {
+    "id": "q_inv_006",
+    "question": "How soon do I need to report a damaged item to get a free replacement?",
+    "type": "rag",
+    "expected_keywords": ["48 hours", "pre-paid return label", "Expedited"]
+  },
+  {
+    "id": "q_inv_007",
+    "question": "Show my recent orders and tracking status.",
+    "type": "sql_rls",
+    "expected_tables": ["orders"],
+    "expected_pattern": "WHERE"
+  }
+]

@@ -1,0 +1,55 @@
+[
+  {
+    "id": "q_saas_001",
+    "question": "What is our total Monthly Recurring Revenue across all active subscriptions?",
+    "type": "sql",
+    "expected_tables": ["subscriptions"],
+    "expected_pattern": "SELECT SUM(mrr_cents) FROM subscriptions WHERE status = 'active'"
+  },
+  {
+    "id": "q_saas_002",
+    "question": "List all organizations currently on the Enterprise plan.",
+    "type": "sql",
+    "expected_tables": ["organizations"],
+    "expected_pattern": "SELECT name, slug FROM organizations WHERE plan_tier ILIKE '%enterprise%'"
+  },
+  {
+    "id": "q_saas_003",
+    "question": "Which organizations have open or unpaid invoices?",
+    "type": "sql",
+    "expected_tables": ["organizations", "invoices"],
+    "expected_pattern": "JOIN invoices ON"
+  },
+  {
+    "id": "q_saas_004",
+    "question": "What is our SLA credit policy if monthly uptime drops below 99%?",
+    "type": "rag",
+    "expected_keywords": ["25%", "credit", "99.0%"]
+  },
+  {
+    "id": "q_saas_005",
+    "question": "Show the users belonging to Acme Logistics Inc.",
+    "type": "sql",
+    "expected_tables": ["users", "organizations"],
+    "expected_pattern": "JOIN organizations ON"
+  },
+  {
+    "id": "q_saas_006",
+    "question": "Can I cancel my annual subscription and get a refund?",
+    "type": "rag",
+    "expected_keywords": ["14 calendar days", "pro-rata", "annual"]
+  },
+  {
+    "id": "q_saas_007",
+    "question": "What is the rate limit for the Growth plan?",
+    "type": "rag",
+    "expected_keywords": ["600 req/min", "Growth"]
+  },
+  {
+    "id": "q_saas_008",
+    "question": "Show my account subscription details.",
+    "type": "sql_rls",
+    "expected_tables": ["subscriptions"],
+    "expected_pattern": "WHERE"
+  }
+]

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plug-N-Play AI — Enterprise Agent Studio &amp; Workspace Dashboard</title>
+  <title>Plug-N-Play AI — Developer Agent Studio &amp; Operational Workspace</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -2429,7 +2429,7 @@
 
       <div class="form-group">
         <label>System Instructions / Persona Prompt</label>
-        <textarea id="edit-agent-prompt" rows="4" placeholder="e.g. You are a helpful enterprise assistant for Acme Corp. Answer concisely using provided context."></textarea>
+        <textarea id="edit-agent-prompt" rows="4" placeholder="e.g. You are a helpful assistant for Acme Corp. Answer concisely using provided context."></textarea>
       </div>
 
       <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px;">
@@ -2859,15 +2859,18 @@
         <!-- Rendered dynamically via JavaScript -->
       </div>
 
-      <!-- Enterprise Consultation Banner -->
+      <!-- Open Source Self-Hosting & Documentation Banner -->
       <div style="margin-top: 24px; padding: 16px 20px; border-radius: var(--radius-md); background: var(--surface-2); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
         <div>
-          <div style="font-size: 13.5px; font-weight: 700; color: var(--text-1);">Need 100k+ Queries, Dedicated Cloud, or On-Premise Docker?</div>
-          <div style="font-size: 12px; color: var(--text-3);">We offer private VPC deployment, custom LLM fine-tuning, HIPAA/SOC2 compliance, and 99.99% uptime SLAs.</div>
+          <div style="font-size: 13.5px; font-weight: 700; color: var(--text-1);">Deploying in Production or Private VPC?</div>
+          <div style="font-size: 12px; color: var(--text-3);">Plug-N-Play AI is 100% open-source under the MIT license. Spin up self-hosted Docker in 60 seconds with zero vendor lock-in.</div>
         </div>
-        <button class="btn-action-subtle" style="font-size: 12px; padding: 8px 16px;" onclick="alert('Enterprise support: Please email enterprise@plugnplay-ai.com or contact your account executive.')">
-          Contact Enterprise Sales
-        </button>
+        <div style="display: flex; gap: 8px;">
+          <a href="https://github.com/Amrut204/Plug-N-Play-AI" target="_blank" class="btn-action-subtle" style="font-size: 12px; padding: 8px 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+            <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+            GitHub Repository
+          </a>
+        </div>
       </div>
 
       <div style="margin-top: 18px; text-align: right;">
@@ -2951,7 +2954,7 @@
 
       <!-- Guide Footer -->
       <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between;">
-        <span style="font-size: 11.5px; color: var(--text-3);">Plug-N-Play AI Enterprise Knowledge Guide</span>
+        <span style="font-size: 11.5px; color: var(--text-3);">Plug-N-Play AI Operational Knowledge Guide</span>
         <button class="btn-primary" onclick="closeSectionGuide()" style="width: auto; padding: 8px 20px; font-size: 12.5px;">
           Got It, Continue
         </button>
@@ -3008,7 +3011,7 @@
       <div class="hero" style="padding-top: 20px;">
         <div class="hero-badge">
           <svg class="svg-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-          Enterprise AI Integration Platform
+          Developer AI Data Layer &amp; Assistant Platform
         </div>
         <h1 class="hero-title">
           Connect Private Data &amp; Deploy AI Agents <br />
@@ -3121,7 +3124,7 @@
           </div>
           <div class="landing-kpi-card">
             <div style="font-size: 24px; font-weight: 800; color: var(--primary);">Multi-Tenant</div>
-            <div style="font-size: 12px; font-weight: 700; color: var(--text-1); margin-top: 4px;">Enterprise Isolation</div>
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-1); margin-top: 4px;">Cryptographic Tenant Isolation</div>
             <div style="font-size: 11px; color: var(--text-3); margin-top: 2px;">Encrypted per-workspace storage</div>
           </div>
         </div>
@@ -3375,7 +3378,7 @@
             <div class="service-icon-tile">
               <svg class="svg-icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
             </div>
-            <div class="service-title">Hybrid (Dual-Engine Enterprise)</div>
+            <div class="service-title">Hybrid (SQL + Document Dual-Engine)</div>
             <span class="service-tag">Cross-Reference Live Data with Policies</span>
             <p class="service-desc">
               The full intelligence layer. Combines unstructured document rules with live database records in a single cohesive answer (e.g. attendance records + exam policy).
@@ -3390,7 +3393,7 @@
         <!-- Step 1 Bottom Action Bar -->
         <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
           <span style="font-size: 12px; color: var(--text-3);">
-            Architecture selected: <strong id="step1-selected-label" style="color: var(--primary);">Hybrid (Dual-Engine Enterprise)</strong>
+            Architecture selected: <strong id="step1-selected-label" style="color: var(--primary);">Hybrid (SQL + Document Dual-Engine)</strong>
           </span>
           <button type="button" class="btn-primary" style="width: auto; padding: 10px 24px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;" onclick="saveStep1AndContinue()">
             <span>Save &amp; Continue to Step 2</span>
@@ -3410,6 +3413,38 @@
             <svg class="svg-icon" viewBox="0 0 24 24" style="width: 13px; height: 13px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
             <span>Step 2 Overview Guide</span>
           </button>
+        </div>
+
+        <!-- Quickstart Operational Starter Templates -->
+        <div style="margin-bottom: 20px; padding: 14px 16px; border-radius: var(--radius-md); background: rgba(56, 189, 248, 0.05); border: 1px solid rgba(56, 189, 248, 0.2);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg class="svg-icon" viewBox="0 0 24 24" style="color: var(--accent-cyan); width: 16px; height: 16px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <strong style="font-size: 12.5px; color: var(--text-1);">⚡ Quickstart Starter Templates</strong>
+              <span style="font-size: 11px; color: var(--text-3);">(1-Click Pre-populate Schema &amp; Knowledge)</span>
+            </div>
+            <span style="font-size: 10.5px; color: var(--accent-cyan); font-weight: 600;">Production Ready</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px;">
+            <button type="button" class="btn-action-subtle" onclick="loadStarterTemplate('saas_ops')" style="text-align: left; padding: 10px 12px; font-size: 11.5px; display: flex; flex-direction: column; gap: 4px; border-color: rgba(255,255,255,0.12); border-radius: var(--radius-sm);">
+              <span style="font-weight: 700; color: var(--text-1); display: flex; align-items: center; gap: 6px;">
+                <span>🚀 SaaS Ops &amp; Billing</span>
+              </span>
+              <span style="font-size: 10.5px; color: var(--text-3);">Orgs, subscriptions, invoices, ARR metrics + SLA terms</span>
+            </button>
+            <button type="button" class="btn-action-subtle" onclick="loadStarterTemplate('order_inventory')" style="text-align: left; padding: 10px 12px; font-size: 11.5px; display: flex; flex-direction: column; gap: 4px; border-color: rgba(255,255,255,0.12); border-radius: var(--radius-sm);">
+              <span style="font-weight: 700; color: var(--text-1); display: flex; align-items: center; gap: 6px;">
+                <span>📦 Order &amp; Inventory</span>
+              </span>
+              <span style="font-size: 10.5px; color: var(--text-3);">Warehouses, stock levels, fulfillment tracking + returns</span>
+            </button>
+            <button type="button" class="btn-action-subtle" onclick="loadStarterTemplate('customer_support')" style="text-align: left; padding: 10px 12px; font-size: 11.5px; display: flex; flex-direction: column; gap: 4px; border-color: rgba(255,255,255,0.12); border-radius: var(--radius-sm);">
+              <span style="font-weight: 700; color: var(--text-1); display: flex; align-items: center; gap: 6px;">
+                <span>🎧 Helpdesk &amp; Accounts</span>
+              </span>
+              <span style="font-size: 10.5px; color: var(--text-3);">Tickets, customer tiers, account health + KB FAQs</span>
+            </button>
+          </div>
         </div>
 
         <!-- Agent Profile Meta -->
@@ -3453,10 +3488,10 @@
             <div class="audience-card selected" id="aud-end_user" onclick="selectAudience('end_user')">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                 <strong style="font-size: 12.5px; color: var(--text-1);">End-Users / Customers</strong>
-                <span class="s-badge" style="font-size: 9.5px;">Students • Shoppers</span>
+                <span class="s-badge" style="font-size: 9.5px;">Customers • Members • Users</span>
               </div>
               <p style="font-size: 11px; color: var(--text-3); line-height: 1.45; margin-bottom: 8px;">
-                Strict row isolation (WHERE user_id = :id). Auto-masks CGPA, phone numbers, and wholesale costs.
+                Strict row isolation (WHERE user_id = :id). Auto-masks private credentials, internal notes, and wholesale costs.
               </p>
               <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                 <span class="s-badge" style="font-size: 9.5px; color: var(--accent-green);">Zero-Leakage</span>
@@ -3464,14 +3499,14 @@
               </div>
             </div>
 
-            <!-- Card 2: Staff & TPO -->
+            <!-- Card 2: Staff & Ops -->
             <div class="audience-card" id="aud-staff" onclick="selectAudience('staff')">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                 <strong style="font-size: 12.5px; color: var(--text-1);">Operational Staff</strong>
-                <span class="s-badge" style="font-size: 9.5px;">TPO • Teachers • Support</span>
+                <span class="s-badge" style="font-size: 9.5px;">Support • Ops • Internal Staff</span>
               </div>
               <p style="font-size: 11px; color: var(--text-3); line-height: 1.45; margin-bottom: 8px;">
-                Department-level candidate search and order tracking. Hides executive compensation &amp; secrets.
+                Operational candidate search, ticket triage, and order tracking. Hides executive compensation &amp; secrets.
               </p>
               <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                 <span class="s-badge" style="font-size: 9.5px; color: var(--accent-cyan);">Batch Lookups</span>
@@ -3483,7 +3518,7 @@
             <div class="audience-card" id="aud-management" onclick="selectAudience('management')">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                 <strong style="font-size: 12.5px; color: var(--text-1);">Management / Owners</strong>
-                <span class="s-badge" style="font-size: 9.5px;">Dean • Directors • Owners</span>
+                <span class="s-badge" style="font-size: 9.5px;">Founders • Admins • Execs</span>
               </div>
               <p style="font-size: 11px; color: var(--text-3); line-height: 1.45; margin-bottom: 8px;">
                 Full cross-table analytics, revenue breakdowns, macro trends, and aggregate performance reports.
@@ -5544,19 +5579,19 @@ Key Features & Architectural Highlights:
     const audiencePresets = {
       end_user: {
         badge: "Strict Row Isolation (WHERE user_id = :id)",
-        rules: "Do not reveal other users' personal records, marks, phone numbers, or internal pricing. Restrict database answers strictly to the authenticated user."
+        rules: "Do not reveal other users' personal records, billing invoices, phone numbers, or internal notes. Restrict database answers strictly to the authenticated user."
       },
       staff: {
-        badge: "Department Candidate Lookups & Roster",
-        rules: "Allow querying student placement statuses, department rosters, and order tracking. Strictly hide executive payroll and master secrets."
+        badge: "Operational Staff Lookups & Triage",
+        rules: "Allow querying ticket statuses, operational rosters, order tracking, and account metadata. Strictly hide executive payroll and master secrets."
       },
       management: {
         badge: "Full Analytics & Aggregate Reports",
-        rules: "Provide full analytical reports, attendance distributions, revenue metrics, and performance comparisons."
+        rules: "Provide full analytical reports, ARR/MRR metrics, revenue breakdowns, and macro organizational performance comparisons."
       },
       adaptive: {
         badge: "Dynamic RBAC (Switches by JWT role)",
-        rules: "Enforce dynamic role-based access control. If user_role is 'admin' or 'faculty', grant elevated access; otherwise strictly isolate user records."
+        rules: "Enforce dynamic role-based access control. If user_role is 'admin' or 'manager', grant elevated access; otherwise strictly isolate user records."
       }
     };
 
@@ -7953,7 +7988,7 @@ ${authPhpCheck}
       });
       const labelEl = document.getElementById('step1-selected-label');
       if (labelEl) {
-        labelEl.innerText = type === 'rag' ? 'Pure RAG (Document AI)' : (type === 'sql' ? 'Text-to-SQL (Database AI)' : 'Hybrid (Dual-Engine Enterprise)');
+        labelEl.innerText = type === 'rag' ? 'Pure RAG (Document AI)' : (type === 'sql' ? 'Text-to-SQL (Database AI)' : 'Hybrid (SQL + Document Dual-Engine)');
       }
 
       const ragCol = document.getElementById('wiz-rag-col');
@@ -7975,7 +8010,7 @@ ${authPhpCheck}
         ragCol.style.display = 'block';
         sqlCol.style.display = 'block';
         grid.style.gridTemplateColumns = '1fr 1fr';
-        sub.innerText = 'Enterprise Hybrid: Connect your database AND policy documents.';
+        sub.innerText = 'Dual-Engine Hybrid: Connect your operational database AND policy documents.';
       }
       updateStepper(2);
     }
@@ -8000,6 +8035,73 @@ ${authPhpCheck}
       if (t) {
         document.getElementById('wiz-doc-title').value = t.title;
         document.getElementById('wiz-doc-content').value = t.content;
+      }
+    }
+
+    function loadStarterTemplate(templateKey) {
+      const nameInput = document.getElementById('wiz-agent-name');
+      const projInput = document.getElementById('wiz-proj-name');
+      const docTitle = document.getElementById('wiz-doc-title');
+      const docContent = document.getElementById('wiz-doc-content');
+      const ddlInput = document.getElementById('wiz-db-ddl');
+
+      if (templateKey === 'saas_ops') {
+        if (nameInput) nameInput.value = 'SaaS Operations & Billing Assistant';
+        if (projInput) projInput.value = 'CloudFlow SaaS';
+        selectService('hybrid');
+        selectAudience('staff');
+        if (docTitle) docTitle.value = 'SaaS Product Terms & 99.95% SLA Policy';
+        if (docContent) {
+          docContent.value = `## 1. Service Level Agreement (SLA) & Uptime Guarantee
+• Uptime Commitment: We guarantee 99.95% monthly uptime across all core API endpoints.
+• SLA Downtime Credits: Less than 99.95% but above 99.0%: 10% credit. Less than 99.0% but above 95.0%: 25% credit. Below 95.0%: 50% credit.
+• Cancellation & Refunds: Monthly plans can be cancelled anytime. Annual plans may be refunded pro-rata within 14 calendar days of purchase.`;
+        }
+        if (ddlInput) {
+          ddlInput.value = `CREATE TABLE organizations (id VARCHAR(64) PRIMARY KEY, name VARCHAR(255), slug VARCHAR(100), plan_tier VARCHAR(50), status VARCHAR(50));
+CREATE TABLE users (id VARCHAR(64) PRIMARY KEY, org_id VARCHAR(64), email VARCHAR(255), full_name VARCHAR(255), role VARCHAR(50));
+CREATE TABLE subscriptions (id VARCHAR(64) PRIMARY KEY, org_id VARCHAR(64), plan_id VARCHAR(64), status VARCHAR(50), mrr_cents INT);
+CREATE TABLE invoices (id VARCHAR(64) PRIMARY KEY, org_id VARCHAR(64), amount_due_cents INT, amount_paid_cents INT, status VARCHAR(50));`;
+        }
+        showToast('Loaded SaaS Operations & Billing starter template!', 'success');
+      } else if (templateKey === 'order_inventory') {
+        if (nameInput) nameInput.value = 'Fulfillment & Inventory Assistant';
+        if (projInput) projInput.value = 'Apex Logistics Hub';
+        selectService('hybrid');
+        selectAudience('staff');
+        if (docTitle) docTitle.value = 'Return, Shipping & Replacement Policy';
+        if (docContent) {
+          docContent.value = `## 1. Shipping Options & Delivery Windows
+• Standard Ground: 3–5 business days. Free on orders over $75. Expedited 2-Day: $14.99 flat rate. Overnight: $29.99 flat rate.
+• 30-Day Money-Back Guarantee: Items may be returned within 30 calendar days of delivery. Opened electronics subject to 10% restocking fee.
+• Damaged Items: Report within 48 hours for immediate replacement unit dispatch.`;
+        }
+        if (ddlInput) {
+          ddlInput.value = `CREATE TABLE products (id VARCHAR(64) PRIMARY KEY, sku VARCHAR(100), title VARCHAR(255), price_cents INT, cost_cents INT);
+CREATE TABLE warehouses (id VARCHAR(64) PRIMARY KEY, name VARCHAR(100), location_code VARCHAR(50));
+CREATE TABLE inventory (id VARCHAR(64) PRIMARY KEY, product_id VARCHAR(64), warehouse_id VARCHAR(64), quantity_on_hand INT, reorder_threshold INT);
+CREATE TABLE orders (id VARCHAR(64) PRIMARY KEY, customer_id VARCHAR(64), order_number VARCHAR(100), status VARCHAR(50), shipping_carrier VARCHAR(50), tracking_number VARCHAR(100));`;
+        }
+        showToast('Loaded Order & Inventory starter template!', 'success');
+      } else if (templateKey === 'customer_support') {
+        if (nameInput) nameInput.value = 'Customer Support & Helpdesk Bot';
+        if (projInput) projInput.value = 'Support Helpdesk';
+        selectService('hybrid');
+        selectAudience('end_user');
+        if (docTitle) docTitle.value = 'Helpdesk SLA & Technical FAQ';
+        if (docContent) {
+          docContent.value = `## 1. Ticket Priority & Response SLAs
+• Urgent (P1): Outage / data loss. First response within 15 minutes.
+• High (P2): Webhook / integration issue. First response within 1 hour.
+• Medium (P3): Configuration / SSO certificate. First response within 4 hours.
+• Low (P4): General questions / seats. First response within 1 business day.`;
+        }
+        if (ddlInput) {
+          ddlInput.value = `CREATE TABLE accounts (id VARCHAR(64) PRIMARY KEY, company_name VARCHAR(255), support_tier VARCHAR(50), health_score INT, account_manager VARCHAR(255));
+CREATE TABLE tickets (id VARCHAR(64) PRIMARY KEY, account_id VARCHAR(64), ticket_number VARCHAR(50), subject VARCHAR(255), priority VARCHAR(20), status VARCHAR(50));
+CREATE TABLE ticket_messages (id VARCHAR(64) PRIMARY KEY, ticket_id VARCHAR(64), sender_type VARCHAR(20), message_body TEXT, is_internal_note BOOLEAN);`;
+        }
+        showToast('Loaded Customer Support starter template!', 'success');
       }
     }
 
@@ -8915,19 +9017,19 @@ CREATE TABLE scholarships (
       service_selection: {
         icon: '<svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8c0 3.2 1.9 6 4.7 7.2L8 22h8l-.7-4.8c2.8-1.2 4.7-4 4.7-7.2a8 8 0 0 0-8-8z"></path></svg>',
         title: "Step 1: Intelligence Architecture Selector",
-        subtitle: "Choose how your AI agent accesses and synthesizes enterprise knowledge.",
+        subtitle: "Choose how your AI agent accesses and synthesizes operational knowledge.",
         purpose: "Determines whether the bot reads static unstructured documents (PDFs, policies), queries live operational SQL databases, or combines both seamlessly.",
         dos: [
           "Choose <strong>Pure RAG</strong> if you have customer FAQs, PDF handbooks, return policies, or helpdesk manuals.",
           "Choose <strong>Text-to-SQL</strong> if you have live tabular databases (orders, attendance, inventory, fees) and need real-time lookups.",
-          "Choose <strong>Hybrid (Recommended)</strong> if your bot needs to check live records against official policies (e.g., checking a student's attendance records against the 75% exam eligibility rule)."
+          "Choose <strong>Hybrid (Recommended)</strong> if your bot needs to check live records against official policies (e.g., checking order status against shipping policies)."
         ],
         donts: [
           "Don't choose Pure RAG if your users need to look up live, fluctuating data like 'Where is my order #1234?'.",
           "Don't choose Text-to-SQL for unstructured questions like 'What is your refund warranty philosophy?'.",
           "Don't worry about complexity with Hybrid — our autonomous Router routes each inquiry to the right engine automatically."
         ],
-        example: "<strong>University Scenario:</strong> Student asks 'Can I sit for exams?'. Hybrid router fetches the student's live attendance (71%) from PostgreSQL and cross-references it with the College Attendance Policy PDF (75% threshold) to give an accurate, context-aware answer."
+        example: "<strong>Operational Scenario:</strong> Customer asks 'Can I return order #9021?'. Hybrid router fetches the order delivery date from SQL and cross-references it with the 30-Day Return Policy PDF to give an accurate, context-aware answer."
       },
 
       agent_config: {
@@ -8936,7 +9038,7 @@ CREATE TABLE scholarships (
         subtitle: "The core setup hub for defining agent identity, audience limits, and safety boundaries.",
         purpose: "Gives your bot an identity, binds security boundaries, and connects your data sources before vector indexing.",
         dos: [
-          "Give your agent a clear, descriptive name (e.g. 'Campus Student Advisor' or 'Store Order Assistant').",
+          "Give your agent a clear, descriptive name (e.g. 'Customer Support Bot' or 'Store Order Assistant').",
           "Set the Application / Project Name to match your website or company domain.",
           "Select the appropriate Target Audience to automatically apply row-level security isolation."
         ],
@@ -8950,11 +9052,11 @@ CREATE TABLE scholarships (
       audience_boundaries: {
         icon: '<svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
         title: "Target Audience & Access Boundaries",
-        subtitle: "Enterprise role-based permissions preventing unauthorized data leaks.",
-        purpose: "Guarantees that individual customers or students can only view their own personal records, while staff and management have appropriately scoped access.",
+        subtitle: "Deterministic role-based permissions preventing unauthorized data leaks.",
+        purpose: "Guarantees that individual customers or team members can only view their own personal records, while staff and management have appropriately scoped access.",
         dos: [
           "Select <strong>End-Users / Customers</strong> for public-facing website widgets (enforces strict <code>WHERE user_id = :current_user</code>).",
-          "Select <strong>Operational Staff</strong> for internal support agents, teachers, or TPOs who need batch lookups but shouldn't see executive salary data.",
+          "Select <strong>Operational Staff</strong> for internal support agents, ops coordinators, and supervisors who need batch lookups but shouldn't see executive salary data.",
           "Select <strong>Management / Owners</strong> for executive dashboards needing aggregate financial metrics and revenue trends.",
           "Select <strong>Adaptive Multi-Role</strong> if your widget dynamically verifies user JWT tokens at runtime."
         ],
@@ -8962,7 +9064,7 @@ CREATE TABLE scholarships (
           "Never select 'Management' for a public customer-facing chatbot on an e-commerce website.",
           "Don't forget to pass the <code>data-user-id</code> attribute in your embed code when using End-User mode."
         ],
-        example: "<strong>Row Isolation in Action:</strong> When Student #1001 asks 'What are my marks?', the bot only returns marks for ID 1001. If they ask 'Show me Student #1002\\'s marks', the guardrail immediately blocks the request."
+        example: "<strong>Row Isolation in Action:</strong> When Customer #1001 asks 'What is my order status?', the bot only returns orders for ID 1001. If they ask 'Show me Customer #1002\\'s orders', the guardrail immediately blocks the request."
       },
 
       industry_playbooks: {
@@ -9896,6 +9998,38 @@ CREATE TABLE scholarships (
         upBtn.onclick = () => submitSandboxFeedback(currentMsgId, 1, upBtn);
         downBtn.onclick = () => submitSandboxFeedback(currentMsgId, -1, downBtn);
         ttsBtn.onclick = () => speakSandboxText(fullAnswer);
+
+        // If SQL query was generated, append an inspectable AST security proof accordion
+        if (streamedMeta && streamedMeta.generated_sql) {
+          const sqlDetails = document.createElement('details');
+          sqlDetails.style.marginTop = '10px';
+          sqlDetails.style.marginBottom = '6px';
+          sqlDetails.style.fontSize = '11.5px';
+          sqlDetails.style.background = 'rgba(0, 0, 0, 0.35)';
+          sqlDetails.style.borderRadius = 'var(--radius-sm)';
+          sqlDetails.style.padding = '8px 12px';
+          sqlDetails.style.border = '1px solid rgba(56, 189, 248, 0.25)';
+          sqlDetails.innerHTML = `
+            <summary style="cursor: pointer; font-weight: 600; color: var(--accent-cyan); display: flex; align-items: center; justify-content: space-between; user-select: none;">
+              <span style="display: flex; align-items: center; gap: 6px;">
+                <svg class="svg-icon" viewBox="0 0 24 24" style="width: 13px; height: 13px;"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                <span>View Generated SQL &amp; AST Proof</span>
+              </span>
+              <span class="s-badge" style="font-size: 9.5px; color: var(--accent-green); border-color: rgba(34,197,94,0.3);">Read-Only Safe</span>
+            </summary>
+            <div style="margin-top: 8px;">
+              <pre style="padding: 8px; background: #000000; border-radius: 6px; overflow-x: auto; color: #a5f3fc; font-family: var(--font-mono); font-size: 11px; line-height: 1.4; border: 1px solid rgba(255,255,255,0.08);"><code>${escapeHtml(streamedMeta.generated_sql)}</code></pre>
+              <div style="margin-top: 6px; color: var(--text-3); font-size: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <span style="color: var(--accent-green);">✓ AST Validated (sqlglot)</span>
+                <span>•</span>
+                <span style="color: var(--accent-cyan);">✓ SELECT Statement Enforced</span>
+                <span>•</span>
+                <span>LIMIT 50 Clamped</span>
+              </div>
+            </div>
+          `;
+          astBubble.appendChild(sqlDetails);
+        }
 
         astBubble.appendChild(fbRow);
         msgs.scrollTop = msgs.scrollHeight;

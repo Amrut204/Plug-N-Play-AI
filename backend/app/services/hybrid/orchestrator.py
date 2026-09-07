@@ -286,10 +286,16 @@ class QueryOrchestrator:
                 )
             else:
                 role_title = {
-                    "tpo": "Training & Placement Officer (TPO)",
                     "admin": "System Administrator",
+                    "owner": "Workspace Owner",
+                    "manager": "Operations Manager",
+                    "support": "Support Specialist",
+                    "support_rep": "Customer Support Representative",
+                    "member": "Team Member",
+                    "user": "Verified User",
+                    "tpo": "Training & Placement Officer (TPO)",
                     "student": "Student",
-                    "user": "Verified User"
+                    "faculty": "Faculty Member",
                 }.get(str(user_role).lower(), str(user_role).title())
                 identity_answer = f"You are currently logged in as **{external_user_id}** ({role_title})."
 
@@ -1213,10 +1219,16 @@ Context Information:
                 )
             else:
                 role_title = {
-                    "tpo": "Training & Placement Officer (TPO)",
                     "admin": "System Administrator",
+                    "owner": "Workspace Owner",
+                    "manager": "Operations Manager",
+                    "support": "Support Specialist",
+                    "support_rep": "Customer Support Representative",
+                    "member": "Team Member",
+                    "user": "Verified User",
+                    "tpo": "Training & Placement Officer (TPO)",
                     "student": "Student",
-                    "user": "Verified User"
+                    "faculty": "Faculty Member",
                 }.get(str(user_role).lower(), str(user_role).title())
                 identity_answer = f"You are currently logged in as **{external_user_id}** ({role_title})."
 
